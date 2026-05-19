@@ -1,4 +1,4 @@
-# Syntax Design — colgm-mlir
+# Syntax Design
 
 ## Overview
 
