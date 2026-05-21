@@ -11,10 +11,9 @@ Fallback:
 Usage:
   python3 download_llvm.py                    # download latest (default 22.1.6)
   python3 download_llvm.py --version 19.1.0   # specific version
-  python3 download_llvm.py --arch ARM64       # ARM64 architecture
+  python3 download_llvm.py --arch macOS-ARM64 # macOS-ARM64 architecture
   python3 download_llvm.py --output /opt/llvm # custom output dir
 
-Supported platforms: Linux-X64 (default), Linux-ARM64
 Supported versions: any LLVM release tag (e.g., 22.1.6, 19.1.0, 18.1.8)
 """
 
@@ -23,6 +22,7 @@ import subprocess
 import sys
 import tarfile
 import time
+import platform
 from pathlib import Path
 from urllib.request import Request, urlopen
 from urllib.error import URLError
@@ -30,7 +30,17 @@ from urllib.error import URLError
 # ---- config ----
 
 DEFAULT_VERSION = "22.1.6"
-DEFAULT_PLATFORM = "Linux-X64"
+
+match platform.system():
+    case "Linux":
+        if platform.machine() == "aarch64":
+            DEFAULT_PLATFORM = "Linux-ARM64"
+        else:
+            DEFAULT_PLATFORM = "Linux-X64"
+    case "Darwin":
+        DEFAULT_PLATFORM = "macOS-ARM64"
+    case _:
+        raise RuntimeError("Unsupported platform")
 
 # Mirrors ordered by preference (for users in China, Tsinghua first)
 MIRRORS: list[tuple[str, str]] = [
@@ -66,7 +76,7 @@ def format_duration(seconds: float) -> str:
 
 class ProgressBar:
     """Simple progress bar without external dependencies."""
-    def __init__(self, total: int, label: str = "", width: int = 40):
+    def __init__(self, total: int, label: str = "", width: int = 30):
         self.total = total
         self.label = label
         self.width = width
@@ -128,6 +138,11 @@ def download_with_progress(url: str, dest: Path, label: str = "") -> bool:
         if dest.exists():
             dest.unlink()
         return False
+    except KeyboardInterrupt:
+        sys.stderr.write("\n  Aborted by user\n")
+        if dest.exists():
+            dest.unlink()
+        return False
 
 
 def extract_tar_xz(archive: Path, dest_dir: Path) -> bool:
@@ -138,8 +153,7 @@ def extract_tar_xz(archive: Path, dest_dir: Path) -> bool:
         # Use system tar for better performance on large files
         subprocess.run(
             ["tar", "-xJf", str(archive), "-C", str(dest_dir)],
-            check=True,
-            stdout=subprocess.DEVNULL,
+            check=True
         )
     except (subprocess.CalledProcessError, FileNotFoundError):
         print("  (falling back to Python tarfile, this may be slower)")
@@ -165,11 +179,6 @@ def main():
         help=f"Target platform (default: {DEFAULT_PLATFORM})",
     )
     ap.add_argument(
-        "--output", "-o",
-        default=None,
-        help="Output directory (default: ./llvm-{version}-{arch}/)",
-    )
-    ap.add_argument(
         "--no-extract",
         action="store_true",
         help="Skip extraction, keep only the tarball",
@@ -187,10 +196,11 @@ def main():
     filename = f"{base_name}.tar.xz"
 
     # Determine output directory
-    if args.output:
-        extract_dir = Path(args.output)
-    else:
-        extract_dir = Path.cwd() / base_name
+    root_dir = Path.cwd() / "bin"
+    extract_dir = root_dir / base_name
+
+    if not root_dir.exists():
+        root_dir.mkdir(parents=True)
 
     if extract_dir.exists() and any(extract_dir.iterdir()):
         print(f"  Output directory already exists and is not empty: {extract_dir}")
@@ -209,13 +219,18 @@ def main():
     downloaded = False
     archive_path = extract_dir.parent / filename  # Save next to extract dir
 
-    for mirror_name, url in urls:
-        print(f"  Trying {mirror_name}: {url}")
-        if download_with_progress(url, archive_path, label=f"[{mirror_name}] "):
-            downloaded = True
-            print(f"  ✓ Downloaded from {mirror_name}")
-            break
-        print(f"  ✗ {mirror_name} failed, trying next mirror...\n")
+    if archive_path.exists():
+        print(f"  Archive already exists: {archive_path}")
+        print(f"  Skipping download.")
+        downloaded = True
+    else:
+        for mirror_name, url in urls:
+            print(f"  Trying {mirror_name}: {url}")
+            if download_with_progress(url, archive_path, label=f"[{mirror_name}] "):
+                downloaded = True
+                print(f"  ✓ Downloaded from {mirror_name}")
+                break
+            print(f"  ✗ {mirror_name} failed, trying next mirror...\n")
 
     if not downloaded:
         print("  ERROR: All mirrors failed.", file=sys.stderr)

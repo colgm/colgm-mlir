@@ -1,7 +1,5 @@
+bin
 build
 .vscode
 .claude
 __pycache__
-
-LLVM-*
-*.tar.gz
