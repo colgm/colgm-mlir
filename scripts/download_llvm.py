@@ -146,19 +146,26 @@ def download_with_progress(url: str, dest: Path, label: str = "") -> bool:
 
 
 def extract_tar_xz(archive: Path, dest_dir: Path) -> bool:
-    """Extract .tar.xz archive. Requires xz utils or Python's tarfile."""
+    """Extract .tar.xz archive with progress indicator."""
     print(f"  Extracting to {dest_dir} ...")
     dest_dir.mkdir(parents=True, exist_ok=True)
     try:
-        # Use system tar for better performance on large files
+        # Use system tar with checkpoint dots for large archives
         subprocess.run(
-            ["tar", "-xJf", str(archive), "-C", str(dest_dir)],
-            check=True
+            ["tar", "-xJf", str(archive), "-C", str(dest_dir),
+             "--checkpoint=200", "--checkpoint-action=dot"],
+            check=True,
         )
+        sys.stderr.write("\n")
     except (subprocess.CalledProcessError, FileNotFoundError):
         print("  (falling back to Python tarfile, this may be slower)")
         with tarfile.open(archive, "r:xz") as tar:
-            tar.extractall(path=dest_dir, filter="fully_trusted")
+            members = tar.getmembers()
+            bar = ProgressBar(len(members), label="[Extracting] ")
+            for member in members:
+                tar.extract(member, path=str(dest_dir), filter="fully_trusted")
+                bar.update(1)
+            bar.finish()
     return True
 
 
@@ -182,11 +189,6 @@ def main():
         "--no-extract",
         action="store_true",
         help="Skip extraction, keep only the tarball",
-    )
-    ap.add_argument(
-        "--keep-archive",
-        action="store_true",
-        help="Keep the downloaded archive after extraction",
     )
     args = ap.parse_args()
 
@@ -219,6 +221,8 @@ def main():
     downloaded = False
     archive_path = extract_dir.parent / filename  # Save next to extract dir
 
+    print(f"  Downloading to {archive_path} ...")
+
     if archive_path.exists():
         print(f"  Archive already exists: {archive_path}")
         print(f"  Skipping download.")
@@ -238,29 +242,25 @@ def main():
 
     # Extract
     if not args.no_extract:
-        extract_tar_xz(archive_path, extract_dir)
+        extract_tar_xz(archive_path, root_dir)  # extract to bin/ — tarball already has a top-level dir
         print(f"  ✓ Extracted to {extract_dir.resolve()}")
 
         # Verify MLIR is present
-        mlir_cmake = extract_dir / base_name / "lib" / "cmake" / "mlir" / "MLIRConfig.cmake"
+        mlir_cmake = extract_dir / "lib" / "cmake" / "mlir" / "MLIRConfig.cmake"
         if mlir_cmake.exists():
             print(f"  ✓ MLIR development files detected")
         else:
             print(f"  ⚠ Warning: MLIRConfig.cmake not found at expected path")
             print(f"    Expected: {mlir_cmake}")
 
-    # Cleanup
-    if not args.keep_archive and not args.no_extract:
-        archive_path.unlink()
-        print(f"  ✓ Removed archive (use --keep-archive to preserve)")
-    elif args.no_extract:
+    if args.no_extract:
         print(f"  ✓ Archive saved at {archive_path.resolve()}")
     else:
         print(f"  ✓ Archive kept at {archive_path.resolve()}")
 
     print(f"\n  Done. Use with CMake:")
-    print(f"    cmake -DLLVM_DIR={extract_dir.resolve()}/{base_name}/lib/cmake/llvm \\")
-    print(f"          -DMLIR_DIR={extract_dir.resolve()}/{base_name}/lib/cmake/mlir \\")
+    print(f"    cmake -DLLVM_DIR={extract_dir.resolve()}/lib/cmake/llvm \\")
+    print(f"          -DMLIR_DIR={extract_dir.resolve()}/lib/cmake/mlir \\")
     print(f"          ...")
 
 
