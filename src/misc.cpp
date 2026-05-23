@@ -1,4 +1,4 @@
-#include "colgm.h"
+#include "colgm.hpp"
 
 #include <cstring>
 #include <sstream>

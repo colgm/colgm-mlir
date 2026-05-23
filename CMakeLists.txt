@@ -48,39 +48,41 @@ endif()
 
 # ---- source files ----
 set(COLOGM_SOURCES
+    src/ast/ast.cpp
     src/main.cpp
     src/misc.cpp
     src/lexer.cpp
     src/report.cpp
 )
 
-# ---- colgm library ----
-add_library(colgm STATIC
+# ---- colgm mlir core library ----
+add_library(colgm_mlir_core STATIC
+    src/ast/ast.cpp
     src/misc.cpp
     src/lexer.cpp
     src/report.cpp
 )
 
-target_include_directories(colgm PUBLIC
+target_include_directories(colgm_mlir_core PUBLIC
     "${CMAKE_SOURCE_DIR}/src"
 )
 
 # platform-specific linkage
 if(NOT WIN32)
-    target_link_libraries(colgm PUBLIC pthread)
+    target_link_libraries(colgm_mlir_core PUBLIC pthread)
 endif()
 
-# ---- colgm executable ----
+# ---- colgm mlir executable ----
 add_executable(colgm-mlir src/main.cpp)
 
 target_include_directories(colgm-mlir PRIVATE
     "${CMAKE_SOURCE_DIR}/src"
 )
 
-target_link_libraries(colgm-mlir PRIVATE colgm)
+target_link_libraries(colgm-mlir PRIVATE colgm_mlir_core)
 
 if(ENABLE_MLIR)
-    target_link_libraries(colgm PRIVATE
+    target_link_libraries(colgm_mlir_core PRIVATE
         ${LLVM_LIBRARIES}
         ${MLIR_LIBRARIES}
     )
@@ -91,13 +93,13 @@ if(ENABLE_MLIR)
 endif()
 
 # ---- install ----
-install(TARGETS colgm colgm-mlir
+install(TARGETS colgm_mlir_core colgm-mlir
     RUNTIME DESTINATION bin
     ARCHIVE DESTINATION lib
 )
 
 # ---- version defines ----
-target_compile_definitions(colgm PRIVATE
+target_compile_definitions(colgm_mlir_core PRIVATE
     __colgm_ver__="${PROJECT_VERSION}"
 )
 

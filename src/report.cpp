@@ -1,9 +1,9 @@
-#include "report.h"
+#include "report.hpp"
 
 namespace colgm_mlir {
 
 std::ostream& operator<<(std::ostream& out, const span& self) {
-    if (self.file.size()>2 && self.file.substr(0, 2)=="./") {
+    if (self.file.size() > 2 && self.file.substr(0, 2) == "./") {
         out << self.file.substr(2, self.file.size()-2);
     } else {
         out << self.file;
