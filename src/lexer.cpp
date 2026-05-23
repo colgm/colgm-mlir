@@ -2,7 +2,7 @@
 
 #include <filesystem>
 
-namespace colgm {
+namespace colgm_mlir {
 
 bool lexer::skip(char c) {
     return c == ' ' || c == '\n' || c == '\t' || c == '\r' || c == 0;

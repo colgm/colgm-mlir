@@ -8,7 +8,7 @@
 
 #include "colgm.h"
 
-namespace colgm {
+namespace colgm_mlir {
 
 struct span {
     u32 begin_line;

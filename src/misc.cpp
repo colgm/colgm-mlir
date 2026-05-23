@@ -16,7 +16,7 @@
 
 #include <time.h>
 
-namespace colgm {
+namespace colgm_mlir {
 
 bool is_windows() {
 #if defined(_WIN32) || defined(_WIN64)

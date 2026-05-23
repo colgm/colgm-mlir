@@ -8,7 +8,7 @@
 #include "colgm.h"
 #include "report.h"
 
-namespace colgm {
+namespace colgm_mlir {
 
 enum class tok:u32 {
     tk_null = 0,     // null token (default token type)

@@ -25,16 +25,16 @@ std::ostream& help(std::ostream& out) {
 
 std::ostream& logo(std::ostream& out) {
     out
-    << "                     __             \n"
-    << "         _________  / /___  ___ __  \n"
-    << "        / ___/ __ \\/ / __ `/ _ `_ \\ \n"
-    << "       / /__/ /_/ / / /_/ / // // / \n"
-    << "       \\___/\\____/_/\\__, /_//_//_/  \n"
-    << "      -------------/____/-----------\n\n"
+    << "             .__                                    .__  .__        \n"
+    << "  ____  ____ |  |    ____   _____             _____ |  | |__|______ \n"
+    << "_/ ___\\/  _ \\|  |   / ___\\ /     \\   ______  /     \\|  | |  \\_  __ \\\n"
+    << "\\  \\__(  <_> )  |__/ /_/  >  Y Y  \\ /_____/ |  Y Y  \\  |_|  ||  | \\/\n"
+    << " \\___  >____/|____/\\___  /|__|_|  /         |__|_|  /____/__||__|   \n"
+    << "     \\/           /_____/       \\/                \\/                \n\n"
     << "version : " << __colgm_ver__
-    << " " << colgm::get_platform() << " " << colgm::get_arch()
+    << " " << colgm_mlir::get_platform() << " " << colgm_mlir::get_arch()
     << " (" << __DATE__ << " " << __TIME__ << ")\n"
-    << "repo    : https://github.com/colgm/colgm\n"
+    << "repo    : https://github.com/colgm/colgm-mlir\n"
     << "license : Apache 2.0\n"
     << "\n"
     << "input <colgm -h> to get help.\n\n";
@@ -42,8 +42,8 @@ std::ostream& logo(std::ostream& out) {
 }
 
 std::ostream& version(std::ostream& out) {
-    out << "colgm compiler version " << __colgm_ver__;
-    out << " " << colgm::get_platform() << " " << colgm::get_arch();
+    out << "colgm-mlir compiler version " << __colgm_ver__;
+    out << " " << colgm_mlir::get_platform() << " " << colgm_mlir::get_arch();
     out << " (" << __DATE__ << " " << __TIME__ << ")\n";
     return out;
 }
@@ -60,8 +60,8 @@ void execute(const std::string& input_file,
              const std::string& output_file,
              const u32 cmd = 0) {
     // main components of compiler
-    colgm::error err;
-    colgm::lexer lexer(err);
+    colgm_mlir::error err;
+    colgm_mlir::lexer lexer(err);
 
     // lexer scans file to get tokens
     lexer.scan(input_file).chkerr();
@@ -131,14 +131,14 @@ i32 main(i32 argc, const char* argv[]) {
             }
         } else if (args[i] == "--arch") {
             if (i + 1 < argc) {
-                colgm::target_info::singleton()->set_arch(args[i + 1]);
+                colgm_mlir::target_info::singleton()->set_arch(args[i + 1]);
                 ++i;
             } else {
                 err();
             }
         } else if (args[i] == "--platform") {
             if (i + 1 < argc) {
-                colgm::target_info::singleton()->set_platform(args[i + 1]);
+                colgm_mlir::target_info::singleton()->set_platform(args[i + 1]);
                 ++i;
             } else {
                 err();

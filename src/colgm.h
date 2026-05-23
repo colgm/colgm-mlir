@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef __colgm_ver__
-#define __colgm_ver__ "0.4.1"
+#define __colgm_ver__ "0.0.1"
 #endif
 
 #include <cstdint>
@@ -25,7 +25,7 @@ using u64 = std::uint64_t;
 using usize = std::size_t;
 using f64 = double;
 
-namespace colgm {
+namespace colgm_mlir {
 
 class target_info {
 private:
