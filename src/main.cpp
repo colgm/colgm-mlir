@@ -102,7 +102,6 @@ i32 main(i32 argc, const char* argv[]) {
     u32 cmd = 0;
     std::string input_file = "";
     std::string output_file = "a.out.ll";
-    std::string library_path = "";
 
     std::vector<std::string> args;
     for (i32 i = 0; i < argc; ++i) {
@@ -115,13 +114,6 @@ i32 main(i32 argc, const char* argv[]) {
             return 0;
         } else if (cmdlst.count(args[i])) {
             cmd |= cmdlst.at(args[i]);
-        } else if (args[i] == "-L" || args[i] == "--library") {
-            if (i + 1 < argc) {
-                library_path = args[i + 1];
-                ++i;
-            } else {
-                err();
-            }
         } else if (args[i] == "-o" || args[i] == "--output") {
             if (i + 1 < argc) {
                 output_file = args[i + 1];
