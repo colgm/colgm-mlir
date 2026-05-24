@@ -49,6 +49,7 @@ endif()
 # ---- source files ----
 set(COLOGM_SOURCES
     src/ast/ast.cpp
+    src/utils/span.cpp
     src/main.cpp
     src/misc.cpp
     src/lexer.cpp
@@ -58,6 +59,7 @@ set(COLOGM_SOURCES
 # ---- colgm mlir core library ----
 add_library(colgm_mlir_core STATIC
     src/ast/ast.cpp
+    src/utils/span.cpp
     src/misc.cpp
     src/lexer.cpp
     src/report.cpp
