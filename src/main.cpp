@@ -1,5 +1,5 @@
 #include "colgm.hpp"
-#include "lexer.hpp"
+#include "lexer/lexer.hpp"
 
 #include <vector>
 #include <unordered_map>

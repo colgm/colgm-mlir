@@ -1,4 +1,4 @@
-#include "report.hpp"
+#include "report/report.hpp"
 
 namespace colgm_mlir {
 

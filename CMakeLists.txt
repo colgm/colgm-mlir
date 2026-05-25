@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(colgm-mlir
-    VERSION 0.4.1
+    VERSION 0.0.1
     DESCRIPTION "Experimental MLIR-based compiler"
-    LANGUAGES CXX
+    LANGUAGES CXX C
 )
 
 # ---- C++ standard ----
@@ -49,20 +49,20 @@ endif()
 # ---- source files ----
 set(COLOGM_SOURCES
     src/ast/ast.cpp
+    src/lexer/lexer.cpp
+    src/report/report.cpp
     src/utils/span.cpp
     src/main.cpp
     src/misc.cpp
-    src/lexer.cpp
-    src/report.cpp
 )
 
 # ---- colgm mlir core library ----
 add_library(colgm_mlir_core STATIC
     src/ast/ast.cpp
+    src/lexer/lexer.cpp
+    src/report/report.cpp
     src/utils/span.cpp
     src/misc.cpp
-    src/lexer.cpp
-    src/report.cpp
 )
 
 target_include_directories(colgm_mlir_core PUBLIC
