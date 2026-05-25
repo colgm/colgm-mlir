@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 
-#include "colgm.hpp"
+#include "utils/colgm.hpp"
 
 namespace colgm_mlir {
 

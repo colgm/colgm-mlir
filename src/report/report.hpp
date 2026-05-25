@@ -6,7 +6,7 @@
 #include <cstring>
 #include <vector>
 
-#include "colgm.hpp"
+#include "utils/colgm.hpp"
 #include "utils/span.hpp"
 
 namespace colgm_mlir {

@@ -5,7 +5,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "colgm.hpp"
+#include "utils/colgm.hpp"
 #include "report/report.hpp"
 
 namespace colgm_mlir {

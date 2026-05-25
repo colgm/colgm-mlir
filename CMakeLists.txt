@@ -49,20 +49,24 @@ endif()
 # ---- source files ----
 set(COLOGM_SOURCES
     src/ast/ast.cpp
+    src/ast/decl.cpp
+    src/ast/expr.cpp
     src/lexer/lexer.cpp
     src/report/report.cpp
+    src/utils/misc.cpp
     src/utils/span.cpp
     src/main.cpp
-    src/misc.cpp
 )
 
 # ---- colgm mlir core library ----
 add_library(colgm_mlir_core STATIC
     src/ast/ast.cpp
+    src/ast/decl.cpp
+    src/ast/expr.cpp
     src/lexer/lexer.cpp
     src/report/report.cpp
+    src/utils/misc.cpp
     src/utils/span.cpp
-    src/misc.cpp
 )
 
 target_include_directories(colgm_mlir_core PUBLIC

@@ -1,5 +1,6 @@
 #include "lexer.hpp"
 
+#include <cctype>
 #include <filesystem>
 
 namespace colgm_mlir {
@@ -89,10 +90,12 @@ void lexer::skip_multi_line_comment() {
 void lexer::err_char() {
     ++column;
     char c = res[ptr++];
-    err.err(
-        {line, column-1, line, column, filename},
-        "invalid character 0x" + char_to_hex(c)
-    );
+    auto place = span { line, column - 1, line, column, filename };
+    if (std::isprint(c)) {
+        err.err(place, "invalid character '" + std::string(1, c) + "'");
+    } else {
+        err.err(place, "invalid character 0x" + char_to_hex(c));
+    }
     ++invalid_char;
 }
 
@@ -123,7 +126,7 @@ tok lexer::get_type(const std::string& str) {
 
 std::string lexer::utf8_gen() {
     std::string str = "";
-    while (ptr<res.size() && res[ptr]<0) {
+    while (ptr < res.size() && res[ptr] < 0) {
         std::string tmp = "";
         u32 nbytes = utf8_hdchk(res[ptr]);
         if (!nbytes) {
@@ -147,7 +150,7 @@ std::string lexer::utf8_gen() {
                 utf_info += " 0x" + char_to_hex(tmp[i]);
             }
             err.err(
-                {line, column-1, line, column, filename},
+                span { line, column - 1, line, column, filename },
                 "invalid utf-8 <"+utf_info+">"
             );
             ++invalid_char;
