@@ -41,4 +41,24 @@ public:
 class decl;
 class expr;
 
+class int_literal;
+class float_literal;
+class bool_literal;
+class identifier;
+class binary_expr;
+class unary_expr;
+class call_expr;
+class index_access;
+class range_expr;
+
+class var_decl;
+class assign_stmt;
+class return_stmt;
+class if_stmt;
+class for_stmt;
+class block_stmt;
+
+class func_decl;
+class param;
+
 }
