@@ -6,6 +6,9 @@
 #include <thread>
 #include <cstdlib>
 
+using colgm_mlir::u32;
+using colgm_mlir::i32;
+
 const u32 COMPILE_VIEW_TOKEN = 1;
 
 std::ostream& help(std::ostream& out) {
