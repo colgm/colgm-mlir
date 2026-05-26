@@ -51,7 +51,10 @@ set(COLOGM_SOURCES
     src/ast/ast.cpp
     src/ast/decl.cpp
     src/ast/expr.cpp
+    src/ast/stmt.cpp
+    src/ast/visitor.cpp
     src/lexer/lexer.cpp
+    src/parse/parser.cpp
     src/report/report.cpp
     src/utils/misc.cpp
     src/utils/span.cpp
@@ -63,7 +66,10 @@ add_library(colgm_mlir_core STATIC
     src/ast/ast.cpp
     src/ast/decl.cpp
     src/ast/expr.cpp
+    src/ast/stmt.cpp
+    src/ast/visitor.cpp
     src/lexer/lexer.cpp
+    src/parse/parser.cpp
     src/report/report.cpp
     src/utils/misc.cpp
     src/utils/span.cpp

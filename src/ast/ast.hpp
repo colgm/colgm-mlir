@@ -4,6 +4,8 @@
 
 namespace colgm_mlir {
 
+class visitor;
+
 class ast {
 public:
     enum class type {
@@ -36,9 +38,11 @@ protected:
 public:
     ast(type t, span& loc): type_(t), loc_(loc) {}
     virtual ~ast() = default;
+    virtual void accept(visitor*);
 };
 
 class decl;
+class stmt;
 class expr;
 
 class int_literal;
