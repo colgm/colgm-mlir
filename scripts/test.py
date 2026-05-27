@@ -5,6 +5,9 @@ def get_test_suite(dirpath: Path) -> tuple[list[Path], list[Path], list[Path]]:
     tests = [f for f in dirpath.rglob("**/*.colgm")]
     stdouts = [f for f in dirpath.rglob("**/*.stdout")]
     stderrs = [f for f in dirpath.rglob("**/*.stderr")]
+    tests.sort()
+    stdouts.sort()
+    stderrs.sort()
     return tests, stdouts, stderrs
 
 def de_color(text: str) -> str:
