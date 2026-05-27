@@ -28,6 +28,7 @@ public:
         block_stmt,
         // declaration
         func_decl,
+        type_def,
         param
     };
 
@@ -36,7 +37,7 @@ protected:
     span loc_;
 
 public:
-    ast(type t, span& loc): type_(t), loc_(loc) {}
+    ast(type t, const span& loc): type_(t), loc_(loc) {}
     virtual ~ast() = default;
     virtual void accept(visitor*);
 };
@@ -63,6 +64,7 @@ class for_stmt;
 class block_stmt;
 
 class func_decl;
+class type_def;
 class param;
 
 }

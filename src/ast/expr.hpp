@@ -11,7 +11,7 @@ namespace colgm_mlir {
 
 class expr: public ast {
 public:
-    expr(ast::type t, span& loc): ast(t, loc) {}
+    expr(ast::type t, const span& loc): ast(t, loc) {}
     ~expr() override = default;
 };
 
@@ -66,8 +66,8 @@ public:
 
 private:
     op op_type;
-    expr* lhs;
-    expr* rhs;
+    expr* lhs = nullptr;
+    expr* rhs = nullptr;
 
 public:
     binary_expr(span& loc): expr(ast::type::binary_expr, loc) {}
@@ -88,7 +88,7 @@ public:
 
 private:
     op op_type;
-    expr* operand;
+    expr* operand = nullptr;
 
 public:
     unary_expr(span& loc): expr(ast::type::unary_expr, loc) {}
@@ -106,7 +106,7 @@ public:
     };
 
 private:
-    expr* callee;
+    expr* callee = nullptr;
     std::vector<arg> args;
 
 public:
@@ -124,8 +124,8 @@ public:
 
 class index_access: public expr {
 private:
-    expr* target;
-    expr* index;
+    expr* target = nullptr;
+    expr* index = nullptr;
 
 public:
     index_access(span& loc): expr(ast::type::index_access, loc) {}
@@ -137,8 +137,8 @@ public:
 
 class range_expr: public expr {
 private:
-    expr* start;
-    expr* end;
+    expr* start = nullptr;
+    expr* end = nullptr;
 
 public:
     range_expr(span& loc): expr(ast::type::range_expr, loc) {}
