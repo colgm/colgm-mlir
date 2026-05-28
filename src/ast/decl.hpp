@@ -20,6 +20,7 @@ private:
 
 public:
     func_decl(const span& loc): decl(ast::type::func_decl, loc) {}
+    ~func_decl() override;
     void add_param(param* p) { params.push_back(p); }
     const auto& get_params() const { return params; }
     void set_return_type(type_def* t) { return_type = t; }
@@ -42,6 +43,7 @@ private:
 
 public:
     type_def(const span& loc): decl(ast::type::type_def, loc) {}
+    ~type_def() override = default;
     void set_dtype(dtype_kind k) { dtype = k; }
     auto get_dtype() const { return dtype; }
     void add_dim(i64 d) { dims.push_back(d); }
@@ -56,6 +58,7 @@ private:
 
 public:
     param(const span& loc): decl(ast::type::param, loc) {}
+    ~param() override;
     void set_name(const std::string& n) { name = n; }
     const auto& get_name() const { return name; }
     void set_type(type_def* t) { type = t; }

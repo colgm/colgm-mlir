@@ -21,6 +21,7 @@ private:
 
 public:
     int_literal(span& loc): expr(ast::type::int_literal, loc) {}
+    ~int_literal() override = default;
     void set_literal(i64 lit) { literal = lit; }
     auto get_literal() const { return literal; }
 };
@@ -31,6 +32,7 @@ private:
 
 public:
     float_literal(span& loc): expr(ast::type::float_literal, loc) {}
+    ~float_literal() override = default;
     void set_literal(f64 lit) { literal = lit; }
     auto get_literal() const { return literal; }
 };
@@ -41,6 +43,7 @@ private:
 
 public:
     bool_literal(span& loc): expr(ast::type::bool_literal, loc) {}
+    ~bool_literal() override = default;
     void set_flag(bool f) { flag = f; }
     auto get_flag() const { return flag; }
 };
@@ -51,6 +54,7 @@ private:
 
 public:
     identifier(span& loc): expr(ast::type::identifier, loc) {}
+    ~identifier() override = default;
     void set_name(const std::string& n) { name = n; }
     const auto& get_name() const { return name; }
 };
@@ -71,6 +75,7 @@ private:
 
 public:
     binary_expr(span& loc): expr(ast::type::binary_expr, loc) {}
+    ~binary_expr() override;
     void set_op_type(op o) { op_type = o; }
     void set_lhs(expr* l) { lhs = l; }
     void set_rhs(expr* r) { rhs = r; }
@@ -92,6 +97,7 @@ private:
 
 public:
     unary_expr(span& loc): expr(ast::type::unary_expr, loc) {}
+    ~unary_expr() override;
     void set_op_type(op o) { op_type = o; }
     void set_operand(expr* o) { operand = o; }
     auto get_op_type() const { return op_type; }
@@ -111,6 +117,7 @@ private:
 
 public:
     call_expr(span& loc): expr(ast::type::call_expr, loc) {}
+    ~call_expr() override;
     void set_callee(expr* c) { callee = c; }
     void add_normal_arg(expr* a) {
         args.push_back({std::nullopt, a});
@@ -129,6 +136,7 @@ private:
 
 public:
     index_access(span& loc): expr(ast::type::index_access, loc) {}
+    ~index_access() override;
     void set_target(expr* t) { target = t; }
     void set_index(expr* i) { index = i; }
     auto get_target() const { return target; }
@@ -142,6 +150,7 @@ private:
 
 public:
     range_expr(span& loc): expr(ast::type::range_expr, loc) {}
+    ~range_expr() override;
     void set_start(expr* s) { start = s; }
     void set_end(expr* e) { end = e; }
     auto get_start() const { return start; }
