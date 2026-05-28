@@ -13,6 +13,7 @@ public:
     virtual bool visit_decl(decl*);
     virtual bool visit_stmt(stmt*);
     virtual bool visit_expr(expr*);
+    virtual bool visit_root(root*);
 
     virtual bool visit_int_literal(int_literal*);
     virtual bool visit_float_literal(float_literal*);

@@ -18,6 +18,16 @@ bool visitor::visit_expr(expr*) {
     return true;
 }
 
+bool visitor::visit_root(root* n) {
+    for (auto i : n->get_funcs()) {
+        if (!i) {
+            continue;
+        }
+        i->accept(this);
+    }
+    return true;
+}
+
 bool visitor::visit_int_literal(int_literal*) {
     return true;
 }

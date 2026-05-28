@@ -80,6 +80,7 @@ void execute(const std::string& input_file,
     }
 
     colgm_mlir::parser parser(lexer.result(), err);
+    parser.scan().chkerr();
 }
 
 i32 main(i32 argc, const char* argv[]) {

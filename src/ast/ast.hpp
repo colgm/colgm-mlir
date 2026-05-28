@@ -2,6 +2,8 @@
 
 #include "utils/span.hpp"
 
+#include <vector>
+
 namespace colgm_mlir {
 
 class visitor;
@@ -9,6 +11,7 @@ class visitor;
 class ast {
 public:
     enum class type {
+        root,
         // expression
         int_literal,
         float_literal,
@@ -66,5 +69,17 @@ class block_stmt;
 class func_decl;
 class type_def;
 class param;
+
+class root: public ast {
+private:
+    std::vector<func_decl*> funcs;
+
+public:
+    root(const span& loc): ast(ast::type::root, loc) {}
+    ~root() override;
+    void accept(visitor*) override;
+    void add_func(func_decl* fd) { funcs.push_back(fd); }
+    const auto& get_funcs() const { return funcs; }
+};
 
 }
