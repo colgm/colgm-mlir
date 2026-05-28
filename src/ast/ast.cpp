@@ -5,7 +5,8 @@
 
 namespace colgm_mlir {
 
-void ast::accept(visitor*) {
+void ast::accept(visitor* v) {
+    v->visit_ast(this);
     assert(false && "ast::accept() not implemented for this node type");
 }
 

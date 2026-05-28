@@ -1,10 +1,13 @@
 #include "utils/colgm.hpp"
 #include "lexer/lexer.hpp"
+#include "parse/parser.hpp"
 
 #include <vector>
 #include <unordered_map>
 #include <thread>
 #include <cstdlib>
+
+#include <mlir/Support/LLVM.h>
 
 using colgm_mlir::u32;
 using colgm_mlir::i32;
@@ -35,8 +38,9 @@ std::ostream& logo(std::ostream& out) {
     << " \\___  >____/|____/\\___  /|__|_|  /         |__|_|  /____/__||__|   \n"
     << "     \\/           /_____/       \\/                \\/                \n\n"
     << "version : " << __colgm_ver__
-    << " " << colgm_mlir::get_platform() << " " << colgm_mlir::get_arch()
     << " (" << __DATE__ << " " << __TIME__ << ")\n"
+    << "arch    : " << colgm_mlir::get_platform() << " " << colgm_mlir::get_arch() << "\n"
+    << "mlir    : " << LLVM_VERSION_STRING << "\n"
     << "repo    : https://github.com/colgm/colgm-mlir\n"
     << "license : Apache 2.0\n"
     << "\n"
@@ -72,7 +76,10 @@ void execute(const std::string& input_file,
         for (const auto& token : lexer.result()) {
             std::cout << token.loc << ": " << token.str << "\n";
         }
+        return;
     }
+
+    colgm_mlir::parser parser(lexer.result(), err);
 }
 
 i32 main(i32 argc, const char* argv[]) {
