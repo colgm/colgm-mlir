@@ -1,6 +1,7 @@
 #include "utils/colgm.hpp"
 #include "lexer/lexer.hpp"
 #include "parse/parser.hpp"
+#include "dialect/dialect.hpp"
 
 #include <vector>
 #include <unordered_map>

@@ -1,8 +1,8 @@
 from pathlib import Path
 import subprocess
 
-def get_test_suite(dirpath: Path) -> tuple[list[Path], list[Path], list[Path]]:
-    tests = [f for f in dirpath.rglob("**/*.colgm")]
+def get_test_suite(dirpath: Path, suffix: str) -> tuple[list[Path], list[Path], list[Path]]:
+    tests = [f for f in dirpath.rglob(f"**/*.{suffix}")]
     stdouts = [f for f in dirpath.rglob("**/*.stdout")]
     stderrs = [f for f in dirpath.rglob("**/*.stderr")]
     tests.sort()
@@ -41,12 +41,8 @@ def check(cmd: list[str], expect_stdout: str, expect_stderr: str) -> bool:
         return False
     return True
 
-if __name__ == "__main__":
-    executable = Path("build/colgm-mlir")
-    if not executable.exists():
-        print("Error: executable not found")
-        exit(1)
-    lex_test, lex_stdout, lex_stderr = get_test_suite(Path("test/lexer"))
+def test_lexer(executable: Path) -> tuple[int, int]:
+    lex_test, lex_stdout, lex_stderr = get_test_suite(Path("test/lexer"), "colgm")
     passed = 0
     for i in range(len(lex_test)):
         cmd = [str(executable), str(lex_test[i]), "--lex"]
@@ -60,7 +56,45 @@ if __name__ == "__main__":
             print("[PASSED]", lex_test[i])
         else:
             print("[FAILED]", lex_test[i])
+    return passed, len(lex_test)
+
+def test_colgm_opt(executable: Path) -> tuple[int, int]:
+    colgm_opt_test, colgm_opt_stdout, colgm_opt_stderr = get_test_suite(Path("test/mlir"), "mlir")
+    passed = 0
+    for i in range(len(colgm_opt_test)):
+        cmd = [str(executable), str(colgm_opt_test[i])]
+        with open(colgm_opt_stdout[i], "r") as f:
+            stdout = f.read()
+        with open(colgm_opt_stderr[i], "r") as f:
+            stderr = f.read()
+        res = check(cmd, stdout, stderr)
+        passed += 1 if res else 0
+        if res:
+            print("[PASSED]", colgm_opt_test[i])
+        else:
+            print("[FAILED]", colgm_opt_test[i])
+    return passed, len(colgm_opt_test)
+
+if __name__ == "__main__":
+    colgm_mlir = Path("build/colgm-mlir")
+    colgm_opt = Path("build/colgm-opt")
+    if not colgm_mlir.exists():
+        print("Error: executable not found")
+        exit(1)
+    if not colgm_opt.exists():
+        print("Error: executable not found")
+        exit(1)
+
+    passed, len_test = 0, 0
+
+    lex_passed, len_lex_test = test_lexer(colgm_mlir)
+    passed += lex_passed
+    len_test += len_lex_test
+
+    colgm_opt_passed, len_colgm_opt_test = test_colgm_opt(colgm_opt)
+    passed += colgm_opt_passed
+    len_test += len_colgm_opt_test
     
     print("=" * 60)
-    print(f"{passed}/{len(lex_test)} passed")
+    print(f"{passed}/{len_test} passed")
     print("=" * 60)

@@ -22,6 +22,14 @@ set(MLIR_DIR "" CACHE PATH "Path to MLIR cmake directory")
 option(ENABLE_MLIR "Enable MLIR support" OFF)
 
 if(ENABLE_MLIR)
+    # zstd is an optional LLVM dependency for compressed debug-info / bitcode.
+    # Our pipeline (text .mlir → IR → JIT) never touches compressed data, so an
+    # empty stub target is safe.  Install libzstd-dev if you later need to read
+    # compressed .bc.zst files.
+    if(NOT TARGET zstd::libzstd_static)
+      add_library(zstd::libzstd_static INTERFACE IMPORTED)
+    endif()
+
     # try to auto-discover from the local bin/ directory
     if(NOT LLVM_DIR OR NOT MLIR_DIR)
         file(GLOB LLVM_DIRS LIST_DIRECTORIES true
@@ -36,9 +44,6 @@ if(ENABLE_MLIR)
     if(LLVM_DIR AND MLIR_DIR)
         find_package(LLVM REQUIRED CONFIG PATHS "${LLVM_DIR}" NO_DEFAULT_PATH)
         find_package(MLIR REQUIRED CONFIG PATHS "${MLIR_DIR}" NO_DEFAULT_PATH)
-        include_directories(${LLVM_INCLUDE_DIRS})
-        include_directories(${MLIR_INCLUDE_DIRS})
-        add_definitions(${LLVM_DEFINITIONS})
         message(STATUS "MLIR support enabled (LLVM ${LLVM_PACKAGE_VERSION})")
     else()
         message(FATAL_ERROR "ENABLE_MLIR=ON but LLVM_DIR or MLIR_DIR not found. "
@@ -53,6 +58,8 @@ set(COLOGM_SOURCES
     src/ast/expr.cpp
     src/ast/stmt.cpp
     src/ast/visitor.cpp
+    src/dialect/dialect.cpp
+    src/dialect/op.cpp
     src/lexer/lexer.cpp
     src/parse/parser.cpp
     src/report/report.cpp
@@ -68,6 +75,8 @@ add_library(colgm_mlir_core STATIC
     src/ast/expr.cpp
     src/ast/stmt.cpp
     src/ast/visitor.cpp
+    src/dialect/dialect.cpp
+    src/dialect/op.cpp
     src/lexer/lexer.cpp
     src/parse/parser.cpp
     src/report/report.cpp
@@ -94,13 +103,48 @@ target_include_directories(colgm-mlir PRIVATE
 target_link_libraries(colgm-mlir PRIVATE colgm_mlir_core)
 
 if(ENABLE_MLIR)
-    target_link_libraries(colgm_mlir_core PRIVATE
-        ${LLVM_LIBRARIES}
-        ${MLIR_LIBRARIES}
+    target_include_directories(colgm_mlir_core PUBLIC
+        ${LLVM_INCLUDE_DIRS}
+        ${MLIR_INCLUDE_DIRS}
     )
-    target_link_libraries(colgm-mlir PRIVATE
-        ${LLVM_LIBRARIES}
-        ${MLIR_LIBRARIES}
+    target_compile_definitions(colgm_mlir_core PUBLIC
+        ${LLVM_DEFINITIONS}
+    )
+    target_compile_options(colgm_mlir_core PUBLIC
+        -fno-rtti
+    )
+    target_link_libraries(colgm_mlir_core PUBLIC
+        MLIRIR
+        MLIRParser
+        MLIRSupport
+        MLIRDialect
+        MLIRFuncDialect
+    )
+
+    # Standalone colgm-opt tool (like mlir-opt, but statically includes our dialect)
+    add_executable(colgm-opt
+        src/tools/colgm-opt.cpp
+    )
+    target_include_directories(colgm-opt PRIVATE
+        "${CMAKE_SOURCE_DIR}/src"
+        ${LLVM_INCLUDE_DIRS}
+        ${MLIR_INCLUDE_DIRS}
+    )
+    target_compile_definitions(colgm-opt PRIVATE
+        ${LLVM_DEFINITIONS}
+    )
+    target_compile_options(colgm-opt PRIVATE
+        -fno-rtti
+    )
+    target_link_libraries(colgm-opt PRIVATE
+        colgm_mlir_core
+        MLIRIR
+        MLIRParser
+        MLIRSupport
+        MLIRDialect
+        MLIRFuncDialect
+        MLIRTensorDialect
+        MLIRMlirOptMain
     )
 endif()
 
