@@ -24,7 +24,7 @@ public:
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
-    mlir::LogicalResult verify();
+    mlir::LogicalResult verify() { return mlir::success(); }
 };
 
 class sub_op: public mlir::Op<sub_op,
@@ -44,7 +44,7 @@ public:
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
-    mlir::LogicalResult verify();
+    mlir::LogicalResult verify() { return mlir::success(); }
 };
 
 class mul_op: public mlir::Op<mul_op,
@@ -64,7 +64,27 @@ public:
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
-    mlir::LogicalResult verify();
+    mlir::LogicalResult verify() { return mlir::success(); }
+};
+
+class div_op: public mlir::Op<div_op,
+                              mlir::OpTrait::NOperands<2>::Impl,
+                              mlir::OpTrait::OneResult,
+                              mlir::OpTrait::SameOperandsAndResultType> {
+public:
+    using Op::Op;
+    static llvm::StringRef getOperationName() { return "colgm.div"; }
+    static llvm::ArrayRef<llvm::StringRef> getAttributeNames() { return {};}
+
+    mlir::Value get_lhs() { return getOperand(0); }
+    mlir::Value get_rhs() { return getOperand(1); }
+
+    static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
+                      mlir::Value lhs, mlir::Value rhs);
+    static mlir::ParseResult parse(mlir::OpAsmParser& parser,
+                                   mlir::OperationState& result);
+    void print(mlir::OpAsmPrinter& p);
+    mlir::LogicalResult verify() { return mlir::success(); }
 };
 
 class matmul_op: public mlir::Op<matmul_op,
@@ -84,6 +104,25 @@ public:
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
     mlir::LogicalResult verify();
+};
+
+class relu_op: public mlir::Op<relu_op,
+                            mlir::OpTrait::OneOperand,
+                            mlir::OpTrait::OneResult,
+                            mlir::OpTrait::SameOperandsAndResultType> {
+public:
+    using Op::Op;
+    static llvm::StringRef getOperationName() { return "colgm.relu"; }
+    static llvm::ArrayRef<llvm::StringRef> getAttributeNames() { return {}; }
+
+    mlir::Value get_input() { return getOperand(); }
+
+    static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
+                      mlir::Value input);
+    static mlir::ParseResult parse(mlir::OpAsmParser& parser,
+                                   mlir::OperationState& result);
+    void print(mlir::OpAsmPrinter& p);
+    mlir::LogicalResult verify() { return mlir::success(); }
 };
 
 }

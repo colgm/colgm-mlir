@@ -12,32 +12,31 @@
 
 ## Phase 0 — Project Skeleton
 
-- [ ] Set up CMake build (MLIR dependency, LLVM find_package)
-- [ ] Bring up minimal `main.cpp` that links against MLIR and prints the MLIR version
-- [ ] Choose the LLVM/MLIR version to track (llvm-project revision)
+- [x] Set up CMake build (MLIR dependency, LLVM find_package)
+- [x] Bring up minimal `main.cpp` that links against MLIR and prints the MLIR version
+- [x] Choose the LLVM/MLIR version to track (llvm-project revision)
 
 ---
 
 ## Phase 1 — Lexer
 
-- [ ] Port Colgm bootstrap lexer (`lexer.cpp`, `lexer.h`) into the project
-- [ ] Slash the token enum down to what this DSL needs
+- [x] Port Colgm bootstrap lexer (`lexer.cpp`, `lexer.h`) into the project
+- [x] Slash the token enum down to what this DSL needs
   - Keywords: `func`, `var`, `return`, `if`, `else`, `for`, `struct`, `pub`, `extern`, `true`, `false`
   - Domain keywords: `tensor`, `f32`, `f64`, `i32`, `i64` (dtype keywords)
   - Literals: integer, float, string, char
   - Operators: `+`, `-`, `*`, `/`, `%`, `==`, `!=`, `<`, `>`, `<=`, `>=`, `=`, `->`, `(`, `)`, `{`, `}`, `[`, `]`, `,`, `;`, `.`, `:`
-- [ ] Remove Colgm-specific tokens: `elsif`, `defer`, `match`, `foreach`, `forindex`, `=>`, `use`, `impl`, `union`, `enum`, `&`
 - [ ] Write smoke tests for the lexer (tokenize a few example `.toy` / `.dsl` files)
 
 ---
 
 ## Phase 2 — AST
 
-- [ ] Define the AST node hierarchy (similar to Colgm's `ast_kind` discriminated-union pattern, or a class hierarchy)
+- [x] Define the AST node hierarchy (similar to Colgm's `ast_kind` discriminated-union pattern, or a class hierarchy)
   - **Declarations**: `func_decl`, `struct_decl`
   - **Statements**: `var_decl`, `assign`, `if_stmt`, `for_stmt`, `return_stmt`, `expr_stmt`, `block`
   - **Expressions**: `binary`, `unary`, `call`, `tensor_literal`, `identifier`, `number_literal`, `float_literal`, `index_access`
-- [ ] Each AST node carries a `span` for error reporting
+- [x] Each AST node carries a `span` for error reporting
 - [ ] AST dumper / pretty-printer for debugging
 
 ---

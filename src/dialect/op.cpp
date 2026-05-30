@@ -35,10 +35,6 @@ void add_op::print(mlir::OpAsmPrinter& p) {
       << " : " << get_lhs().getType();
 }
 
-mlir::LogicalResult add_op::verify() {
-    return mlir::success();
-}
-
 void sub_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                    mlir::Value lhs, mlir::Value rhs) {
   state.addOperands({lhs, rhs});
@@ -68,10 +64,6 @@ mlir::ParseResult sub_op::parse(mlir::OpAsmParser& parser,
 void sub_op::print(mlir::OpAsmPrinter& p) {
     p << " " << get_lhs() << ", " << get_rhs()
       << " : " << get_lhs().getType();
-}
-
-mlir::LogicalResult sub_op::verify() {
-    return mlir::success();
 }
 
 void mul_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
@@ -105,8 +97,35 @@ void mul_op::print(mlir::OpAsmPrinter& p) {
       << " : " << get_lhs().getType();
 }
 
-mlir::LogicalResult mul_op::verify() {
+void div_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
+                   mlir::Value lhs, mlir::Value rhs) {
+  state.addOperands({lhs, rhs});
+  state.addTypes(lhs.getType()); // SameOperandsAndResultType requires this
+}
+
+mlir::ParseResult div_op::parse(mlir::OpAsmParser& parser,
+                                mlir::OperationState& result) {
+    mlir::OpAsmParser::UnresolvedOperand lhs, rhs;
+    mlir::Type type;
+
+    // %lhs, %rhs : type
+    if (parser.parseOperand(lhs) || parser.parseComma() ||
+        parser.parseOperand(rhs) || parser.parseColonType(type)) {
+        return mlir::failure();
+    }
+
+    if (parser.resolveOperand(lhs, type, result.operands) ||
+        parser.resolveOperand(rhs, type, result.operands)) {
+        return mlir::failure();
+    }
+
+    result.addTypes(type);
     return mlir::success();
+}
+
+void div_op::print(mlir::OpAsmPrinter& p) {
+    p << " " << get_lhs() << ", " << get_rhs()
+      << " : " << get_lhs().getType();
 }
 
 void matmul_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
@@ -163,6 +182,35 @@ mlir::LogicalResult matmul_op::verify() {
         return emitOpError("lhs cols must equal rhs rows");
     }
     return mlir::success();
+}
+
+void relu_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
+                    mlir::Value input) {
+    state.addOperands({input});
+    state.addTypes(input.getType());
+}
+
+mlir::ParseResult relu_op::parse(mlir::OpAsmParser& parser,
+                                 mlir::OperationState& result) {
+    mlir::OpAsmParser::UnresolvedOperand input;
+    mlir::Type type;
+
+    // %input : type
+    if (parser.parseOperand(input) || parser.parseColonType(type)) {
+        return mlir::failure();
+    }
+
+    if (parser.resolveOperand(input, type, result.operands)) {
+        return mlir::failure();
+    }
+
+    result.addTypes(type);
+    return mlir::success();
+}
+
+void relu_op::print(mlir::OpAsmPrinter& p) {
+    p << " " << get_input()
+      << " : " << get_input().getType();
 }
 
 }

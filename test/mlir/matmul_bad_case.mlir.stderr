@@ -1,4 +1,4 @@
-test/mlir/matmul_bad_case.mlir:5:8: error: 'colgm.matmul' op matmul op lhs cols must equal rhs rows
+test/mlir/matmul_bad_case.mlir:5:8: error: 'colgm.matmul' op lhs cols must equal rhs rows
   %0 = colgm.matmul %arg0, %arg1 : tensor<2x4xf32>, tensor<2x24xf32>
        ^
 test/mlir/matmul_bad_case.mlir:5:8: note: see current operation: %0 = "colgm.matmul"(%arg0, %arg1) : (tensor<2x4xf32>, tensor<2x24xf32>) -> tensor<2x24xf32>

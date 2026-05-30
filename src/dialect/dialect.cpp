@@ -13,7 +13,9 @@ colgm_dialect::colgm_dialect(mlir::MLIRContext* ctx):
         add_op,
         sub_op,
         mul_op,
-        matmul_op
+        div_op,
+        matmul_op,
+        relu_op
     >();
 }
 
