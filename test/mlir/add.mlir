@@ -1,5 +1,5 @@
-// colgm dialect round-trip test: add op
-// parse → print → verify should all pass
+// colgm dialect test: add op
+// parse -> print -> verify should all pass
 
 // scalar add (rank-0 tensor)
 func.func @add_scalar(%a: tensor<f32>, %b: tensor<f32>) -> tensor<f32> {

@@ -10,7 +10,10 @@ colgm_dialect::colgm_dialect(mlir::MLIRContext* ctx):
         mlir::TypeID::get<colgm_dialect>()
     ) {
     addOperations<
-        add_op
+        add_op,
+        sub_op,
+        mul_op,
+        matmul_op
     >();
 }
 

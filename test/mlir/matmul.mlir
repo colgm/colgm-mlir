@@ -1,0 +1,6 @@
+// colgm dialect test: matmul op
+// parse -> print -> verify should all pass
+func.func @test_matmul(%arg0: tensor<2x4xf32>, %arg1: tensor<4x24xf32>) -> tensor<2x24xf32> {
+  %0 = colgm.matmul %arg0, %arg1 : tensor<2x4xf32>, tensor<4x24xf32>
+  return %0 : tensor<2x24xf32>
+}
