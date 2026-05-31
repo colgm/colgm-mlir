@@ -58,6 +58,7 @@ set(COLOGM_SOURCES
     src/ast/expr.cpp
     src/ast/stmt.cpp
     src/ast/visitor.cpp
+    src/ast/dumper.cpp
     src/dialect/dialect.cpp
     src/dialect/op.cpp
     src/lexer/lexer.cpp
@@ -75,6 +76,7 @@ add_library(colgm_mlir_core STATIC
     src/ast/expr.cpp
     src/ast/stmt.cpp
     src/ast/visitor.cpp
+    src/ast/dumper.cpp
     src/dialect/dialect.cpp
     src/dialect/op.cpp
     src/lexer/lexer.cpp

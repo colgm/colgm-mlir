@@ -117,6 +117,10 @@ public:
     struct arg {
         std::optional<std::string> name;
         expr* value;
+
+        bool operator==(const arg& rhs) const {
+            return name == rhs.name && value == rhs.value;
+        }
     };
 
 private:

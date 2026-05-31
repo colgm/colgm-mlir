@@ -41,6 +41,7 @@ protected:
 
 public:
     ast(type t, const span& loc): type_(t), loc_(loc) {}
+    const auto& get_location() const { return loc_; }
     virtual ~ast() = default;
     virtual void accept(visitor*);
 };

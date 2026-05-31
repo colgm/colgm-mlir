@@ -1,5 +1,6 @@
 #include "utils/colgm.hpp"
 #include "lexer/lexer.hpp"
+#include "ast/dumper.hpp"
 #include "parse/parser.hpp"
 #include "dialect/dialect.hpp"
 
@@ -14,6 +15,7 @@ using colgm_mlir::u32;
 using colgm_mlir::i32;
 
 const u32 COMPILE_VIEW_TOKEN = 1;
+const u32 COMPILE_VIEW_AST = 1 << 1;
 
 std::ostream& help(std::ostream& out) {
     out
@@ -24,6 +26,7 @@ std::ostream& help(std::ostream& out) {
     << "\ncolgm [option] <file>\n"
     << "option:\n"
     << "   -l,   --lex            | view analysed tokens.\n"
+    << "   -a,   --ast            | view analysed ast.\n"
     << "file:\n"
     << "   <filename>             | input file.\n"
     << "\n";
@@ -82,6 +85,10 @@ void execute(const std::string& input_file,
 
     colgm_mlir::parser parser(lexer.result(), err);
     parser.scan().chkerr();
+    if (cmd & COMPILE_VIEW_AST) {
+        colgm_mlir::dumper::dump(parser.get_tree());
+        return;
+    }
 }
 
 i32 main(i32 argc, const char* argv[]) {
@@ -108,8 +115,10 @@ i32 main(i32 argc, const char* argv[]) {
 
     // execute with arguments
     const std::unordered_map<std::string, u32> cmdlst = {
-        {"--lex", COMPILE_VIEW_TOKEN},
-        {"-l", COMPILE_VIEW_TOKEN},
+        { "--lex", COMPILE_VIEW_TOKEN },
+        { "-l",    COMPILE_VIEW_TOKEN },
+        { "--ast", COMPILE_VIEW_AST },
+        { "-a",    COMPILE_VIEW_AST },
     };
     u32 cmd = 0;
     std::string input_file = "";
