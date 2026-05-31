@@ -1,0 +1,7 @@
+module {
+  func.func @test_sigmoid(%arg0: tensor<2x4xf32>) -> tensor<2x4xf32> {
+    %0 = colgm.sigmoid %arg0 : tensor<2x4xf32>
+    return %0 : tensor<2x4xf32>
+  }
+}
+

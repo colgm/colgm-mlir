@@ -1,0 +1,7 @@
+module {
+  func.func @test_abs(%arg0: tensor<4xf64>) -> tensor<4xf64> {
+    %0 = colgm.abs %arg0 : tensor<4xf64>
+    return %0 : tensor<4xf64>
+  }
+}
+

@@ -15,7 +15,14 @@ colgm_dialect::colgm_dialect(mlir::MLIRContext* ctx):
         mul_op,
         div_op,
         matmul_op,
-        relu_op
+        relu_op,
+        neg_op,
+        abs_op,
+        exp_op,
+        log_op,
+        sqrt_op,
+        sigmoid_op,
+        tanh_op
     >();
 }
 

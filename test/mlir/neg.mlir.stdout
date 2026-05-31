@@ -1,0 +1,7 @@
+module {
+  func.func @test_neg(%arg0: tensor<2x3xf32>) -> tensor<2x3xf32> {
+    %0 = colgm.neg %arg0 : tensor<2x3xf32>
+    return %0 : tensor<2x3xf32>
+  }
+}
+

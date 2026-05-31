@@ -1,0 +1,7 @@
+module {
+  func.func @test_log(%arg0: tensor<2x2xf64>) -> tensor<2x2xf64> {
+    %0 = colgm.log %arg0 : tensor<2x2xf64>
+    return %0 : tensor<2x2xf64>
+  }
+}
+
