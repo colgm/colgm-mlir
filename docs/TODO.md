@@ -37,7 +37,7 @@
   - **Statements**: `var_decl`, `assign`, `if_stmt`, `for_stmt`, `return_stmt`, `expr_stmt`, `block`
   - **Expressions**: `binary`, `unary`, `call`, `tensor_literal`, `identifier`, `number_literal`, `float_literal`, `index_access`
 - [x] Each AST node carries a `span` for error reporting
-- [ ] AST dumper / pretty-printer for debugging
+- [x] AST dumper / pretty-printer for debugging
 
 ---
 

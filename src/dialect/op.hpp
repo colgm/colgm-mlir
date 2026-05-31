@@ -267,7 +267,7 @@ public:
     static llvm::ArrayRef<llvm::StringRef> getAttributeNames() { return {}; }
 
     mlir::Value get_input() { return getOperand(); }
-    
+
     mlir::ArrayAttr get_target_shape() {
         return llvm::cast<mlir::ArrayAttr>((*this)->getAttr("target_shape"));
     }

@@ -419,7 +419,7 @@ void reshape_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
     auto res_type = mlir::RankedTensorType::get(shape, elem_type);
     state.addTypes(res_type);
 
-    state.addAttribute("target_shape", builder.getI64ArrayAttr(shape));    
+    state.addAttribute("target_shape", builder.getI64ArrayAttr(shape));
 }
 
 mlir::ParseResult reshape_op::parse(mlir::OpAsmParser& parser,
