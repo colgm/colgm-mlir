@@ -1,5 +1,6 @@
 #include <mlir/IR/OpImplementation.h>
 
+#include "utils/type.hpp"
 #include "dialect/op.hpp"
 
 namespace colgm_mlir {
@@ -407,6 +408,69 @@ mlir::ParseResult tanh_op::parse(mlir::OpAsmParser& parser,
 void tanh_op::print(mlir::OpAsmPrinter& p) {
     p << " " << get_input()
       << " : " << get_input().getType();
+}
+
+void reshape_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
+                       mlir::Value input, mlir::ArrayRef<int64_t> shape) {
+    state.addOperands({input});
+
+    auto input_type = llvm::cast<mlir::RankedTensorType>(input.getType());
+    auto elem_type = input_type.getElementType();
+    auto res_type = mlir::RankedTensorType::get(shape, elem_type);
+    state.addTypes(res_type);
+
+    state.addAttribute("target_shape", builder.getI64ArrayAttr(shape));    
+}
+
+mlir::ParseResult reshape_op::parse(mlir::OpAsmParser& parser,
+                                    mlir::OperationState& result) {
+    mlir::OpAsmParser::UnresolvedOperand input;
+    mlir::TensorType input_type, result_type;
+
+    // %input {target_shape = [...]} : input_type -> result_type
+    if (parser.parseOperand(input) ||
+        parser.parseOptionalAttrDict(result.attributes) ||
+        parser.parseColonType(input_type) ||
+        parser.parseArrow() ||
+        parser.parseType(result_type)) {
+        return mlir::failure();
+    }
+
+    if (parser.resolveOperand(input, input_type, result.operands)) {
+        return mlir::failure();
+    }
+
+    result.addTypes(result_type);
+    return mlir::success();
+}
+
+void reshape_op::print(mlir::OpAsmPrinter& p) {
+    p << " " << get_input()
+      << " {target_shape = " << get_target_shape() << "}"
+      << " : " << get_input().getType()
+      << " -> " << (*this)->getResult(0).getType();
+}
+
+mlir::LogicalResult reshape_op::verify() {
+    auto input_rt = llvm::cast<mlir::RankedTensorType>(get_input().getType());
+    auto output_rt = llvm::cast<mlir::RankedTensorType>((*this)->getResult(0).getType());
+
+    if (input_rt.getElementType() != output_rt.getElementType()) {
+        return emitOpError("element type mismatch");
+    }
+
+    auto target = llvm::cast<mlir::ArrayAttr>((*this)->getAttr("target_shape"));
+    i64 input_elems = 1, output_elems = 1;
+    for (auto dim : input_rt.getShape()) {
+        input_elems *= dim;
+    }
+    for (auto dim : output_rt.getShape()) {
+        output_elems *= dim;
+    }
+    if (input_elems != output_elems) {
+        return emitOpError("total elements mismatch");
+    }
+    return mlir::success();
 }
 
 }

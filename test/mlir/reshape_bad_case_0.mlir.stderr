@@ -1,0 +1,4 @@
+test/mlir/reshape_bad_case_0.mlir:3:8: error: 'colgm.reshape' op total elements mismatch
+  %0 = colgm.reshape %arg {target_shape = [2, 2]} : tensor<2x3xf32> -> tensor<2x2xf32>
+       ^
+test/mlir/reshape_bad_case_0.mlir:3:8: note: see current operation: %0 = "colgm.reshape"(%arg0) {target_shape = [2, 2]} : (tensor<2x3xf32>) -> tensor<2x2xf32>
