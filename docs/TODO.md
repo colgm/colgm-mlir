@@ -56,7 +56,7 @@
 
 ## Phase 4 — MLIR Dialect Definition
 
-- [ ] Write TableGen files for the `tensor_ops` (or `toy2`) dialect
+- [x] Write TableGen files for the `tensor_ops` (or `toy2`) dialect
   - **ops**: `AddOp`, `SubOp`, `MulOp`, `DivOp`, `NegOp`, `ReluOp`, `ReshapeOp`
   - Each op has a custom assembly format and a verifier
 - [ ] Define the `ToyTensorType` wrapper (or reuse MLIR's built-in `TensorType`)

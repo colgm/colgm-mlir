@@ -452,14 +452,45 @@ void reshape_op::print(mlir::OpAsmPrinter& p) {
 }
 
 mlir::LogicalResult reshape_op::verify() {
-    auto input_rt = llvm::cast<mlir::RankedTensorType>(get_input().getType());
-    auto output_rt = llvm::cast<mlir::RankedTensorType>((*this)->getResult(0).getType());
+    auto input_type = get_input().getType();
+    if (!llvm::isa<mlir::RankedTensorType>(input_type)) {
+        return emitOpError("input must be a ranked tensor");
+    }
+    auto output_type = (*this)->getResult(0).getType();
+    if (!llvm::isa<mlir::RankedTensorType>(output_type)) {
+        return emitOpError("output must be a ranked tensor");
+    }
+
+    auto input_rt = llvm::cast<mlir::RankedTensorType>(input_type);
+    auto output_rt = llvm::cast<mlir::RankedTensorType>(output_type);
 
     if (input_rt.getElementType() != output_rt.getElementType()) {
-        return emitOpError("element type mismatch");
+        return emitOpError("element type mismatch: input=")
+               << input_rt.getElementType() << ", output="
+               << output_rt.getElementType();
+    }
+
+    if (!(*this)->hasAttr("target_shape")) {
+        return emitOpError("missing 'target_shape' attribute");
     }
 
     auto target = llvm::cast<mlir::ArrayAttr>((*this)->getAttr("target_shape"));
+    auto output_shape = output_rt.getShape();
+    if (target.size() != output_shape.size()) {
+        return emitOpError("shape mismatch");
+    }
+
+    for (u64 i = 0; i < target.size(); ++i) {
+        if (!llvm::isa<mlir::IntegerAttr>(target[i])) {
+            return emitOpError("target_shape[") << i << "] must be an integer";
+        }
+        auto dim_attr = llvm::cast<mlir::IntegerAttr>(target[i]);
+        if (dim_attr.getInt() != output_shape[i]) {
+            return emitOpError("target_shape[") << i << "] = " << dim_attr.getInt()
+                   << " != output[" << i << "] = " << output_shape[i];
+        }
+    }
+
     i64 input_elems = 1, output_elems = 1;
     for (auto dim : input_rt.getShape()) {
         input_elems *= dim;

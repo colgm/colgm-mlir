@@ -153,6 +153,7 @@ def extract_tar_xz(archive: Path, dest_dir: Path) -> bool:
         # Use system tar with checkpoint dots for large archives
         subprocess.run(
             ["tar", "-xJf", str(archive), "-C", str(dest_dir),
+             "--touch", "--no-same-owner",
              "--checkpoint=200", "--checkpoint-action=dot"],
             check=True,
         )

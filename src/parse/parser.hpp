@@ -27,6 +27,12 @@ private:
         }
         ptr++;
     }
+    void match(tok t);
+
+private:
+    type_def* parse_type();
+    param* parse_param();
+    func_decl* parse_func_decl();
 
 public:
     parser(const std::vector<token>& tokens, error& e):

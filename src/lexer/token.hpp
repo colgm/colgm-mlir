@@ -22,8 +22,8 @@ enum class tok: u32 {
     tk_ret,          // function keyword return
     tk_if,           // condition expression keyword if
     tk_else,         // condition expression keyword else
-    tk_lcurve,       // (
-    tk_rcurve,       // )
+    tk_lparen,       // (
+    tk_rparen,       // )
     tk_lbracket,     // [
     tk_rbracket,     // ]
     tk_lbrace,       // {
@@ -56,6 +56,8 @@ struct token {
     token(const token&) = default;
     token(const span& loc, tok type, const std::string& str):
         loc(loc), type(type), str(str) {}
+    static const char* to_string(tok);
+    std::string type_to_string() const;
 };
 
 }

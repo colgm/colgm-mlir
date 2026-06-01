@@ -62,6 +62,7 @@ set(COLOGM_SOURCES
     src/dialect/dialect.cpp
     src/dialect/op.cpp
     src/lexer/lexer.cpp
+    src/lexer/token.cpp
     src/parse/parser.cpp
     src/report/report.cpp
     src/utils/misc.cpp
@@ -80,6 +81,7 @@ add_library(colgm_mlir_core STATIC
     src/dialect/dialect.cpp
     src/dialect/op.cpp
     src/lexer/lexer.cpp
+    src/lexer/token.cpp
     src/parse/parser.cpp
     src/report/report.cpp
     src/utils/misc.cpp

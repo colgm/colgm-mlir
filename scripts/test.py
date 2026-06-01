@@ -1,5 +1,6 @@
 from pathlib import Path
 import subprocess
+import sys
 
 def get_test_suite(dirpath: Path, suffix: str) -> tuple[list[Path], list[Path], list[Path]]:
     tests = [f for f in dirpath.rglob(f"**/*.{suffix}")]
@@ -31,13 +32,17 @@ def check(cmd: list[str], expect_stdout: str, expect_stderr: str) -> bool:
     stderr = de_color(res.stderr.decode("utf-8"))
     if stdout != expect_stdout:
         print(f"Error: {cmd}")
-        print(f"Expected stdout:\n{expect_stdout.replace(" ", ".").replace("\n", "\n|")}")
-        print(f"Actual stdout:\n{stdout.replace(" ", ".").replace("\n", "\n|")}")
+        eo = expect_stdout.replace(" ", ".").replace("\n", "\n|")
+        ao = stdout.replace(" ", ".").replace("\n", "\n|")
+        print(f"Expected stdout:\n{eo}")
+        print(f"Actual stdout:\n{ao}")
         return False
     if stderr != expect_stderr:
         print(f"Error: {cmd}")
-        print(f"Expected stderr:\n{expect_stderr.replace(" ", ".").replace("\n", "\n|")}")
-        print(f"Actual stderr:\n{stderr.replace(" ", ".").replace("\n", "\n|")}")
+        ee = expect_stderr.replace(" ", ".").replace("\n", "\n|")
+        ae = stderr.replace(" ", ".").replace("\n", "\n|")
+        print(f"Expected stderr:\n{ee}")
+        print(f"Actual stderr:\n{ae}")
         return False
     return True
 
@@ -98,3 +103,6 @@ if __name__ == "__main__":
     print("=" * 60)
     print(f"{passed}/{len_test} passed")
     print("=" * 60)
+
+    if passed != len_test:
+        sys.exit(1)
