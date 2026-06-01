@@ -67,7 +67,25 @@ func_decl* parser::parse_func_decl() {
         match(tok::tk_arrow);
         node->set_return_type(parse_type());
     }
+
+    node->set_body(parse_block());
     return node;
+}
+
+block_stmt* parser::parse_block() {
+    auto node = new block_stmt(tokens[ptr].loc);
+    match(tok::tk_lbrace);
+    while (!lookahead(tok::tk_rbrace)) {
+        node->add_stmt(parse_stmt());
+    }
+    match(tok::tk_rbrace);
+    return node;
+}
+
+stmt* parser::parse_stmt() {
+    // TODO
+    next();
+    return nullptr;
 }
 
 const error& parser::scan() {

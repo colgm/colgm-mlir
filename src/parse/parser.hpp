@@ -33,6 +33,8 @@ private:
     type_def* parse_type();
     param* parse_param();
     func_decl* parse_func_decl();
+    block_stmt* parse_block();
+    stmt* parse_stmt();
 
 public:
     parser(const std::vector<token>& tokens, error& e):

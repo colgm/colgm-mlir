@@ -26,7 +26,7 @@ private:
         indent.push_back("|--");
     }
     void pop_indent() { indent.pop_back(); }
-    void set_last() { indent.back() = "+--"; }
+    void set_last() { indent.back() = "`--"; }
     void dump_indent() {
         if (indent.size() && indent.back()=="|  ") {
             indent.back() = "|--";

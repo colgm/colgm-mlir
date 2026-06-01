@@ -199,7 +199,7 @@ bool dumper::visit_func_decl(func_decl* node) {
     dump_indent();
     std::cout << "FuncDecl " << node->get_name() << format_location(node);
     push_indent();
-    {
+    if (!node->get_params().empty()) {
         dump_indent();
         std::cout << "Params:\n";
         push_indent();
