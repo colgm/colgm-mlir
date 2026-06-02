@@ -148,7 +148,7 @@ if(ENABLE_MLIR)
         MLIRDialect
         MLIRFuncDialect
         MLIRTensorDialect
-        MLIRMlirOptMain
+        MLIROptLib
     )
 endif()
 

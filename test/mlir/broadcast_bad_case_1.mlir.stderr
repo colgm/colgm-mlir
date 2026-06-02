@@ -1,0 +1,4 @@
+test/mlir/broadcast_bad_case_1.mlir:3:10: error: 'colgm.broadcast' op missing 'target_shape' attribute
+    %0 = colgm.broadcast %arg : tensor<1x3x4xf32> -> tensor<2x3x4xf32>
+         ^
+test/mlir/broadcast_bad_case_1.mlir:3:10: note: see current operation: %0 = "colgm.broadcast"(%arg0) : (tensor<1x3x4xf32>) -> tensor<2x3x4xf32>

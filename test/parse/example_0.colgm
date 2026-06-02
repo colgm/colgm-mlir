@@ -1,0 +1,4 @@
+func main() -> f32[1] {
+    var a = [0.1]
+    return a
+}

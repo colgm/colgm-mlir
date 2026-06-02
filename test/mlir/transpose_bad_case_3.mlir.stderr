@@ -1,0 +1,4 @@
+test/mlir/transpose_bad_case_3.mlir:3:8: error: 'colgm.transpose' op permutation[1] = 2 is out of range [0, 2)
+  %0 = colgm.transpose %arg {permutation = [0, 2]} : tensor<2x3xf32> -> tensor<3x2xf32>
+       ^
+test/mlir/transpose_bad_case_3.mlir:3:8: note: see current operation: %0 = "colgm.transpose"(%arg0) {permutation = [0, 2]} : (tensor<2x3xf32>) -> tensor<3x2xf32>

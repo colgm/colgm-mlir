@@ -1,0 +1,4 @@
+test/mlir/transpose_bad_case_0.mlir:3:8: error: 'colgm.transpose' op element type mismatch: input='f32', output='i32'
+  %0 = colgm.transpose %arg {permutation = [1, 0]} : tensor<2x3xf32> -> tensor<3x2xi32>
+       ^
+test/mlir/transpose_bad_case_0.mlir:3:8: note: see current operation: %0 = "colgm.transpose"(%arg0) {permutation = [1, 0]} : (tensor<2x3xf32>) -> tensor<3x2xi32>

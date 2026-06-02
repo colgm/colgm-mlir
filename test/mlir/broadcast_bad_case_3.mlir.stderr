@@ -1,0 +1,4 @@
+test/mlir/broadcast_bad_case_3.mlir:3:10: error: 'colgm.broadcast' op target_shape[2] = 4 != output dim 2 = 5
+    %0 = colgm.broadcast %arg {target_shape = [2, 3, 4]} : tensor<1x3x4xf32> -> tensor<2x3x5xf32>
+         ^
+test/mlir/broadcast_bad_case_3.mlir:3:10: note: see current operation: %0 = "colgm.broadcast"(%arg0) {target_shape = [2, 3, 4]} : (tensor<1x3x4xf32>) -> tensor<2x3x5xf32>

@@ -1,0 +1,4 @@
+test/mlir/transpose_bad_case_1.mlir:3:8: error: 'colgm.transpose' op missing 'permutation' attribute
+  %0 = colgm.transpose %arg : tensor<2x3xf32> -> tensor<3x2xf32>
+       ^
+test/mlir/transpose_bad_case_1.mlir:3:8: note: see current operation: %0 = "colgm.transpose"(%arg0) : (tensor<2x3xf32>) -> tensor<3x2xf32>

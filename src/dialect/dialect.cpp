@@ -23,7 +23,9 @@ colgm_dialect::colgm_dialect(mlir::MLIRContext* ctx):
         sqrt_op,
         sigmoid_op,
         tanh_op,
-        reshape_op
+        reshape_op,
+        transpose_op,
+        broadcast_op
     >();
 }
 

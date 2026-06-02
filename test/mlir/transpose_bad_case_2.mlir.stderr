@@ -1,0 +1,4 @@
+test/mlir/transpose_bad_case_2.mlir:3:8: error: 'colgm.transpose' op permutation size 2 != input rank 3
+  %0 = colgm.transpose %arg {permutation = [0, 1]} : tensor<2x3x4xf32> -> tensor<2x3x4xf32>
+       ^
+test/mlir/transpose_bad_case_2.mlir:3:8: note: see current operation: %0 = "colgm.transpose"(%arg0) {permutation = [0, 1]} : (tensor<2x3x4xf32>) -> tensor<2x3x4xf32>

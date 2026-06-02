@@ -1,0 +1,19 @@
+module {
+  func.func @test_broadcast_expand_dim(%arg0: tensor<1x3x4xf32>) -> tensor<2x3x4xf32> {
+    %0 = colgm.broadcast %arg0 {target_shape = [2, 3, 4]} : tensor<1x3x4xf32> -> tensor<2x3x4xf32>
+    return %0 : tensor<2x3x4xf32>
+  }
+  func.func @test_broadcast_new_leading_dim(%arg0: tensor<3x4xf32>) -> tensor<2x3x4xf32> {
+    %0 = colgm.broadcast %arg0 {target_shape = [2, 3, 4]} : tensor<3x4xf32> -> tensor<2x3x4xf32>
+    return %0 : tensor<2x3x4xf32>
+  }
+  func.func @test_broadcast_scalar(%arg0: tensor<f32>) -> tensor<2x3xf32> {
+    %0 = colgm.broadcast %arg0 {target_shape = [2, 3]} : tensor<f32> -> tensor<2x3xf32>
+    return %0 : tensor<2x3xf32>
+  }
+  func.func @test_broadcast_identity(%arg0: tensor<2x3x4xf32>) -> tensor<2x3x4xf32> {
+    %0 = colgm.broadcast %arg0 {target_shape = [2, 3, 4]} : tensor<2x3x4xf32> -> tensor<2x3x4xf32>
+    return %0 : tensor<2x3x4xf32>
+  }
+}
+
