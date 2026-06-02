@@ -19,7 +19,7 @@ private:
         if (indent.size()) {
             if (indent.back()=="|--") {
                 indent.back() = "|  ";
-            } else if (indent.back()=="+--") {
+            } else if (indent.back()=="`--") {
                 indent.back() = "   ";
             }
         }

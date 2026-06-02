@@ -33,7 +33,14 @@ type_def* parser::parse_type() {
         match(tok::tk_lbracket);
         while (!lookahead(tok::tk_rbracket)) {
             // TODO
-            next();
+            auto num = dec_to_u64(tokens[ptr].str.c_str());
+            node->add_dim(num);
+            match(tok::tk_num);
+            if (lookahead(tok::tk_comma)) {
+                match(tok::tk_comma);
+            } else if (lookahead(tok::tk_num)) {
+                err.err(tokens[ptr - 1].loc, "Expect ',' after this");
+            }
         }
         match(tok::tk_rbracket);
     }
@@ -77,6 +84,9 @@ block_stmt* parser::parse_block() {
     match(tok::tk_lbrace);
     while (!lookahead(tok::tk_rbrace)) {
         node->add_stmt(parse_stmt());
+        while (lookahead(tok::tk_semi)) {
+            match(tok::tk_semi);
+        }
     }
     match(tok::tk_rbrace);
     return node;
