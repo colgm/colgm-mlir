@@ -191,6 +191,11 @@ def main():
         action="store_true",
         help="Skip extraction, keep only the tarball",
     )
+    ap.add_argument(
+        "--github",
+        action="store_true",
+        help="Download from GitHub instead of all mirrors",
+    )
     args = ap.parse_args()
 
     version = args.version
@@ -230,6 +235,8 @@ def main():
         downloaded = True
     else:
         for mirror_name, url in urls:
+            if args.github and mirror_name != "GitHub":
+                continue
             print(f"  Trying {mirror_name}: {url}")
             if download_with_progress(url, archive_path, label=f"[{mirror_name}] "):
                 downloaded = True

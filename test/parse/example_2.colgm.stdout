@@ -1,0 +1,56 @@
+Root -> test/parse/example_2.colgm:1:1
+|--FuncDecl test -> test/parse/example_2.colgm:1:1
+|  |--Params:
+|  |  |--Param input -> test/parse/example_2.colgm:1:11
+|  |  `--Param target_shape -> test/parse/example_2.colgm:1:18
+|  `--BlockStmt -> test/parse/example_2.colgm:1:32
+|     `--ReturnStmt -> test/parse/example_2.colgm:2:5
+|        `--CallExpr -> test/parse/example_2.colgm:2:19
+|           |--identifier reshape -> test/parse/example_2.colgm:2:12
+|           |--identifier input -> test/parse/example_2.colgm:2:20
+|           `--identifier target_shape -> test/parse/example_2.colgm:2:27
+|--FuncDecl test_specific_shape -> test/parse/example_2.colgm:5:1
+|  |--Params:
+|  |  |--Param input -> test/parse/example_2.colgm:5:26
+|  |  |  `--TypeDef i32[6] -> test/parse/example_2.colgm:5:33
+|  |  `--Param target_shape -> test/parse/example_2.colgm:5:41
+|  |     `--TypeDef i32[2] -> test/parse/example_2.colgm:5:55
+|  `--BlockStmt -> test/parse/example_2.colgm:5:63
+|     `--ReturnStmt -> test/parse/example_2.colgm:6:5
+|        `--CallExpr -> test/parse/example_2.colgm:6:19
+|           |--identifier reshape -> test/parse/example_2.colgm:6:12
+|           |--identifier input -> test/parse/example_2.colgm:6:20
+|           `--identifier target_shape -> test/parse/example_2.colgm:6:27
+`--FuncDecl main -> test/parse/example_2.colgm:9:1
+   `--BlockStmt -> test/parse/example_2.colgm:9:13
+      |--VarDecl input -> test/parse/example_2.colgm:10:5
+      |  `--Tensor -> test/parse/example_2.colgm:10:17
+      |     |--IntLiteral 1 -> test/parse/example_2.colgm:10:18
+      |     |--IntLiteral 2 -> test/parse/example_2.colgm:10:21
+      |     |--IntLiteral 3 -> test/parse/example_2.colgm:10:24
+      |     |--IntLiteral 4 -> test/parse/example_2.colgm:10:27
+      |     |--IntLiteral 5 -> test/parse/example_2.colgm:10:30
+      |     `--IntLiteral 6 -> test/parse/example_2.colgm:10:33
+      |--VarDecl output -> test/parse/example_2.colgm:11:5
+      |  `--CallExpr -> test/parse/example_2.colgm:11:22
+      |     |--identifier test -> test/parse/example_2.colgm:11:18
+      |     |--identifier input -> test/parse/example_2.colgm:11:23
+      |     `--Arg target_shape: 
+      |        `--Tensor -> test/parse/example_2.colgm:11:45
+      |           |--IntLiteral 2 -> test/parse/example_2.colgm:11:46
+      |           `--IntLiteral 3 -> test/parse/example_2.colgm:11:49
+      |--VarDecl output2 -> test/parse/example_2.colgm:12:5
+      |  `--CallExpr -> test/parse/example_2.colgm:12:38
+      |     |--identifier test_specific_shape -> test/parse/example_2.colgm:12:19
+      |     |--identifier input -> test/parse/example_2.colgm:12:39
+      |     `--Tensor -> test/parse/example_2.colgm:12:46
+      |        |--IntLiteral 2 -> test/parse/example_2.colgm:12:47
+      |        `--IntLiteral 3 -> test/parse/example_2.colgm:12:50
+      `--ReturnStmt -> test/parse/example_2.colgm:13:5
+         `--BinaryExpr + -> test/parse/example_2.colgm:13:26
+            |--CallExpr -> test/parse/example_2.colgm:13:17
+            |  |--identifier print -> test/parse/example_2.colgm:13:12
+            |  `--identifier output -> test/parse/example_2.colgm:13:18
+            `--CallExpr -> test/parse/example_2.colgm:13:33
+               |--identifier print -> test/parse/example_2.colgm:13:28
+               `--identifier output2 -> test/parse/example_2.colgm:13:34

@@ -1,5 +1,11 @@
 #include "dialect/dialect.hpp"
-#include "dialect/op.hpp"
+
+#include "dialect/colgm/binary_op.hpp"
+#include "dialect/colgm/unary_op.hpp"
+#include "dialect/colgm/reshape.hpp"
+#include "dialect/colgm/transpose.hpp"
+#include "dialect/colgm/broadcast.hpp"
+#include "dialect/colgm/reduce_sum.hpp"
 
 namespace colgm_mlir {
 
@@ -25,7 +31,8 @@ colgm_dialect::colgm_dialect(mlir::MLIRContext* ctx):
         tanh_op,
         reshape_op,
         transpose_op,
-        broadcast_op
+        broadcast_op,
+        reduce_sum
     >();
 }
 

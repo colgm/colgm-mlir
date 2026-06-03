@@ -48,7 +48,7 @@ private:
         {"::"      , tok::tk_double_colon},
         {"+"       , tok::tk_add         },
         {"-"       , tok::tk_sub         },
-        {"*"       , tok::tk_mult        },
+        {"*"       , tok::tk_mul         },
         {"/"       , tok::tk_div         },
         {"="       , tok::tk_eq          },
         {"=="      , tok::tk_cmpeq       },

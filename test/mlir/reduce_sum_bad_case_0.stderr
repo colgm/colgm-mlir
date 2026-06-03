@@ -1,0 +1,4 @@
+test/mlir/reduce_sum_bad_case_0.mlir:3:10: error: 'colgm.reduce_sum' op element type mismatch: input='f32', output='i32'
+    %0 = colgm.reduce_sum %arg {axes = [1]} : tensor<2x3x4xf32> -> tensor<2x4xi32>
+         ^
+test/mlir/reduce_sum_bad_case_0.mlir:3:10: note: see current operation: %0 = "colgm.reduce_sum"(%arg0) {axes = [1]} : (tensor<2x3x4xf32>) -> tensor<2x4xi32>

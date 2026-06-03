@@ -31,7 +31,7 @@ const char* token::to_string(tok t) {
         case tok::tk_double_colon: return "::";
         case tok::tk_add:          return "+";
         case tok::tk_sub:          return "-";
-        case tok::tk_mult:         return "*";
+        case tok::tk_mul:          return "*";
         case tok::tk_div:          return "/";
         case tok::tk_eq:           return "=";
         case tok::tk_cmpeq:        return "==";

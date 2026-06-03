@@ -1,0 +1,18 @@
+Root -> test/parse/example_0.colgm:1:1
+`--FuncDecl main -> test/parse/example_0.colgm:1:1
+   |--ReturnType:
+   |  `--TypeDef f32[1] -> test/parse/example_0.colgm:1:16
+   `--BlockStmt -> test/parse/example_0.colgm:1:23
+      |--VarDecl a -> test/parse/example_0.colgm:2:5
+      |  `--Tensor -> test/parse/example_0.colgm:2:13
+      |     `--FloatLiteral 0.1 -> test/parse/example_0.colgm:2:14
+      |--VarDecl b -> test/parse/example_0.colgm:3:5
+      |  `--Tensor -> test/parse/example_0.colgm:3:13
+      |     |--Tensor -> test/parse/example_0.colgm:3:14
+      |     |  |--IntLiteral 1 -> test/parse/example_0.colgm:3:15
+      |     |  `--IntLiteral 2 -> test/parse/example_0.colgm:3:18
+      |     `--Tensor -> test/parse/example_0.colgm:3:22
+      |        |--IntLiteral 3 -> test/parse/example_0.colgm:3:23
+      |        `--IntLiteral 4 -> test/parse/example_0.colgm:3:26
+      `--ReturnStmt -> test/parse/example_0.colgm:4:5
+         `--identifier a -> test/parse/example_0.colgm:4:12

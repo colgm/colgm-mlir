@@ -20,7 +20,20 @@ private:
     root* tree = nullptr;
 
 private:
-    bool lookahead(tok t) const;
+    bool lookahead(tok t, i64 offset = 0) const;
+    bool next_token_in_next_line() const {
+        if (ptr + 1 < tokens.size()) {
+            return tokens[ptr + 1].loc.begin_line > tokens[ptr].loc.begin_line;
+        }
+        return false;
+    }
+
+    bool this_token_in_next_line() const {
+        if (ptr - 1 >= 0) {
+            return tokens[ptr].loc.begin_line > tokens[ptr - 1].loc.begin_line;
+        }
+        return false;
+    }
     void next() {
         if (tokens[ptr].type == tok::tk_eof) {
             return;
@@ -34,7 +47,25 @@ private:
     param* parse_param();
     func_decl* parse_func_decl();
     block_stmt* parse_block();
+    var_decl* parse_var_decl();
+    if_stmt* parse_if_stmt();
+    for_stmt* parse_for_stmt();
+    return_stmt* parse_return_stmt();
+    assign_stmt* parse_assign_stmt();
     stmt* parse_stmt();
+    int_literal* parse_int_literal();
+    float_literal* parse_float_literal();
+    expr* parse_number();
+    bool_literal* parse_bool_literal();
+    tensor* parse_tensor();
+    identifier* parse_identifier();
+    range_expr* parse_range_expr();
+    expr* parse_value();
+    expr* parse_unary_operator();
+    expr* parse_call();
+    expr* parse_add_sub();
+    expr* parse_mul_div();
+    expr* parse_expr();
 
 public:
     parser(const std::vector<token>& tokens, error& e):

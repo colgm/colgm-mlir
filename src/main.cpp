@@ -2,6 +2,7 @@
 #include "lexer/lexer.hpp"
 #include "ast/dumper.hpp"
 #include "parse/parser.hpp"
+#include "sema/sema.hpp"
 #include "dialect/dialect.hpp"
 
 #include <vector>

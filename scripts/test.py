@@ -46,39 +46,31 @@ def check(cmd: list[str], expect_stdout: str, expect_stderr: str) -> bool:
         return False
     return True
 
-def test_lexer(executable: Path) -> tuple[int, int]:
-    lex_test, lex_stdout, lex_stderr = get_test_suite(Path("test/lexer"), "colgm")
+def test(executable: Path, directory: Path, suffix: str, options: list[str]) -> tuple[int, int]:
+    stage_test, stage_stdout, stage_stderr = get_test_suite(directory, suffix)
     passed = 0
-    for i in range(len(lex_test)):
-        cmd = [str(executable), str(lex_test[i]), "--lex"]
-        with open(lex_stdout[i], "r") as f:
+    for i in range(len(stage_test)):
+        cmd = [str(executable), str(stage_test[i])] + options
+        with open(stage_stdout[i], "r") as f:
             stdout = f.read()
-        with open(lex_stderr[i], "r") as f:
+        with open(stage_stderr[i], "r") as f:
             stderr = f.read()
         res = check(cmd, stdout, stderr)
         passed += 1 if res else 0
         if res:
-            print("[PASSED]", lex_test[i])
+            print("[PASSED]", stage_test[i])
         else:
-            print("[FAILED]", lex_test[i])
-    return passed, len(lex_test)
+            print("[FAILED]", stage_test[i])
+    return passed, len(stage_test)
+
+def test_lexer(executable: Path) -> tuple[int, int]:
+    return test(executable, Path("test/lexer"), "colgm", ["--lex"])
+
+def test_parser(executable: Path) -> tuple[int, int]:
+    return test(executable, Path("test/parse"), "colgm", ["--ast"])
 
 def test_colgm_opt(executable: Path) -> tuple[int, int]:
-    colgm_opt_test, colgm_opt_stdout, colgm_opt_stderr = get_test_suite(Path("test/mlir"), "mlir")
-    passed = 0
-    for i in range(len(colgm_opt_test)):
-        cmd = [str(executable), str(colgm_opt_test[i])]
-        with open(colgm_opt_stdout[i], "r") as f:
-            stdout = f.read()
-        with open(colgm_opt_stderr[i], "r") as f:
-            stderr = f.read()
-        res = check(cmd, stdout, stderr)
-        passed += 1 if res else 0
-        if res:
-            print("[PASSED]", colgm_opt_test[i])
-        else:
-            print("[FAILED]", colgm_opt_test[i])
-    return passed, len(colgm_opt_test)
+    return test(executable, Path("test/mlir"), "mlir", [])
 
 if __name__ == "__main__":
     colgm_mlir = Path("build/colgm-mlir")
@@ -92,9 +84,25 @@ if __name__ == "__main__":
 
     passed, len_test = 0, 0
 
+    print("=" * 60)
+    print("Testing colgm-mlir::lexer")
+    print("=" * 60)
+
     lex_passed, len_lex_test = test_lexer(colgm_mlir)
     passed += lex_passed
     len_test += len_lex_test
+
+    print("=" * 60)
+    print("Testing colgm-mlir::parser")
+    print("=" * 60)
+
+    parser_passed, len_parser_test = test_parser(colgm_mlir)
+    passed += parser_passed
+    len_test += len_parser_test
+
+    print("=" * 60)
+    print("Testing colgm-opt")
+    print("=" * 60)
 
     colgm_opt_passed, len_colgm_opt_test = test_colgm_opt(colgm_opt)
     passed += colgm_opt_passed

@@ -18,6 +18,18 @@ void bool_literal::accept(visitor* v) {
     v->visit_bool_literal(this);
 }
 
+tensor::~tensor() {
+    for (auto& i : values) {
+        if (i) {
+            delete i;
+        }
+    }
+}
+
+void tensor::accept(visitor* v) {
+    v->visit_tensor(this);
+}
+
 void identifier::accept(visitor* v) {
     v->visit_identifier(this);
 }

@@ -26,7 +26,7 @@
   - Domain keywords: `tensor`, `f32`, `f64`, `i32`, `i64` (dtype keywords)
   - Literals: integer, float, string, char
   - Operators: `+`, `-`, `*`, `/`, `%`, `==`, `!=`, `<`, `>`, `<=`, `>=`, `=`, `->`, `(`, `)`, `{`, `}`, `[`, `]`, `,`, `;`, `.`, `:`
-- [ ] Write smoke tests for the lexer (tokenize a few example `.toy` / `.dsl` files)
+- [x] Write smoke tests for the lexer (tokenize a few example `.toy` / `.dsl` files)
 
 ---
 
@@ -43,14 +43,15 @@
 
 ## Phase 3 — Parser
 
-- [ ] Recursive-descent parser (hand-written, following Colgm's parser / MLIR Toy parser pattern)
-- [ ] Parse function declarations: `func name(params...) -> ret_type { body }`
-- [ ] Parse variable declarations: `var name = expr;` or `var name: type = expr;`
-- [ ] Parse tensor type annotations: `f32[2, 3]`, `i32[4]`, `f64[2, 2, 2]`
-- [ ] Parse expressions with precedence climbing (Pratt parser or layered recursive descent)
-- [ ] Parse tensor literals: `[[1.0, 2.0], [3.0, 4.0]]`
-- [ ] Parse control flow: `if`, `for`
-- [ ] Error recovery strategy (at minimum: report the first error and exit, like Colgm bootstrap)
+- [x] Recursive-descent parser (hand-written, following Colgm's parser / MLIR Toy parser pattern)
+- [x] Parse function declarations: `func name(params...) -> ret_type { body }`
+- [x] Parse variable declarations: `var name = expr;` or `var name: type = expr;`
+- [x] Parse tensor type annotations: `f32[2, 3]`, `i32[4]`, `f64[2, 2, 2]`
+- [x] Parse expressions with precedence climbing (Pratt parser or layered recursive descent)
+- [x] Parse tensor literals: `[[1.0, 2.0], [3.0, 4.0]]`
+- [x] Parse control flow: `if`, `for`
+- [x] Parse tensor literal syntax: `[[1,2],[3,4]]`
+- [ ] Error recovery strategy (at minimum: report the first error and exit)
 
 ---
 
@@ -124,6 +125,7 @@
 - [ ] `min` — reduce along specified axis
 - [ ] `matmul` — matrix multiplication (2-D only initially)
 - [ ] `broadcast` — broadcast a tensor to a larger shape
+- [ ] `reduce_sum` — reduce along specified axis
 
 ---
 
@@ -137,17 +139,16 @@
 
 ## Phase 11 — Polish & Ecosystem
 
-- [ ] Better error messages (point to source location, show context)
+- [x] Better error messages (point to source location, show context)
 - [ ] `std` library written in the DSL itself (math functions, initializers: `zeros`, `ones`, `rand`)
-- [ ] Test suite: run each test case through the full pipeline and compare output values
-- [ ] CI (GitHub Actions) with a pinned LLVM build
-- [ ] Editor syntax highlighting (VSCode extension, similar to colgm-extension)
+- [x] Test suite: run each test case through the full pipeline and compare output values
+- [x] CI (GitHub Actions) with a pinned LLVM build
+- [x] Editor syntax highlighting (VSCode extension)
 
 ---
 
 ## Open Design Questions (to resolve as we go)
 
-- Exact tensor literal syntax: `[[1,2],[3,4]]` vs `tensor([[1,2],[3,4]])` vs `f32[2,2]{1,2,3,4}`?
 - Function-call style for ops vs operators: `a + b` vs `add(a, b)` vs both?
 - Should `reshape` / `transpose` expose axis arguments inline or via a separate `@config` / annotation syntax?
 - Does `for` loop stay general-purpose, or should it be specialized for tensor iteration (like `for i in 0..N`)?

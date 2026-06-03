@@ -1,0 +1,47 @@
+Root -> test/parse/example_1.colgm:1:1
+`--FuncDecl main -> test/parse/example_1.colgm:1:1
+   |--ReturnType:
+   |  `--TypeDef i32 -> test/parse/example_1.colgm:1:16
+   `--BlockStmt -> test/parse/example_1.colgm:1:20
+      |--VarDecl a -> test/parse/example_1.colgm:2:5
+      |  `--Tensor -> test/parse/example_1.colgm:2:13
+      |     |--IntLiteral 0 -> test/parse/example_1.colgm:2:14
+      |     |--IntLiteral 1 -> test/parse/example_1.colgm:2:17
+      |     |--IntLiteral 2 -> test/parse/example_1.colgm:2:20
+      |     `--IntLiteral 3 -> test/parse/example_1.colgm:2:23
+      |--VarDecl b -> test/parse/example_1.colgm:3:5
+      |  `--Tensor -> test/parse/example_1.colgm:3:13
+      |     |--IntLiteral 4 -> test/parse/example_1.colgm:3:14
+      |     |--IntLiteral 5 -> test/parse/example_1.colgm:3:17
+      |     |--IntLiteral 6 -> test/parse/example_1.colgm:3:20
+      |     `--IntLiteral 7 -> test/parse/example_1.colgm:3:23
+      |--AssignStmt -> test/parse/example_1.colgm:5:5
+      |  |--identifier a -> test/parse/example_1.colgm:5:5
+      |  `--BinaryExpr + -> test/parse/example_1.colgm:5:11
+      |     |--identifier a -> test/parse/example_1.colgm:5:9
+      |     `--BinaryExpr * -> test/parse/example_1.colgm:5:15
+      |        |--identifier a -> test/parse/example_1.colgm:5:13
+      |        `--identifier b -> test/parse/example_1.colgm:5:17
+      |--AssignStmt -> test/parse/example_1.colgm:6:5
+      |  |--identifier a -> test/parse/example_1.colgm:6:5
+      |  `--BinaryExpr + -> test/parse/example_1.colgm:6:33
+      |     |--BinaryExpr + -> test/parse/example_1.colgm:6:26
+      |     |  |--BinaryExpr + -> test/parse/example_1.colgm:6:19
+      |     |  |  |--BinaryExpr + -> test/parse/example_1.colgm:6:11
+      |     |  |  |  |--identifier a -> test/parse/example_1.colgm:6:9
+      |     |  |  |  `--BinaryExpr * -> test/parse/example_1.colgm:6:15
+      |     |  |  |     |--identifier a -> test/parse/example_1.colgm:6:13
+      |     |  |  |     `--identifier b -> test/parse/example_1.colgm:6:17
+      |     |  |  `--UnaryExpr - -> test/parse/example_1.colgm:6:22
+      |     |  |     `--identifier a -> test/parse/example_1.colgm:6:23
+      |     |  `--UnaryExpr + -> test/parse/example_1.colgm:6:29
+      |     |     `--identifier a -> test/parse/example_1.colgm:6:30
+      |     `--BinaryExpr / -> test/parse/example_1.colgm:6:37
+      |        |--identifier b -> test/parse/example_1.colgm:6:35
+      |        `--identifier a -> test/parse/example_1.colgm:6:39
+      `--ReturnStmt -> test/parse/example_1.colgm:7:5
+         `--CallExpr -> test/parse/example_1.colgm:7:18
+            |--identifier reduce -> test/parse/example_1.colgm:7:12
+            |--identifier a -> test/parse/example_1.colgm:7:19
+            `--Tensor -> test/parse/example_1.colgm:7:22
+               `--IntLiteral 0 -> test/parse/example_1.colgm:7:23

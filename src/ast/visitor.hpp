@@ -18,6 +18,7 @@ public:
     virtual bool visit_int_literal(int_literal*);
     virtual bool visit_float_literal(float_literal*);
     virtual bool visit_bool_literal(bool_literal*);
+    virtual bool visit_tensor(tensor*);
     virtual bool visit_identifier(identifier*);
     virtual bool visit_binary_expr(binary_expr*);
     virtual bool visit_unary_expr(unary_expr*);

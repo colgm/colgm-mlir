@@ -40,6 +40,16 @@ bool visitor::visit_bool_literal(bool_literal*) {
     return true;
 }
 
+bool visitor::visit_tensor(tensor* n) {
+    for (auto i : n->get_values()) {
+        if (!i) {
+            continue;
+        }
+        i->accept(this);
+    }
+    return true;
+}
+
 bool visitor::visit_identifier(identifier*) {
     return true;
 }

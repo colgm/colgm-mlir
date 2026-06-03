@@ -1,0 +1,32 @@
+#pragma once
+
+#include <mlir/IR/OpDefinition.h>
+#include <mlir/IR/BuiltinTypes.h>
+#include <mlir/IR/Builders.h>
+#include <mlir/Interfaces/SideEffectInterfaces.h>
+
+namespace colgm_mlir {
+
+class reduce_sum: public mlir::Op<reduce_sum,
+                                  mlir::OpTrait::OneOperand,
+                                  mlir::OpTrait::OneResult> {
+public:
+    using Op::Op;
+    static llvm::StringRef getOperationName() { return "colgm.reduce_sum"; }
+    static llvm::ArrayRef<llvm::StringRef> getAttributeNames() { return {}; }
+
+    mlir::Value get_input() { return getOperand(); }
+
+    mlir::ArrayAttr get_axes() {
+        return llvm::cast<mlir::ArrayAttr>((*this)->getAttr("axes"));
+    }
+
+    static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
+                      mlir::Value input, mlir::ArrayRef<int64_t> axes);
+    static mlir::ParseResult parse(mlir::OpAsmParser& parser,
+                                   mlir::OperationState& result);
+    void print(mlir::OpAsmPrinter& p);
+    mlir::LogicalResult verify();
+};
+
+}

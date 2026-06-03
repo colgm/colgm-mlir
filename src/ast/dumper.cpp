@@ -34,6 +34,20 @@ bool dumper::visit_bool_literal(bool_literal* node) {
     return true;
 }
 
+bool dumper::visit_tensor(tensor* node) {
+    dump_indent();
+    std::cout << "Tensor"<< format_location(node);
+    push_indent();
+    for (auto i : node->get_values()) {
+        if (i == node->get_values().back()) {
+            set_last();
+        }
+        i->accept(this);
+    }
+    pop_indent();
+    return true;
+}
+
 bool dumper::visit_identifier(identifier* node) {
     dump_indent();
     std::cout << "identifier " << node->get_name() << format_location(node);
@@ -75,7 +89,7 @@ bool dumper::visit_unary_expr(unary_expr* node) {
 
 bool dumper::visit_call_expr(call_expr* node) {
     dump_indent();
-    std::cout << "CallExpr " << format_location(node);
+    std::cout << "CallExpr" << format_location(node);
     push_indent();
     node->get_callee()->accept(this);
     for (auto i : node->get_args()) {
@@ -84,7 +98,7 @@ bool dumper::visit_call_expr(call_expr* node) {
         }
         if (i.name.has_value()) {
             dump_indent();
-            std::cout << "Arg " << i.name.value() << ": ";
+            std::cout << "Arg " << i.name.value() << ": \n";
             push_indent();
             set_last();
             i.value->accept(this);
@@ -99,7 +113,7 @@ bool dumper::visit_call_expr(call_expr* node) {
 
 bool dumper::visit_index_access(index_access* node) {
     dump_indent();
-    std::cout << "IndexAccess " << format_location(node);
+    std::cout << "IndexAccess" << format_location(node);
     push_indent();
     node->get_target()->accept(this);
     set_last();
@@ -110,7 +124,7 @@ bool dumper::visit_index_access(index_access* node) {
 
 bool dumper::visit_range_expr(range_expr* node) {
     dump_indent();
-    std::cout << "RangeExpr " << format_location(node);
+    std::cout << "RangeExpr" << format_location(node);
     push_indent();
     node->get_start()->accept(this);
     set_last();
@@ -131,7 +145,7 @@ bool dumper::visit_var_decl(var_decl* node) {
 
 bool dumper::visit_assign_stmt(assign_stmt* node) {
     dump_indent();
-    std::cout << "AssignStmt " << format_location(node);
+    std::cout << "AssignStmt" << format_location(node);
     push_indent();
     node->get_lhs()->accept(this);
     set_last();
@@ -142,9 +156,10 @@ bool dumper::visit_assign_stmt(assign_stmt* node) {
 
 bool dumper::visit_return_stmt(return_stmt* node) {
     dump_indent();
-    std::cout << "ReturnStmt " << format_location(node);
+    std::cout << "ReturnStmt" << format_location(node);
     push_indent();
     if (node->get_value()) {
+        set_last();
         node->get_value()->accept(this);
     }
     pop_indent();
@@ -153,14 +168,14 @@ bool dumper::visit_return_stmt(return_stmt* node) {
 
 bool dumper::visit_if_stmt(if_stmt* node) {
     dump_indent();
-    std::cout << "IfStmt " << format_location(node);
+    std::cout << "IfStmt" << format_location(node);
     push_indent();
     node->get_condition()->accept(this);
     set_last();
     node->get_body()->accept(this);
     if (node->get_else_body()) {
         dump_indent();
-        std::cout << "ElseStmt " << format_location(node->get_else_body());
+        std::cout << "ElseStmt" << format_location(node->get_else_body());
         push_indent();
         set_last();
         node->get_else_body()->accept(this);
@@ -183,7 +198,7 @@ bool dumper::visit_for_stmt(for_stmt* node) {
 
 bool dumper::visit_block_stmt(block_stmt* node) {
     dump_indent();
-    std::cout << "BlockStmt " << format_location(node);
+    std::cout << "BlockStmt" << format_location(node);
     push_indent();
     for (auto i : node->get_stmts()) {
         if (i == node->get_stmts().back()) {
@@ -247,9 +262,12 @@ bool dumper::visit_type_def(type_def* node) {
 bool dumper::visit_param(param* node) {
     dump_indent();
     std::cout << "Param " << node->get_name() << format_location(node);
-    push_indent();
-    node->get_type()->accept(this);
-    pop_indent();
+    if (node->get_type()) {
+        push_indent();
+        set_last();
+        node->get_type()->accept(this);
+        pop_indent();
+    }
     return true;
 }
 

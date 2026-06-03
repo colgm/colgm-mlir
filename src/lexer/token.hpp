@@ -35,7 +35,7 @@ enum class tok: u32 {
     tk_double_colon, // ::
     tk_add,          // operator +
     tk_sub,          // operator -
-    tk_mult,         // operator *
+    tk_mul,          // operator *
     tk_div,          // operator /
     tk_eq,           // operator =
     tk_cmpeq,        // operator ==

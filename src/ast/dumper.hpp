@@ -47,6 +47,7 @@ private:
     bool visit_int_literal(int_literal*) override;
     bool visit_float_literal(float_literal*) override;
     bool visit_bool_literal(bool_literal*) override;
+    bool visit_tensor(tensor*) override;
     bool visit_identifier(identifier*) override;
     bool visit_binary_expr(binary_expr*) override;
     bool visit_unary_expr(unary_expr*) override;

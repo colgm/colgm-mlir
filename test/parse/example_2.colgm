@@ -1,0 +1,14 @@
+func test(input, target_shape) {
+    return reshape(input, target_shape)
+}
+
+func test_specific_shape(input: i32[6], target_shape: i32[2]) {
+    return reshape(input, target_shape)
+}
+
+func main() {
+    var input = [1, 2, 3, 4, 5, 6]
+    var output = test(input, target_shape = [2, 3])
+    var output2 = test_specific_shape(input, [2, 3])
+    return print(output) + print(output2)
+}

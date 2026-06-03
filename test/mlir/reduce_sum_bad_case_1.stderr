@@ -1,0 +1,4 @@
+test/mlir/reduce_sum_bad_case_1.mlir:3:10: error: 'colgm.reduce_sum' op missing 'axes' attribute
+    %0 = colgm.reduce_sum %arg : tensor<2x3x4xf32> -> tensor<2x4xf32>
+         ^
+test/mlir/reduce_sum_bad_case_1.mlir:3:10: note: see current operation: %0 = "colgm.reduce_sum"(%arg0) : (tensor<2x3x4xf32>) -> tensor<2x4xf32>

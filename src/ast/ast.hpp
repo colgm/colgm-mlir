@@ -16,6 +16,7 @@ public:
         int_literal,
         float_literal,
         bool_literal,
+        tensor,
         identifier,
         binary_expr,
         unary_expr,
@@ -53,6 +54,7 @@ class expr;
 class int_literal;
 class float_literal;
 class bool_literal;
+class tensor;
 class identifier;
 class binary_expr;
 class unary_expr;

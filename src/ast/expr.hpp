@@ -22,7 +22,7 @@ private:
     i64 literal;
 
 public:
-    int_literal(span& loc): expr(ast::type::int_literal, loc) {}
+    int_literal(const span& loc): expr(ast::type::int_literal, loc) {}
     ~int_literal() override = default;
     void accept(visitor*) override;
     void set_literal(i64 lit) { literal = lit; }
@@ -34,7 +34,7 @@ private:
     f64 literal;
 
 public:
-    float_literal(span& loc): expr(ast::type::float_literal, loc) {}
+    float_literal(const span& loc): expr(ast::type::float_literal, loc) {}
     ~float_literal() override = default;
     void accept(visitor*) override;
     void set_literal(f64 lit) { literal = lit; }
@@ -46,11 +46,23 @@ private:
     bool flag;
 
 public:
-    bool_literal(span& loc): expr(ast::type::bool_literal, loc) {}
+    bool_literal(const span& loc): expr(ast::type::bool_literal, loc) {}
     ~bool_literal() override = default;
     void accept(visitor*) override;
     void set_flag(bool f) { flag = f; }
     auto get_flag() const { return flag; }
+};
+
+class tensor: public expr {
+private:
+    std::vector<expr*> values;
+
+public:
+    tensor(const span& loc): expr(ast::type::tensor, loc) {}
+    ~tensor() override;
+    void accept(visitor*) override;
+    void add_value(expr* v) { values.push_back(v); }
+    const auto& get_values() const { return values; }
 };
 
 class identifier: public expr {
@@ -58,7 +70,7 @@ private:
     std::string name;
 
 public:
-    identifier(span& loc): expr(ast::type::identifier, loc) {}
+    identifier(const span& loc): expr(ast::type::identifier, loc) {}
     ~identifier() override = default;
     void accept(visitor*) override;
     void set_name(const std::string& n) { name = n; }
@@ -80,7 +92,7 @@ private:
     expr* rhs = nullptr;
 
 public:
-    binary_expr(span& loc): expr(ast::type::binary_expr, loc) {}
+    binary_expr(const span& loc): expr(ast::type::binary_expr, loc) {}
     ~binary_expr() override;
     void accept(visitor*) override;
     void set_op_type(op o) { op_type = o; }
@@ -103,7 +115,7 @@ private:
     expr* operand = nullptr;
 
 public:
-    unary_expr(span& loc): expr(ast::type::unary_expr, loc) {}
+    unary_expr(const span& loc): expr(ast::type::unary_expr, loc) {}
     ~unary_expr() override;
     void accept(visitor*) override;
     void set_op_type(op o) { op_type = o; }
@@ -128,14 +140,14 @@ private:
     std::vector<arg> args;
 
 public:
-    call_expr(span& loc): expr(ast::type::call_expr, loc) {}
+    call_expr(const span& loc): expr(ast::type::call_expr, loc) {}
     ~call_expr() override;
     void accept(visitor*) override;
     void set_callee(expr* c) { callee = c; }
     void add_normal_arg(expr* a) {
         args.push_back({std::nullopt, a});
     }
-    void add_named_arg(std::string& name, expr* a) {
+    void add_named_arg(const std::string& name, expr* a) {
         args.push_back({name, a});
     }
     auto get_callee() const { return callee; }
@@ -148,7 +160,7 @@ private:
     expr* index = nullptr;
 
 public:
-    index_access(span& loc): expr(ast::type::index_access, loc) {}
+    index_access(const span& loc): expr(ast::type::index_access, loc) {}
     ~index_access() override;
     void accept(visitor*) override;
     void set_target(expr* t) { target = t; }
@@ -163,7 +175,7 @@ private:
     expr* end = nullptr;
 
 public:
-    range_expr(span& loc): expr(ast::type::range_expr, loc) {}
+    range_expr(const span& loc): expr(ast::type::range_expr, loc) {}
     ~range_expr() override;
     void accept(visitor*) override;
     void set_start(expr* s) { start = s; }
