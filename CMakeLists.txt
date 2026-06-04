@@ -52,7 +52,7 @@ if(ENABLE_MLIR)
 endif()
 
 # ---- source files ----
-set(COLOGM_SOURCES
+set(COLGM_LIB_SOURCES
     src/ast/ast.cpp
     src/ast/decl.cpp
     src/ast/expr.cpp
@@ -70,34 +70,21 @@ set(COLOGM_SOURCES
     src/lexer/token.cpp
     src/parse/parser.cpp
     src/report/report.cpp
+    src/sema/context.cpp
     src/sema/sema.cpp
+    src/sema/storage.cpp
+    src/sema/type.cpp
     src/utils/misc.cpp
     src/utils/span.cpp
+)
+set(COLGM_SOURCES
+    ${COLGM_LIB_SOURCES}
     src/main.cpp
 )
 
 # ---- colgm mlir core library ----
 add_library(colgm_mlir_core STATIC
-    src/ast/ast.cpp
-    src/ast/decl.cpp
-    src/ast/expr.cpp
-    src/ast/stmt.cpp
-    src/ast/visitor.cpp
-    src/ast/dumper.cpp
-    src/dialect/colgm/binary_op.cpp
-    src/dialect/colgm/broadcast.cpp
-    src/dialect/colgm/reduce_sum.cpp
-    src/dialect/colgm/reshape.cpp
-    src/dialect/colgm/transpose.cpp
-    src/dialect/colgm/unary_op.cpp
-    src/dialect/dialect.cpp
-    src/lexer/lexer.cpp
-    src/lexer/token.cpp
-    src/parse/parser.cpp
-    src/report/report.cpp
-    src/sema/sema.cpp
-    src/utils/misc.cpp
-    src/utils/span.cpp
+    ${COLGM_LIB_SOURCES}
 )
 
 target_include_directories(colgm_mlir_core PUBLIC
