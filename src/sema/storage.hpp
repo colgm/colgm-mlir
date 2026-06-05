@@ -41,6 +41,9 @@ public:
     type get_void_type() const { return void_type_; }
     type get_function_type(const std::vector<type>&, type);
     type get_tensor_type(type, const std::vector<i64>&);
+
+    const auto& get_function_type_cache() const { return function_types; }
+    const auto& get_tensor_type_cache() const { return tensor_types; }
 };
 
 }

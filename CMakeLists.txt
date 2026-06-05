@@ -105,6 +105,11 @@ target_include_directories(colgm-mlir PRIVATE
 
 target_link_libraries(colgm-mlir PRIVATE colgm_mlir_core)
 
+# ---- type_storage stress test ----
+add_executable(type_storage_test src/test/type_storage_test.cpp)
+target_include_directories(type_storage_test PRIVATE "${CMAKE_SOURCE_DIR}/src")
+target_link_libraries(type_storage_test PRIVATE colgm_mlir_core)
+
 if(ENABLE_MLIR)
     target_include_directories(colgm_mlir_core PUBLIC
         ${LLVM_INCLUDE_DIRS}
