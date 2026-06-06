@@ -2,6 +2,7 @@
 
 #include "utils/type.hpp"
 
+#include <iostream>
 #include <cassert>
 #include <vector>
 #include <string>
@@ -30,6 +31,7 @@ public:
     virtual ~type_impl() = default;
 
     colgm_type_kind get_kind() const { return kind; }
+    virtual std::string to_string() const { return ""; }
 };
 
 class type {
@@ -43,6 +45,18 @@ public:
     auto get_impl() const { return impl; }
     bool operator==(const type& other) const { return impl == other.impl; }
     bool operator!=(const type& other) const { return !(*this == other); }
+    std::string to_string() const { return impl->to_string(); }
+};
+
+std::ostream& operator<<(std::ostream& os, const type& t);
+
+class unknown_type: public type_impl {
+public:
+    using key_type = colgm_type_kind;
+
+public:
+    unknown_type(): type_impl(colgm_type_kind::TYPE_KIND_UNKNOWN) {}
+    std::string to_string() const override { return "{unknown}"; }
 };
 
 class int_type: public type_impl {
@@ -53,7 +67,12 @@ public:
     int_type(i64 width):
         type_impl(width == 32 ?
                   colgm_type_kind::TYPE_KIND_INT32 :
-                  colgm_type_kind::TYPE_KIND_INT64) {}
+                  colgm_type_kind::TYPE_KIND_INT64) {
+        assert(width == 32 || width == 64);
+    }
+    std::string to_string() const override {
+        return get_kind() == colgm_type_kind::TYPE_KIND_INT32 ? "i32" : "i64";
+    }
 };
 
 class float_type: public type_impl {
@@ -64,7 +83,12 @@ public:
     float_type(i64 width):
         type_impl(width == 32 ?
                   colgm_type_kind::TYPE_KIND_FLOAT32 :
-                  colgm_type_kind::TYPE_KIND_FLOAT64) {}
+                  colgm_type_kind::TYPE_KIND_FLOAT64) {
+        assert(width == 32 || width == 64);
+    }
+    std::string to_string() const override {
+        return get_kind() == colgm_type_kind::TYPE_KIND_FLOAT32 ? "f32" : "f64";
+    }
 };
 
 class bool_type: public type_impl {
@@ -73,6 +97,7 @@ public:
 
 public:
     bool_type(): type_impl(colgm_type_kind::TYPE_KIND_BOOL) {}
+    std::string to_string() const override { return "bool"; }
 };
 
 class void_type: public type_impl {
@@ -81,6 +106,7 @@ public:
 
 public:
     void_type(): type_impl(colgm_type_kind::TYPE_KIND_VOID) {}
+    std::string to_string() const override { return "void"; }
 };
 
 class function_type: public type_impl {
@@ -94,12 +120,10 @@ private:
 public:
     function_type(type ret):
         type_impl(colgm_type_kind::TYPE_KIND_FUNCTION), ret(ret) {}
-
     void add_argument(type arg) { args.push_back(arg); }
-
     const auto& get_arguments() const { return args; }
-
     auto get_return_type() const { return ret; }
+    std::string to_string() const override;
 };
 
 class tensor_type: public type_impl {
@@ -113,12 +137,10 @@ private:
 public:
     tensor_type(type et):
         type_impl(colgm_type_kind::TYPE_KIND_TENSOR), element_type(et) {}
-
     auto get_element_type() const { return element_type; }
-
     void add_dimension(i64 dim) { shape.push_back(dim); }
-
     const auto& get_shape() const { return shape; }
+    std::string to_string() const override;
 };
 
 struct function_key_type_hash {

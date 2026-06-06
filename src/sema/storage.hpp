@@ -9,6 +9,7 @@ namespace colgm_mlir {
 
 class type_storage {
 private:
+    unknown_type unknown_type_impl;
     int_type i32_type_impl = int_type(32);
     int_type i64_type_impl = int_type(64);
     float_type f32_type_impl = float_type(32);
@@ -16,6 +17,7 @@ private:
     bool_type bool_type_impl;
     void_type void_type_impl;
 
+    type unknown_type_ = type(&unknown_type_impl);
     type i32_type_ = type(&i32_type_impl);
     type i64_type_ = type(&i64_type_impl);
     type f32_type_ = type(&f32_type_impl);
@@ -32,7 +34,7 @@ private:
 
 public:
     ~type_storage();
-
+    type get_unknown_type() const { return unknown_type_; }
     type get_i32_type() const { return i32_type_; }
     type get_i64_type() const { return i64_type_; }
     type get_f32_type() const { return f32_type_; }

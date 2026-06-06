@@ -44,11 +44,16 @@ TEST(uniquing_scalars) {
     type f2 = s.get_void_type();
     assert(f1 == f2);
 
+    type g1 = s.get_unknown_type();
+    type g2 = s.get_unknown_type();
+    assert(g1 == g2);
+
     // Different scalars must NOT be equal.
     assert(a1 != b1);
     assert(a1 != c1);
     assert(a1 != e1);
     assert(f1 != e1);
+    assert(g1 != f1);
 
     return true;
 }

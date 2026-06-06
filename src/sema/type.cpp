@@ -2,6 +2,34 @@
 
 namespace colgm_mlir {
 
+std::ostream& operator<<(std::ostream& os, const type& t) {
+    os << t.to_string();
+    return os;
+}
+
+std::string function_type::to_string() const {
+    std::string res = "(";
+    for (size_t i = 0; i < args.size(); i++) {
+        res += args[i].to_string();
+        if (i != args.size() - 1) {
+            res += ", ";
+        }
+    }
+    res += ") -> " + ret.to_string();
+    return res;
+}
+
+std::string tensor_type::to_string() const {
+    std::string res ="tensor<";
+    for (const auto& t : shape) {
+        res += std::to_string(t);
+        res += " x ";
+    }
+    res += element_type.to_string();
+    res += ">";
+    return res;
+}
+
 size_t function_key_type_hash::operator()(const function_type::key_type& key) const {
     size_t hash = 0;
     for (const auto& t : std::get<0>(key)) {

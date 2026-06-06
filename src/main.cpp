@@ -2,6 +2,7 @@
 #include "lexer/lexer.hpp"
 #include "ast/dumper.hpp"
 #include "parse/parser.hpp"
+#include "sema/storage.hpp"
 #include "sema/sema.hpp"
 #include "dialect/dialect.hpp"
 
@@ -17,6 +18,7 @@ using colgm_mlir::i32;
 
 const u32 COMPILE_VIEW_TOKEN = 1;
 const u32 COMPILE_VIEW_AST = 1 << 1;
+const u32 COMPILE_VIEW_SEMA = 1 << 2;
 
 std::ostream& help(std::ostream& out) {
     out
@@ -28,6 +30,7 @@ std::ostream& help(std::ostream& out) {
     << "option:\n"
     << "   -l,   --lex            | view analysed tokens.\n"
     << "   -a,   --ast            | view analysed ast.\n"
+    << "   -s,   --sema           | view analysed semantic context.\n"
     << "file:\n"
     << "   <filename>             | input file.\n"
     << "\n";
@@ -90,6 +93,14 @@ void execute(const std::string& input_file,
         colgm_mlir::dumper::dump(parser.get_tree());
         return;
     }
+
+    colgm_mlir::type_storage ts;
+    colgm_mlir::sema sema(err, ts);
+    sema.scan(parser.get_tree()).chkerr();
+    if (cmd & COMPILE_VIEW_SEMA) {
+        sema.dump();
+        return;
+    }
 }
 
 i32 main(i32 argc, const char* argv[]) {
@@ -120,6 +131,8 @@ i32 main(i32 argc, const char* argv[]) {
         { "-l",    COMPILE_VIEW_TOKEN },
         { "--ast", COMPILE_VIEW_AST },
         { "-a",    COMPILE_VIEW_AST },
+        { "--sema", COMPILE_VIEW_SEMA },
+        { "-s",    COMPILE_VIEW_SEMA },
     };
     u32 cmd = 0;
     std::string input_file = "";
