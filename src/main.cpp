@@ -19,6 +19,7 @@ using colgm_mlir::i32;
 const u32 COMPILE_VIEW_TOKEN = 1;
 const u32 COMPILE_VIEW_AST = 1 << 1;
 const u32 COMPILE_VIEW_SEMA = 1 << 2;
+const u32 COMPILE_VIEW_SEMA_AST = 1 << 3;
 
 std::ostream& help(std::ostream& out) {
     out
@@ -31,6 +32,7 @@ std::ostream& help(std::ostream& out) {
     << "   -l,   --lex            | view analysed tokens.\n"
     << "   -a,   --ast            | view analysed ast.\n"
     << "   -s,   --sema           | view analysed semantic context.\n"
+    << "   -sa,  --sema-ast       | view analysed ast with semantic result.\n"
     << "file:\n"
     << "   <filename>             | input file.\n"
     << "\n";
@@ -100,6 +102,9 @@ void execute(const std::string& input_file,
     if (cmd & COMPILE_VIEW_SEMA) {
         sema.dump();
         return;
+    } else if (cmd & COMPILE_VIEW_SEMA_AST) {
+        colgm_mlir::dumper::dump(parser.get_tree());
+        return;
     }
 }
 
@@ -133,6 +138,8 @@ i32 main(i32 argc, const char* argv[]) {
         { "-a",    COMPILE_VIEW_AST },
         { "--sema", COMPILE_VIEW_SEMA },
         { "-s",    COMPILE_VIEW_SEMA },
+        { "--sema-ast", COMPILE_VIEW_SEMA_AST },
+        { "-sa",    COMPILE_VIEW_SEMA_AST },
     };
     u32 cmd = 0;
     std::string input_file = "";

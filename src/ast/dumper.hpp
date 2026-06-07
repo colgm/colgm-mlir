@@ -35,8 +35,11 @@ private:
             std::cout << i;
         }
     }
-    std::string format_location(ast* n) {
+    std::string format_info(ast* n) {
         std::stringstream ss;
+        if (n->get_resolved().get_impl()) {
+            ss << " [" << n->get_resolved() << "]";
+        }
         ss << " -> " << n->get_location() << "\n";
         return ss.str();
     }

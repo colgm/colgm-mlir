@@ -19,7 +19,9 @@ private:
 
 private:
     type resolve_type(type_def*);
+    void resolve_stmt(stmt*);
     void resolve_func_decl(func_decl*);
+    void resolve_func_block(func_decl*);
 
 public:
     sema(error& e, type_storage& t): err(e), ts(t), ctx(t) {}

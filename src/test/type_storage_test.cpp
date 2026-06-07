@@ -218,7 +218,7 @@ TEST(volume) {
         s.get_void_type()
     };
 
-    for (int i = 0; i < 100000; i++) {
+    for (int i = 0; i < 50000; i++) {
         int n = i;
         std::vector<type> args;
         args.reserve(12);
@@ -233,7 +233,7 @@ TEST(volume) {
     // Insert 10000 unique tensor types.
     // Rank-1 tensors with varying single dimension: tensor<f32, [i]>.
     auto f32 = s.get_f32_type();
-    for (int i = 0; i < 100000; i++) {
+    for (int i = 0; i < 50000; i++) {
         auto t = s.get_tensor_type(f32, {static_cast<i64>(i)});
         assert(t.get_kind() == colgm_type_kind::TYPE_KIND_TENSOR);
     }

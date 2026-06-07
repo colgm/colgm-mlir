@@ -10,7 +10,7 @@ namespace colgm_mlir {
 
 class stmt: public ast {
 public:
-    stmt(ast::type t, const span& loc): ast(t, loc) {}
+    stmt(ast_type t, const span& loc): ast(t, loc) {}
     ~stmt() override = default;
     void accept(visitor*) override;
 };
@@ -21,7 +21,7 @@ private:
     expr* init = nullptr;
 
 public:
-    var_decl(const span& loc): stmt(ast::type::var_decl, loc) {}
+    var_decl(const span& loc): stmt(ast_type::var_decl, loc) {}
     ~var_decl() override;
     void accept(visitor*) override;
     void set_name(const std::string& n) { name = n; }
@@ -36,7 +36,7 @@ private:
     expr* rhs = nullptr;
 
 public:
-    assign_stmt(const span& loc): stmt(ast::type::assign_stmt, loc) {}
+    assign_stmt(const span& loc): stmt(ast_type::assign_stmt, loc) {}
     ~assign_stmt() override;
     void accept(visitor*) override;
     void set_lhs(expr* l) { lhs = l; }
@@ -50,7 +50,7 @@ private:
     expr* value = nullptr;
 
 public:
-    return_stmt(const span& loc): stmt(ast::type::return_stmt, loc) {}
+    return_stmt(const span& loc): stmt(ast_type::return_stmt, loc) {}
     ~return_stmt() override;
     void accept(visitor*) override;
     void set_value(expr* v) { value = v; }
@@ -64,7 +64,7 @@ private:
     block_stmt* else_body = nullptr;
 
 public:
-    if_stmt(const span& loc): stmt(ast::type::if_stmt, loc) {}
+    if_stmt(const span& loc): stmt(ast_type::if_stmt, loc) {}
     ~if_stmt() override;
     void accept(visitor*) override;
     void set_condition(expr* c) { condition = c; }
@@ -82,7 +82,7 @@ private:
     block_stmt* body = nullptr;
 
 public:
-    for_stmt(const span& loc): stmt(ast::type::for_stmt, loc) {}
+    for_stmt(const span& loc): stmt(ast_type::for_stmt, loc) {}
     ~for_stmt() override;
     void accept(visitor*) override;
     void set_iter(const std::string& i) { iter = i; }
@@ -98,7 +98,7 @@ private:
     std::vector<stmt*> stmts;
 
 public:
-    block_stmt(const span& loc): stmt(ast::type::block_stmt, loc) {}
+    block_stmt(const span& loc): stmt(ast_type::block_stmt, loc) {}
     ~block_stmt() override;
     void accept(visitor*) override;
     void add_stmt(stmt* s) { stmts.push_back(s); }

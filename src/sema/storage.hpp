@@ -9,27 +9,27 @@ namespace colgm_mlir {
 
 class type_storage {
 private:
-    unknown_type unknown_type_impl;
-    int_type i32_type_impl = int_type(32);
-    int_type i64_type_impl = int_type(64);
-    float_type f32_type_impl = float_type(32);
-    float_type f64_type_impl = float_type(64);
-    bool_type bool_type_impl;
-    void_type void_type_impl;
+    unknown_type_impl unknown_type_impl_;
+    int_type_impl i32_type_impl_ = int_type_impl(32);
+    int_type_impl i64_type_impl_ = int_type_impl(64);
+    float_type_impl f32_type_impl_ = float_type_impl(32);
+    float_type_impl f64_type_impl_ = float_type_impl(64);
+    bool_type_impl bool_type_impl_;
+    void_type_impl void_type_impl_;
 
-    type unknown_type_ = type(&unknown_type_impl);
-    type i32_type_ = type(&i32_type_impl);
-    type i64_type_ = type(&i64_type_impl);
-    type f32_type_ = type(&f32_type_impl);
-    type f64_type_ = type(&f64_type_impl);
-    type bool_type_ = type(&bool_type_impl);
-    type void_type_ = type(&void_type_impl);
+    type unknown_type_ = type(&unknown_type_impl_);
+    type i32_type_ = type(&i32_type_impl_);
+    type i64_type_ = type(&i64_type_impl_);
+    type f32_type_ = type(&f32_type_impl_);
+    type f64_type_ = type(&f64_type_impl_);
+    type bool_type_ = type(&bool_type_impl_);
+    type void_type_ = type(&void_type_impl_);
 
-    std::unordered_map<function_type::key_type,
-                       function_type*,
+    std::unordered_map<function_type_impl::key_type,
+                       function_type_impl*,
                        function_key_type_hash> function_types;
-    std::unordered_map<tensor_type::key_type,
-                       tensor_type*,
+    std::unordered_map<tensor_type_impl::key_type,
+                       tensor_type_impl*,
                        tensor_key_type_hash> tensor_types;
 
 public:

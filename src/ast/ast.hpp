@@ -1,48 +1,52 @@
 #pragma once
 
-#include "utils/span.hpp"
-
 #include <vector>
 
+#include "utils/span.hpp"
+#include "sema/type.hpp"
+
 namespace colgm_mlir {
+
+enum class ast_type {
+    root,
+    // expression
+    int_literal,
+    float_literal,
+    bool_literal,
+    tensor,
+    identifier,
+    binary_expr,
+    unary_expr,
+    call_expr,
+    index_access,
+    range_expr,
+    // statement
+    var_decl,
+    assign_stmt,
+    return_stmt,
+    if_stmt,
+    for_stmt,
+    block_stmt,
+    // declaration
+    func_decl,
+    type_def,
+    param
+};
 
 class visitor;
 
 class ast {
-public:
-    enum class type {
-        root,
-        // expression
-        int_literal,
-        float_literal,
-        bool_literal,
-        tensor,
-        identifier,
-        binary_expr,
-        unary_expr,
-        call_expr,
-        index_access,
-        range_expr,
-        // statement
-        var_decl,
-        assign_stmt,
-        return_stmt,
-        if_stmt,
-        for_stmt,
-        block_stmt,
-        // declaration
-        func_decl,
-        type_def,
-        param
-    };
-
 protected:
-    type type_;
+    ast_type ast_type_;
     span loc_;
+    type resolve_type_;
 
 public:
-    ast(type t, const span& loc): type_(t), loc_(loc) {}
+    ast(ast_type t, const span& loc):
+        ast_type_(t), loc_(loc), resolve_type_(nullptr) {}
     const auto& get_location() const { return loc_; }
+    void set_resolved(const type& t) { resolve_type_ = t; }
+    const auto get_resolved() const { return resolve_type_; }
     virtual ~ast() = default;
     virtual void accept(visitor*);
 };
@@ -78,7 +82,7 @@ private:
     std::vector<func_decl*> funcs;
 
 public:
-    root(const span& loc): ast(ast::type::root, loc) {}
+    root(const span& loc): ast(ast_type::root, loc) {}
     ~root() override;
     void accept(visitor*) override;
     void add_func(func_decl* fd) { funcs.push_back(fd); }

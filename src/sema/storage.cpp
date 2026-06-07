@@ -12,13 +12,13 @@ type_storage::~type_storage() {
 }
 
 type type_storage::get_function_type(const std::vector<type>& args, type ret) {
-    function_type::key_type key(args, ret);
+    function_type_impl::key_type key(args, ret);
     auto [it, inserted] = function_types.insert({std::move(key), nullptr});
     if (!inserted) {
         return type(it->second);
     }
 
-    auto impl = new function_type(ret);
+    auto impl = new function_type_impl(ret);
     for (auto& arg : args) {
         impl->add_argument(arg);
     }
@@ -27,13 +27,13 @@ type type_storage::get_function_type(const std::vector<type>& args, type ret) {
 }
 
 type type_storage::get_tensor_type(type et, const std::vector<i64>& dims) {
-    tensor_type::key_type key(et, dims);
+    tensor_type_impl::key_type key(et, dims);
     auto [it, inserted] = tensor_types.insert({std::move(key), nullptr});
     if (!inserted) {
         return type(it->second);
     }
 
-    auto impl = new tensor_type(et);
+    auto impl = new tensor_type_impl(et);
     for (auto& dim : dims) {
         impl->add_dimension(dim);
     }

@@ -9,7 +9,7 @@ namespace colgm_mlir {
 
 class decl: public ast {
 public:
-    decl(ast::type t, const span& loc): ast(t, loc) {}
+    decl(ast_type t, const span& loc): ast(t, loc) {}
     ~decl() override = default;
     void accept(visitor*) override;
 };
@@ -22,7 +22,7 @@ private:
     block_stmt* body = nullptr;
 
 public:
-    func_decl(const span& loc): decl(ast::type::func_decl, loc) {}
+    func_decl(const span& loc): decl(ast_type::func_decl, loc) {}
     ~func_decl() override;
     void accept(visitor*) override;
     void set_name(const std::string& n) { name = n; }
@@ -41,7 +41,7 @@ private:
     std::vector<i64> dims;
 
 public:
-    type_def(const span& loc): decl(ast::type::type_def, loc) {}
+    type_def(const span& loc): decl(ast_type::type_def, loc) {}
     ~type_def() override = default;
     void accept(visitor*) override;
     void set_base(const std::string& b) { base = b; }
@@ -57,7 +57,7 @@ private:
     type_def* type = nullptr;
 
 public:
-    param(const span& loc): decl(ast::type::param, loc) {}
+    param(const span& loc): decl(ast_type::param, loc) {}
     ~param() override;
     void accept(visitor*) override;
     void set_name(const std::string& n) { name = n; }

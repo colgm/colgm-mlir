@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
 project(colgm-mlir
-    VERSION 0.0.1
     DESCRIPTION "Experimental MLIR-based compiler"
     LANGUAGES CXX C
 )
@@ -160,13 +159,4 @@ endif()
 install(TARGETS colgm_mlir_core colgm-mlir
     RUNTIME DESTINATION bin
     ARCHIVE DESTINATION lib
-)
-
-# ---- version defines ----
-target_compile_definitions(colgm_mlir_core PRIVATE
-    __colgm_ver__="${PROJECT_VERSION}"
-)
-
-target_compile_definitions(colgm-mlir PRIVATE
-    __colgm_ver__="${PROJECT_VERSION}"
 )

@@ -4,8 +4,14 @@ namespace colgm_mlir {
 
 void context::dump() const {
     std::cout << "====== functions =====" << std::endl;
-    for (const auto& [name, type] : functions) {
-        std::cout << "func " << name << type << std::endl;
+    for (const auto& [name, fi] : functions) {
+        auto ft = type::as<function_type>(fi.func_type);
+        std::cout << "func " << name << ft;
+        std::cout << " [" << fi.loc << "]" << std::endl;
+        for (const auto& arg : fi.args) {
+            std::cout << "  - arg " << arg << ": " << fi.args_types.at(arg) << std::endl;
+        }
+        std::cout << "  - ret: " << ft.get_return_type() << std::endl;
     }
     std::cout << "======================" << std::endl;
 }
