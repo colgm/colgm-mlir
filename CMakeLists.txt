@@ -73,6 +73,7 @@ set(COLGM_LIB_SOURCES
     src/sema/sema.cpp
     src/sema/storage.cpp
     src/sema/type.cpp
+    src/utils/colorful.cpp
     src/utils/misc.cpp
     src/utils/span.cpp
 )

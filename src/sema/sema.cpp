@@ -28,6 +28,76 @@ type sema::resolve_type(type_def* t) {
 }
 
 void sema::resolve_stmt(stmt* node) {
+    switch (node->get_ast_type()) {
+        case ast_type::var_decl:
+            resolve_var_decl(static_cast<var_decl*>(node));
+            break;
+        case ast_type::assign_stmt:
+            resolve_assign_stmt(static_cast<assign_stmt*>(node));
+            break;
+        case ast_type::return_stmt:
+            resolve_return_stmt(static_cast<return_stmt*>(node));
+            break;
+        case ast_type::if_stmt:
+            resolve_if_stmt(static_cast<if_stmt*>(node));
+            break;
+        case ast_type::for_stmt:
+            resolve_for_stmt(static_cast<for_stmt*>(node));
+            break;
+        case ast_type::block_stmt:
+            resolve_block_stmt(static_cast<block_stmt*>(node));
+            break;
+        default:
+            assert(false && "unsupported ast type");
+            break;
+    }
+}
+
+void sema::resolve_var_decl(var_decl* node) {
+
+}
+
+void sema::resolve_assign_stmt(assign_stmt* node) {
+
+}
+
+void sema::resolve_return_stmt(return_stmt* node) {
+
+}
+
+void sema::resolve_if_stmt(if_stmt* node) {
+
+}
+
+void sema::resolve_for_stmt(for_stmt* node) {
+
+}
+
+void sema::resolve_block_stmt(block_stmt* node) {
+    for (auto node: node->get_stmts()) {
+        resolve_stmt(node);
+    }
+}
+
+type sema::resolve_expr(expr* node) {
+    switch (node->get_ast_type()) {
+        case ast_type::int_literal:
+        case ast_type::float_literal:
+        case ast_type::bool_literal:
+        case ast_type::tensor:
+        case ast_type::identifier:
+        case ast_type::binary_expr:
+        case ast_type::unary_expr:
+        case ast_type::call_expr:
+        case ast_type::index_access:
+        case ast_type::range_expr:
+            break;
+        default:
+            assert(false && "unsupported ast type");
+            break;
+    }
+
+    return ts.get_unknown_type();
 }
 
 void sema::resolve_func_decl(func_decl* f) {

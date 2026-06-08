@@ -1,10 +1,11 @@
 #include "ast/dumper.hpp"
+#include "utils/colorful.hpp"
 
 namespace colgm_mlir {
 
 bool dumper::visit_root(root* node) {
     dump_indent();
-    std::cout << "Root" << format_info(node);
+    std::cout << purple << "Root" << reset << format_info(node);
     push_indent();
     for (auto i : node->get_funcs()) {
         if (i == node->get_funcs().back()) {
@@ -18,25 +19,30 @@ bool dumper::visit_root(root* node) {
 
 bool dumper::visit_int_literal(int_literal* node) {
     dump_indent();
-    std::cout << "IntLiteral " << node->get_literal() << format_info(node);
+    std::cout << purple << "IntLiteral " << reset;
+    std::cout << green << node->get_literal() << reset;
+    std::cout << format_info(node);
     return true;
 }
 
 bool dumper::visit_float_literal(float_literal* node) {
     dump_indent();
-    std::cout << "FloatLiteral " << node->get_literal() << format_info(node);
+    std::cout << purple << "FloatLiteral " << reset;
+    std::cout << green << node->get_literal() << reset << format_info(node);
     return true;
 }
 
 bool dumper::visit_bool_literal(bool_literal* node) {
     dump_indent();
-    std::cout << "BoolLiteral " << (node->get_flag()? "true":"false") << format_info(node);
+    std::cout << purple << "BoolLiteral " << reset;
+    std::cout << green << (node->get_flag() ? "true" : "false") << reset;
+    std::cout << format_info(node);
     return true;
 }
 
 bool dumper::visit_tensor(tensor* node) {
     dump_indent();
-    std::cout << "Tensor"<< format_info(node);
+    std::cout << purple << "Tensor" << reset << format_info(node);
     push_indent();
     for (auto i : node->get_values()) {
         if (i == node->get_values().back()) {
@@ -50,13 +56,14 @@ bool dumper::visit_tensor(tensor* node) {
 
 bool dumper::visit_identifier(identifier* node) {
     dump_indent();
-    std::cout << "identifier " << node->get_name() << format_info(node);
+    std::cout << purple << "identifier " << reset;
+    std::cout << green << node->get_name() << reset << format_info(node);
     return true;
 }
 
 bool dumper::visit_binary_expr(binary_expr* node) {
     dump_indent();
-    std::cout << "BinaryExpr ";
+    std::cout << purple << "BinaryExpr " << reset;
     switch (node->get_op_type()) {
         case binary_expr::op::add: std::cout << "+"; break;
         case binary_expr::op::sub: std::cout << "-"; break;
@@ -74,7 +81,7 @@ bool dumper::visit_binary_expr(binary_expr* node) {
 
 bool dumper::visit_unary_expr(unary_expr* node) {
     dump_indent();
-    std::cout << "UnaryExpr ";
+    std::cout << purple << "UnaryExpr " << reset;
     switch (node->get_op_type()) {
         case unary_expr::op::add: std::cout << "+"; break;
         case unary_expr::op::sub: std::cout << "-"; break;
@@ -89,7 +96,7 @@ bool dumper::visit_unary_expr(unary_expr* node) {
 
 bool dumper::visit_call_expr(call_expr* node) {
     dump_indent();
-    std::cout << "CallExpr" << format_info(node);
+    std::cout << purple << "CallExpr" << reset << format_info(node);
     push_indent();
     node->get_callee()->accept(this);
     for (auto i : node->get_args()) {
@@ -98,7 +105,7 @@ bool dumper::visit_call_expr(call_expr* node) {
         }
         if (i.name.has_value()) {
             dump_indent();
-            std::cout << "Arg " << i.name.value() << ": \n";
+            std::cout << purple << "Arg " << reset << i.name.value() << ": \n";
             push_indent();
             set_last();
             i.value->accept(this);
@@ -113,7 +120,7 @@ bool dumper::visit_call_expr(call_expr* node) {
 
 bool dumper::visit_index_access(index_access* node) {
     dump_indent();
-    std::cout << "IndexAccess" << format_info(node);
+    std::cout << purple << "IndexAccess" << reset << format_info(node);
     push_indent();
     node->get_target()->accept(this);
     set_last();
@@ -124,7 +131,7 @@ bool dumper::visit_index_access(index_access* node) {
 
 bool dumper::visit_range_expr(range_expr* node) {
     dump_indent();
-    std::cout << "RangeExpr" << format_info(node);
+    std::cout << purple << "RangeExpr" << reset << format_info(node);
     push_indent();
     node->get_start()->accept(this);
     set_last();
@@ -135,7 +142,8 @@ bool dumper::visit_range_expr(range_expr* node) {
 
 bool dumper::visit_var_decl(var_decl* node) {
     dump_indent();
-    std::cout << "VarDecl " << node->get_name() << format_info(node);
+    std::cout << purple << "VarDecl " << reset;
+    std::cout << green << node->get_name() << reset << format_info(node);
     push_indent();
     set_last();
     node->get_init()->accept(this);
@@ -145,7 +153,7 @@ bool dumper::visit_var_decl(var_decl* node) {
 
 bool dumper::visit_assign_stmt(assign_stmt* node) {
     dump_indent();
-    std::cout << "AssignStmt" << format_info(node);
+    std::cout << purple << "AssignStmt" << reset << format_info(node);
     push_indent();
     node->get_lhs()->accept(this);
     set_last();
@@ -156,7 +164,7 @@ bool dumper::visit_assign_stmt(assign_stmt* node) {
 
 bool dumper::visit_return_stmt(return_stmt* node) {
     dump_indent();
-    std::cout << "ReturnStmt" << format_info(node);
+    std::cout << purple << "ReturnStmt" << reset << format_info(node);
     push_indent();
     if (node->get_value()) {
         set_last();
@@ -168,14 +176,15 @@ bool dumper::visit_return_stmt(return_stmt* node) {
 
 bool dumper::visit_if_stmt(if_stmt* node) {
     dump_indent();
-    std::cout << "IfStmt" << format_info(node);
+    std::cout << purple << "IfStmt" << reset << format_info(node);
     push_indent();
     node->get_condition()->accept(this);
     set_last();
     node->get_body()->accept(this);
     if (node->get_else_body()) {
         dump_indent();
-        std::cout << "ElseStmt" << format_info(node->get_else_body());
+        std::cout << purple << "ElseStmt" << reset;
+        std::cout << format_info(node->get_else_body());
         push_indent();
         set_last();
         node->get_else_body()->accept(this);
@@ -187,7 +196,8 @@ bool dumper::visit_if_stmt(if_stmt* node) {
 
 bool dumper::visit_for_stmt(for_stmt* node) {
     dump_indent();
-    std::cout << "ForStmt " << node->get_iter() << format_info(node);
+    std::cout << purple << "ForStmt " << reset;
+    std::cout << node->get_iter() << format_info(node);
     push_indent();
     node->get_range()->accept(this);
     set_last();
@@ -198,7 +208,7 @@ bool dumper::visit_for_stmt(for_stmt* node) {
 
 bool dumper::visit_block_stmt(block_stmt* node) {
     dump_indent();
-    std::cout << "BlockStmt" << format_info(node);
+    std::cout << purple << "BlockStmt" << reset << format_info(node);
     push_indent();
     for (auto i : node->get_stmts()) {
         if (i == node->get_stmts().back()) {
@@ -212,11 +222,12 @@ bool dumper::visit_block_stmt(block_stmt* node) {
 
 bool dumper::visit_func_decl(func_decl* node) {
     dump_indent();
-    std::cout << "FuncDecl " << node->get_name() << format_info(node);
+    std::cout << purple << "FuncDecl " << reset;
+    std::cout << node->get_name() << format_info(node);
     push_indent();
     if (!node->get_params().empty()) {
         dump_indent();
-        std::cout << "Params:\n";
+        std::cout << purple << "Params:\n" << reset;
         push_indent();
         for (auto i : node->get_params()) {
             if (i == node->get_params().back()) {
@@ -228,7 +239,7 @@ bool dumper::visit_func_decl(func_decl* node) {
     }
     if (node->get_return_type()) {
         dump_indent();
-        std::cout << "ReturnType:\n";
+        std::cout << purple << "ReturnType:\n" << reset;
         push_indent();
         set_last();
         node->get_return_type()->accept(this);
@@ -242,7 +253,8 @@ bool dumper::visit_func_decl(func_decl* node) {
 
 bool dumper::visit_type_def(type_def* node) {
     dump_indent();
-    std::cout << "TypeDef " << node->get_base();
+    std::cout << purple << "TypeDef " << reset;
+    std::cout << green << node->get_base();
     if (!node->get_dims().empty()) {
         std::cout << "[";
         i64 count = 0;
@@ -255,13 +267,14 @@ bool dumper::visit_type_def(type_def* node) {
         }
         std::cout << "]";
     }
-    std::cout << format_info(node);
+    std::cout << reset << format_info(node);
     return true;
 }
 
 bool dumper::visit_param(param* node) {
     dump_indent();
-    std::cout << "Param " << node->get_name() << format_info(node);
+    std::cout << purple << "Param " << reset;
+    std::cout << node->get_name() << format_info(node);
     if (node->get_type()) {
         push_indent();
         set_last();

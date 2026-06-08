@@ -198,12 +198,11 @@ token lexer::num_gen() {
             str += res[ptr++];
         }
         // "xxxx." is not a correct number
+        // but pattern like `0..10` should be recognized as [`0`, `..`, `10`]
         if (str.back() == '.') {
+            str.pop_back();
+            ptr--;
             column += str.length();
-            err.err(
-                {begin_line, begin_column, line, column, filename},
-                "invalid number `" + str + "`"
-            );
             return token {
                 {begin_line, begin_column, line, column, filename},
                 tok::tk_num,

@@ -2,6 +2,29 @@ from pathlib import Path
 import subprocess
 import sys
 
+def find_binary_tests():
+    binary_tests = [
+        "build/type_storage_test"
+    ]
+    res = []
+    for i in binary_tests:
+        if not Path(i).exists():
+            continue
+        res.append(Path(i))
+    return res
+
+def test_binary() -> tuple[int, int]:
+    tests = find_binary_tests()
+    passed = 0
+    for t in tests:
+        res = subprocess.run([str(t)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if res.returncode != 0:
+            print("[FAILED]", t)
+        else:
+            print("[PASSED]", t)
+            passed += 1
+    return passed, len(tests)
+
 def get_test_suite(dirpath: Path, suffix: str) -> tuple[list[Path], list[Path], list[Path]]:
     tests = [f for f in dirpath.rglob(f"**/*.{suffix}")]
     stdouts = [f for f in dirpath.rglob("**/*.stdout")]
@@ -107,6 +130,14 @@ if __name__ == "__main__":
     colgm_opt_passed, len_colgm_opt_test = test_colgm_opt(colgm_opt)
     passed += colgm_opt_passed
     len_test += len_colgm_opt_test
+
+    print("=" * 60)
+    print("Testing modules functionality")
+    print("=" * 60)
+
+    bin_passed, len_bin_test = test_binary()
+    passed += bin_passed
+    len_test += len_bin_test
     
     print("=" * 60)
     print(f"{passed}/{len_test} passed")

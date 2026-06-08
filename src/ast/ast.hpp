@@ -47,6 +47,7 @@ public:
     const auto& get_location() const { return loc_; }
     void set_resolved(const type& t) { resolve_type_ = t; }
     const auto get_resolved() const { return resolve_type_; }
+    auto get_ast_type() const { return ast_type_; }
     virtual ~ast() = default;
     virtual void accept(visitor*);
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ast/visitor.hpp"
+#include "utils/colorful.hpp"
 
 #include <vector>
 #include <iostream>
@@ -38,9 +39,9 @@ private:
     std::string format_info(ast* n) {
         std::stringstream ss;
         if (n->get_resolved().get_impl()) {
-            ss << " [" << n->get_resolved() << "]";
+            ss << cyan << " [" << n->get_resolved() << "]" << reset;
         }
-        ss << " -> " << n->get_location() << "\n";
+        ss << white << " -> " << n->get_location() << reset << "\n";
         return ss.str();
     }
 

@@ -92,6 +92,9 @@ block_stmt* parser::parse_block() {
         if (stmt) {
             node->add_stmt(stmt);
         }
+        if (lookahead(tok::tk_eof)) {
+            break;
+        }
         while (lookahead(tok::tk_semi)) {
             match(tok::tk_semi);
         }
@@ -112,7 +115,9 @@ stmt* parser::parse_stmt() {
     } else if (lookahead(tok::tk_id)) {
         return parse_assign_stmt();
     } else {
-        err.err(tokens[ptr].loc, "Unexpected token '" + tokens[ptr].type_to_string() + "'");
+        err.err(tokens[ptr].loc,
+            "Unexpected statement token '" + tokens[ptr].type_to_string() + "'"
+        );
         next();
     }
     return nullptr;
