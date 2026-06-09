@@ -54,23 +54,26 @@ void sema::resolve_stmt(stmt* node) {
 }
 
 void sema::resolve_var_decl(var_decl* node) {
-
+    resolve_expr(node->get_init());
 }
 
 void sema::resolve_assign_stmt(assign_stmt* node) {
-
+    resolve_expr(node->get_lhs());
+    resolve_expr(node->get_rhs());
 }
 
 void sema::resolve_return_stmt(return_stmt* node) {
-
+    if (node->get_value()) {
+        resolve_expr(node->get_value());
+    }
 }
 
 void sema::resolve_if_stmt(if_stmt* node) {
-
+    resolve_expr(node->get_condition());
 }
 
 void sema::resolve_for_stmt(for_stmt* node) {
-
+    resolve_range_expr(node->get_range());
 }
 
 void sema::resolve_block_stmt(block_stmt* node) {
@@ -79,19 +82,88 @@ void sema::resolve_block_stmt(block_stmt* node) {
     }
 }
 
+type sema::resolve_int_literal(int_literal* node) {
+    auto it = ts.get_i64_type();
+    node->set_resolved(it);
+    return it;
+}
+
+type sema::resolve_float_literal(float_literal* node) {
+    auto ft = ts.get_f64_type();
+    node->set_resolved(ft);
+    return ft;
+}
+
+type sema::resolve_bool_literal(bool_literal* node) {
+    auto bt = ts.get_bool_type();
+    node->set_resolved(bt);
+    return bt;
+}
+
+type sema::resolve_tensor(tensor* node) {
+    for (auto i : node->get_values()) {
+        resolve_expr(i);
+    }
+    return ts.get_unknown_type();
+}
+
+type sema::resolve_identifier(identifier* node) {
+    return ts.get_unknown_type();
+}
+
+type sema::resolve_binary_expr(binary_expr* node) {
+    resolve_expr(node->get_lhs());
+    resolve_expr(node->get_rhs());
+    return ts.get_unknown_type();
+}
+
+type sema::resolve_unary_expr(unary_expr* node) {
+    resolve_expr(node->get_operand());
+    return ts.get_unknown_type();
+}
+
+type sema::resolve_call_expr(call_expr* node) {
+    resolve_expr(node->get_callee());
+    for (const auto& i : node->get_args()) {
+        resolve_expr(i.value);
+    }
+    return ts.get_unknown_type();
+}
+
+type sema::resolve_index_access(index_access* node) {
+    resolve_expr(node->get_target());
+    resolve_expr(node->get_index());
+    return ts.get_unknown_type();
+}
+
+type sema::resolve_range_expr(range_expr* node) {
+    resolve_expr(node->get_start());
+    resolve_expr(node->get_end());
+    return ts.get_unknown_type();
+}
+
 type sema::resolve_expr(expr* node) {
     switch (node->get_ast_type()) {
         case ast_type::int_literal:
+            return resolve_int_literal(static_cast<int_literal*>(node));
         case ast_type::float_literal:
+            return resolve_float_literal(static_cast<float_literal*>(node));
         case ast_type::bool_literal:
+            return resolve_bool_literal(static_cast<bool_literal*>(node));
         case ast_type::tensor:
+            return resolve_tensor(static_cast<tensor*>(node));
         case ast_type::identifier:
+            return resolve_identifier(static_cast<identifier*>(node));
         case ast_type::binary_expr:
+            return resolve_binary_expr(static_cast<binary_expr*>(node));
         case ast_type::unary_expr:
+            return resolve_unary_expr(static_cast<unary_expr*>(node));
         case ast_type::call_expr:
+            return resolve_call_expr(static_cast<call_expr*>(node));
         case ast_type::index_access:
+            return resolve_index_access(static_cast<index_access*>(node));
         case ast_type::range_expr:
-            break;
+            return resolve_range_expr(static_cast<range_expr*>(node));
         default:
             assert(false && "unsupported ast type");
             break;
@@ -104,7 +176,7 @@ void sema::resolve_func_decl(func_decl* f) {
     type return_type = ts.get_void_type();
     if (f->get_return_type()) {
         return_type = resolve_type(f->get_return_type());
-        f->set_resolved(return_type);
+        f->get_return_type()->set_resolved(return_type);
     }
 
     std::vector<type> params;
@@ -122,6 +194,7 @@ void sema::resolve_func_decl(func_decl* f) {
         fi.add_arg(f->get_params()[i]->get_name(), params[i]);
     }
 
+    f->set_resolved(fi.func_type);
     ctx.regist_function(f->get_name(), std::move(fi));
 }
 

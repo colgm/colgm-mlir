@@ -26,6 +26,16 @@ private:
     void resolve_if_stmt(if_stmt*);
     void resolve_for_stmt(for_stmt*);
     void resolve_block_stmt(block_stmt*);
+    type resolve_int_literal(int_literal*);
+    type resolve_float_literal(float_literal*);
+    type resolve_bool_literal(bool_literal*);
+    type resolve_tensor(tensor*);
+    type resolve_identifier(identifier*);
+    type resolve_binary_expr(binary_expr*);
+    type resolve_unary_expr(unary_expr*);
+    type resolve_call_expr(call_expr*);
+    type resolve_index_access(index_access*);
+    type resolve_range_expr(range_expr*);
     type resolve_expr(expr*);
     void resolve_func_decl(func_decl*);
     void resolve_func_block(func_decl*);
