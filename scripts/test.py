@@ -92,6 +92,9 @@ def test_lexer(executable: Path) -> tuple[int, int]:
 def test_parser(executable: Path) -> tuple[int, int]:
     return test(executable, Path("test/parse"), "colgm", ["--ast"])
 
+def test_sema(executable: Path) -> tuple[int, int]:
+    return test(executable, Path("test/sema"), "colgm", ["--sema"])
+
 def test_colgm_opt(executable: Path) -> tuple[int, int]:
     return test(executable, Path("test/mlir"), "mlir", [])
 
@@ -110,7 +113,6 @@ if __name__ == "__main__":
     print("=" * 60)
     print("Testing colgm-mlir::lexer")
     print("=" * 60)
-
     lex_passed, len_lex_test = test_lexer(colgm_mlir)
     passed += lex_passed
     len_test += len_lex_test
@@ -118,15 +120,20 @@ if __name__ == "__main__":
     print("=" * 60)
     print("Testing colgm-mlir::parser")
     print("=" * 60)
-
     parser_passed, len_parser_test = test_parser(colgm_mlir)
     passed += parser_passed
     len_test += len_parser_test
 
     print("=" * 60)
+    print("Testing colgm-mlir::sema")
+    print("=" * 60)
+    sema_passed, len_sema_test = test_sema(colgm_mlir)
+    passed += sema_passed
+    len_test += len_sema_test
+
+    print("=" * 60)
     print("Testing colgm-opt")
     print("=" * 60)
-
     colgm_opt_passed, len_colgm_opt_test = test_colgm_opt(colgm_opt)
     passed += colgm_opt_passed
     len_test += len_colgm_opt_test
@@ -134,11 +141,10 @@ if __name__ == "__main__":
     print("=" * 60)
     print("Testing modules functionality")
     print("=" * 60)
-
     bin_passed, len_bin_test = test_binary()
     passed += bin_passed
     len_test += len_bin_test
-    
+
     print("=" * 60)
     print(f"{passed}/{len_test} passed")
     print("=" * 60)

@@ -11,6 +11,18 @@
 
 namespace colgm_mlir {
 
+struct fmt_helper {
+    ast* node;
+
+    friend std::ostream& operator<<(std::ostream& os, const fmt_helper& f) {
+        if (f.node->get_resolved().get_impl()) {
+            os << cyan << " [" << f.node->get_resolved() << "]" << reset;
+        }
+        os << white << " -> " << f.node->get_location() << reset << "\n";
+        return os;
+    }
+};
+
 class dumper: public visitor {
 private:
     std::vector<std::string> indent;
@@ -36,13 +48,8 @@ private:
             std::cout << i;
         }
     }
-    std::string format_info(ast* n) {
-        std::stringstream ss;
-        if (n->get_resolved().get_impl()) {
-            ss << cyan << " [" << n->get_resolved() << "]" << reset;
-        }
-        ss << white << " -> " << n->get_location() << reset << "\n";
-        return ss.str();
+    fmt_helper format_info(ast* n) {
+        return fmt_helper { n };
     }
 
 private:

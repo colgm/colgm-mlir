@@ -1,0 +1,40 @@
+Root -> test/parse/example_4.colgm:1:1
+`--FuncDecl main -> test/parse/example_4.colgm:1:1
+   `--BlockStmt -> test/parse/example_4.colgm:1:13
+      |--VarDecl a -> test/parse/example_4.colgm:2:5
+      |  `--Tensor -> test/parse/example_4.colgm:2:13
+      |     |--Tensor -> test/parse/example_4.colgm:3:9
+      |     |  |--Tensor -> test/parse/example_4.colgm:3:10
+      |     |  |  |--IntLiteral 0 -> test/parse/example_4.colgm:3:11
+      |     |  |  |--IntLiteral 0 -> test/parse/example_4.colgm:3:14
+      |     |  |  `--IntLiteral 0 -> test/parse/example_4.colgm:3:17
+      |     |  `--Tensor -> test/parse/example_4.colgm:3:21
+      |     |     |--IntLiteral 1 -> test/parse/example_4.colgm:3:22
+      |     |     |--IntLiteral 1 -> test/parse/example_4.colgm:3:25
+      |     |     `--IntLiteral 1 -> test/parse/example_4.colgm:3:28
+      |     |--Tensor -> test/parse/example_4.colgm:4:9
+      |     |  |--Tensor -> test/parse/example_4.colgm:4:10
+      |     |  |  |--IntLiteral 2 -> test/parse/example_4.colgm:4:11
+      |     |  |  |--IntLiteral 2 -> test/parse/example_4.colgm:4:14
+      |     |  |  `--IntLiteral 2 -> test/parse/example_4.colgm:4:17
+      |     |  `--Tensor -> test/parse/example_4.colgm:4:21
+      |     |     |--IntLiteral 3 -> test/parse/example_4.colgm:4:22
+      |     |     |--IntLiteral 3 -> test/parse/example_4.colgm:4:25
+      |     |     `--IntLiteral 3 -> test/parse/example_4.colgm:4:28
+      |     `--Tensor -> test/parse/example_4.colgm:5:9
+      |        |--Tensor -> test/parse/example_4.colgm:5:10
+      |        |  |--IntLiteral 4 -> test/parse/example_4.colgm:5:11
+      |        |  |--IntLiteral 4 -> test/parse/example_4.colgm:5:14
+      |        |  `--IntLiteral 4 -> test/parse/example_4.colgm:5:17
+      |        `--Tensor -> test/parse/example_4.colgm:5:21
+      |           |--IntLiteral 5 -> test/parse/example_4.colgm:5:22
+      |           |--IntLiteral 5 -> test/parse/example_4.colgm:5:25
+      |           `--IntLiteral 5 -> test/parse/example_4.colgm:5:28
+      `--VarDecl b -> test/parse/example_4.colgm:7:5
+         `--IndexAccess -> test/parse/example_4.colgm:7:20
+            |--IndexAccess -> test/parse/example_4.colgm:7:17
+            |  |--IndexAccess -> test/parse/example_4.colgm:7:14
+            |  |  |--identifier a -> test/parse/example_4.colgm:7:13
+            |  |  `--IntLiteral 0 -> test/parse/example_4.colgm:7:15
+            |  `--IntLiteral 1 -> test/parse/example_4.colgm:7:18
+            `--IntLiteral 2 -> test/parse/example_4.colgm:7:21

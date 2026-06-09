@@ -62,7 +62,8 @@ private:
     range_expr* parse_range_expr();
     expr* parse_value();
     expr* parse_unary_operator();
-    expr* parse_call();
+    expr* parse_call_expr();
+    expr* parse_index_access();
     expr* parse_add_sub();
     expr* parse_mul_div();
     expr* parse_expr();

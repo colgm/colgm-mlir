@@ -253,7 +253,13 @@ expr* parser::parse_value() {
     } else if (lookahead(tok::tk_true) || lookahead(tok::tk_false)) {
         return parse_bool_literal();
     } else if (lookahead(tok::tk_id)) {
-        return parse_call();
+        if (lookahead(tok::tk_lparen, 1)) {
+            return parse_call_expr();
+        } else if (lookahead(tok::tk_lbracket, 1)) {
+            return parse_index_access();
+        } else {
+            return parse_identifier();
+        }
     } else if (lookahead(tok::tk_lbracket)) {
         return parse_tensor();
     } else if (lookahead(tok::tk_lparen)) {
@@ -281,7 +287,7 @@ expr* parser::parse_unary_operator() {
     return node;
 }
 
-expr* parser::parse_call() {
+expr* parser::parse_call_expr() {
     auto callee = parse_identifier();
     if (!lookahead(tok::tk_lparen)) {
         return callee;
@@ -308,6 +314,20 @@ expr* parser::parse_call() {
         }
     }
     match(tok::tk_rparen);
+    return node;
+}
+
+expr* parser::parse_index_access() {
+    auto callee = parse_identifier();
+    expr* node = callee;
+    while (lookahead(tok::tk_lbracket)) {
+        auto res = new index_access(tokens[ptr].loc);
+        res->set_target(node);
+        match(tok::tk_lbracket);
+        res->set_index(parse_expr());
+        match(tok::tk_rbracket);
+        node = res;
+    }
     return node;
 }
 

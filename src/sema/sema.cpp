@@ -54,12 +54,14 @@ void sema::resolve_stmt(stmt* node) {
 }
 
 void sema::resolve_var_decl(var_decl* node) {
-    resolve_expr(node->get_init());
+    auto ty = resolve_expr(node->get_init());
+    node->set_resolved(ty);
+    ctx.regist_variable(node->get_name(), ty);
 }
 
 void sema::resolve_assign_stmt(assign_stmt* node) {
-    resolve_expr(node->get_lhs());
-    resolve_expr(node->get_rhs());
+    auto lt = resolve_expr(node->get_lhs());
+    auto rt = resolve_expr(node->get_rhs());
 }
 
 void sema::resolve_return_stmt(return_stmt* node) {
@@ -77,9 +79,11 @@ void sema::resolve_for_stmt(for_stmt* node) {
 }
 
 void sema::resolve_block_stmt(block_stmt* node) {
+    ctx.new_scope();
     for (auto node: node->get_stmts()) {
         resolve_stmt(node);
     }
+    ctx.pop_scope();
 }
 
 type sema::resolve_int_literal(int_literal* node) {
@@ -101,10 +105,37 @@ type sema::resolve_bool_literal(bool_literal* node) {
 }
 
 type sema::resolve_tensor(tensor* node) {
-    for (auto i : node->get_values()) {
-        resolve_expr(i);
+    if (node->get_values().empty()) {
+        err.err(node->get_location(), "empty tensor literal");
+        return ts.get_unknown_type();
     }
-    return ts.get_unknown_type();
+
+    std::vector<type> values;
+    for (auto i : node->get_values()) {
+        values.push_back(resolve_expr(i));
+    }
+    auto target_type = values.front();
+    for (auto i : values) {
+        if (i != target_type) {
+            err.err(node->get_location(), "different types in tensor literal");
+            return ts.get_unknown_type();
+        }
+    }
+
+    i64 dim = values.size();
+    if (type::isa<tensor_type>(target_type)) {
+        auto tt = type::as<tensor_type>(target_type);
+        std::vector<i64> shape = tt.get_shape();
+        shape.push_back(dim);
+        
+        auto res = ts.get_tensor_type(tt.get_element_type(), shape);
+        node->set_resolved(res);
+        return res;
+    }
+
+    auto res = ts.get_tensor_type(target_type, {dim});
+    node->set_resolved(res);
+    return res;
 }
 
 type sema::resolve_identifier(identifier* node) {
@@ -112,18 +143,21 @@ type sema::resolve_identifier(identifier* node) {
 }
 
 type sema::resolve_binary_expr(binary_expr* node) {
-    resolve_expr(node->get_lhs());
-    resolve_expr(node->get_rhs());
-    return ts.get_unknown_type();
+    auto lt = resolve_expr(node->get_lhs());
+    auto rt = resolve_expr(node->get_rhs());
+    // TODO
+    return lt;
 }
 
 type sema::resolve_unary_expr(unary_expr* node) {
-    resolve_expr(node->get_operand());
-    return ts.get_unknown_type();
+    auto t = resolve_expr(node->get_operand());
+    node->set_resolved(t);
+    // TODO
+    return t;
 }
 
 type sema::resolve_call_expr(call_expr* node) {
-    resolve_expr(node->get_callee());
+    auto callee = resolve_expr(node->get_callee());
     for (const auto& i : node->get_args()) {
         resolve_expr(i.value);
     }
@@ -131,14 +165,15 @@ type sema::resolve_call_expr(call_expr* node) {
 }
 
 type sema::resolve_index_access(index_access* node) {
-    resolve_expr(node->get_target());
-    resolve_expr(node->get_index());
+    auto lt = resolve_expr(node->get_target());
+    auto rt = resolve_expr(node->get_index());
     return ts.get_unknown_type();
 }
 
 type sema::resolve_range_expr(range_expr* node) {
-    resolve_expr(node->get_start());
-    resolve_expr(node->get_end());
+    auto lt = resolve_expr(node->get_start());
+    auto rt = resolve_expr(node->get_end());
+
     return ts.get_unknown_type();
 }
 
@@ -200,9 +235,11 @@ void sema::resolve_func_decl(func_decl* f) {
 
 void sema::resolve_func_block(func_decl* f) {
     const auto& fi = ctx.get_functions().at(f->get_name());
+    ctx.new_scope();
     for (auto node : f->get_body()->get_stmts()) {
         resolve_stmt(node);
     }
+    ctx.pop_scope();
 }
 
 const error& sema::scan(root* ast_root) {
