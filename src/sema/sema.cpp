@@ -114,32 +114,35 @@ type sema::resolve_tensor(tensor* node) {
     for (auto i : node->get_values()) {
         values.push_back(resolve_expr(i));
     }
-    auto target_type = values.front();
+    auto first_type = values.front();
     for (auto i : values) {
-        if (i != target_type) {
+        if (i != first_type) {
             err.err(node->get_location(), "different types in tensor literal");
             return ts.get_unknown_type();
         }
     }
 
-    i64 dim = values.size();
-    if (type::isa<tensor_type>(target_type)) {
-        auto tt = type::as<tensor_type>(target_type);
-        std::vector<i64> shape = tt.get_shape();
-        shape.push_back(dim);
-        
-        auto res = ts.get_tensor_type(tt.get_element_type(), shape);
-        node->set_resolved(res);
-        return res;
+    std::vector<i64> shape = { static_cast<i64>(values.size()) };
+    auto element_type = first_type;
+    if (type::isa<tensor_type>(first_type)) {
+        auto tt = type::as<tensor_type>(first_type);
+        shape.insert(shape.end(), tt.get_shape().begin(), tt.get_shape().end());
+        element_type = tt.get_element_type();
     }
 
-    auto res = ts.get_tensor_type(target_type, {dim});
+    auto res = ts.get_tensor_type(element_type, shape);
     node->set_resolved(res);
     return res;
 }
 
 type sema::resolve_identifier(identifier* node) {
-    return ts.get_unknown_type();
+    auto res = ctx.find_variable(node->get_name());
+    if (!res.found) {
+        err.err(node->get_location(), "variable not found");
+        return ts.get_unknown_type();
+    }
+    node->set_resolved(res.t);
+    return res.t;
 }
 
 type sema::resolve_binary_expr(binary_expr* node) {

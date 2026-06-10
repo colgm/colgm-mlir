@@ -66,6 +66,9 @@ public:
                 return var_find_res { it->at(name), true };
             }
         }
+        if (functions.find(name) != functions.end()) {
+            return var_find_res { functions.at(name).func_type, true };
+        }
         return var_find_res { ts.get_unknown_type(), false };
     }
     void dump() const;
