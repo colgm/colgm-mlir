@@ -59,6 +59,7 @@ false            // bool
 ```
 
 Integer literals support hex and octal prefixes:
+
 ```rs
 0x7fffffff       // hex → i64
 0o777            // octal → i64
@@ -139,20 +140,20 @@ Everything beyond basic arithmetic is a function-style call with optional
 named parameters:
 
 ```rs
-relu(x)                         // activation: element-wise max(0, x)
-sigmoid(x)                      // activation: 1 / (1 + exp(-x))
-tanh(x)                         // activation: tanh
-exp(x)                          // element-wise e^x
-log(x)                          // element-wise ln(x)
-sqrt(x)                         // element-wise sqrt
-abs(x)                          // element-wise |x|
+relu(x)                   // activation: element-wise max(0, x)
+sigmoid(x)                // activation: 1 / (1 + exp(-x))
+tanh(x)                   // activation: tanh
+exp(x)                    // element-wise e^x
+log(x)                    // element-wise ln(x)
+sqrt(x)                   // element-wise sqrt
+abs(x)                    // element-wise |x|
 
-matmul(a, b)                    // matrix multiplication
+matmul(a, b)              // matrix multiplication
 
-reshape(a, shape=[2, 4])        // reshape to new dimensions
-transpose(a, perm=[1, 0])       // permute axes
-sum(a, axis=0)                  // reduce along axis
-mean(a, axis=1)                 // reduce along axis
+reshape(a, [2, 4])        // reshape to new dimensions
+transpose(a, [1, 0])      // permute axes
+sum(a, 0)                 // reduce along axis
+mean(a, 1)                // reduce along axis
 ```
 
 The function-call syntax `name(arg, param=val, ...)` is used for:
@@ -203,6 +204,7 @@ if x == y {
 ```
 
 No `elsif` keyword. Nested `if` / `else` only:
+
 ```rs
 if a {
     // ...
@@ -266,8 +268,7 @@ var b = relu(               // one statement: relu(x)
 var c = [[1, 2],
          [3, 4]]            // one statement: 2x2 tensor
 
-var d = reshape(a,
-    shape=[2, 4])           // one statement: reshape call
+var d = reshape(a, [2, 4])  // one statement: reshape call
 ```
 
 ---
@@ -283,7 +284,7 @@ func main() {
     var a = [[1.0, -2.0], [-3.0, 4.0]]
     var b = relu(a)
     var c = b + [[1.0, 0.0], [0.0, 1.0]]
-    var d = reshape(c, shape=[4])
+    var d = reshape(c, [4])
 
     for i in 0..4 {
         var val = exp(d[i])

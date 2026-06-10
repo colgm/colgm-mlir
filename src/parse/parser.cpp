@@ -26,6 +26,11 @@ void parser::match(tok t) {
     next();
 }
 
+void parser::update_location(ast* node) {
+    const token& end = (ptr >= 1) ? tokens[ptr - 1] : tokens[ptr];
+    node->update_location(end.loc);
+}
+
 type_def* parser::parse_type() {
     auto node = new type_def(tokens[ptr].loc);
     node->set_base(tokens[ptr].str);
@@ -45,6 +50,7 @@ type_def* parser::parse_type() {
         }
         match(tok::tk_rbracket);
     }
+    update_location(node);
     return node;
 }
 
@@ -56,6 +62,7 @@ param* parser::parse_param() {
         match(tok::tk_colon);
         node->set_type(parse_type());
     }
+    update_location(node);
     return node;
 }
 
@@ -81,6 +88,8 @@ func_decl* parser::parse_func_decl() {
     }
 
     node->set_body(parse_block());
+
+    update_location(node);
     return node;
 }
 
@@ -100,6 +109,7 @@ block_stmt* parser::parse_block() {
         }
     }
     match(tok::tk_rbrace);
+    update_location(node);
     return node;
 }
 
@@ -130,6 +140,7 @@ var_decl* parser::parse_var_decl() {
     match(tok::tk_id);
     match(tok::tk_eq);
     node->set_init(parse_expr());
+    update_location(node);
     return node;
 }
 
@@ -144,6 +155,7 @@ if_stmt* parser::parse_if_stmt() {
         match(tok::tk_else);
         node->set_else_body(parse_block());
     }
+    update_location(node);
     return node;
 }
 
@@ -155,6 +167,7 @@ for_stmt* parser::parse_for_stmt() {
     match(tok::tk_in);
     node->set_range(parse_range_expr());
     node->set_body(parse_block());
+    update_location(node);
     return node;
 }
 
@@ -174,6 +187,7 @@ return_stmt* parser::parse_return_stmt() {
         lookahead(tok::tk_lparen)) {
         node->set_value(parse_expr());
     }
+    update_location(node);
     return node;
 }
 
@@ -182,6 +196,8 @@ assign_stmt* parser::parse_assign_stmt() {
     node->set_lhs(parse_expr());
     match(tok::tk_eq);
     node->set_rhs(parse_expr());
+
+    update_location(node);
     return node;
 }
 
@@ -191,6 +207,8 @@ range_expr* parser::parse_range_expr() {
     match(tok::tk_dot);
     match(tok::tk_dot);
     node->set_end(parse_expr());
+
+    update_location(node);
     return node;
 }
 
@@ -237,6 +255,8 @@ tensor* parser::parse_tensor() {
         }
     }
     match(tok::tk_rbracket);
+
+    update_location(node);
     return node;
 }
 
@@ -286,6 +306,7 @@ expr* parser::parse_unary_operator() {
         next();
     }
     node->set_operand(parse_value());
+    update_location(node);
     return node;
 }
 
@@ -307,6 +328,7 @@ expr* parser::parse_call_expr() {
         }
     }
     match(tok::tk_rparen);
+    update_location(node);
     return node;
 }
 
@@ -319,6 +341,7 @@ expr* parser::parse_index_access() {
         match(tok::tk_lbracket);
         res->set_index(parse_expr());
         match(tok::tk_rbracket);
+        update_location(res);
         node = res;
     }
     return node;
@@ -338,6 +361,7 @@ expr* parser::parse_add_sub() {
         node->set_lhs(lhs);
         node->set_rhs(parse_mul_div());
         lhs = node;
+        update_location(lhs);
     }
     return lhs;
 }
@@ -356,6 +380,7 @@ expr* parser::parse_mul_div() {
         node->set_lhs(lhs);
         node->set_rhs(parse_value());
         lhs = node;
+        update_location(lhs);
     }
     return lhs;
 }
@@ -378,6 +403,7 @@ const error& parser::scan() {
         }
     }
 
+    update_location(tree);
     return err;
 }
 

@@ -2,5 +2,5 @@ Error: empty tensor literal
   --> test/sema/example_0.colgm:2:13
   | 
 2 |     var a = []
-  |             ^
+  |             ^^
 

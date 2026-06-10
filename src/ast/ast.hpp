@@ -44,11 +44,15 @@ protected:
 public:
     ast(ast_type t, const span& loc):
         ast_type_(t), loc_(loc), resolve_type_(nullptr) {}
+    virtual ~ast() = default;
     const auto& get_location() const { return loc_; }
     void set_resolved(const type& t) { resolve_type_ = t; }
     const auto get_resolved() const { return resolve_type_; }
     auto get_ast_type() const { return ast_type_; }
-    virtual ~ast() = default;
+    void update_location(const span& end) {
+        loc_.end_line = end.end_line;
+        loc_.end_column = end.end_column;
+    }
     virtual void accept(visitor*);
 };
 

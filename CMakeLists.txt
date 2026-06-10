@@ -70,6 +70,7 @@ set(COLGM_LIB_SOURCES
     src/parse/parser.cpp
     src/report/report.cpp
     src/sema/context.cpp
+    src/sema/intrinsic.cpp
     src/sema/sema.cpp
     src/sema/storage.cpp
     src/sema/type.cpp

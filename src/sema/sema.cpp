@@ -168,8 +168,8 @@ type sema::resolve_identifier(identifier* node) {
         err.err(node->get_location(), "variable not found");
         return ts.get_unknown_type();
     }
-    node->set_resolved(res.t);
-    return res.t;
+    node->set_resolved(res.ty);
+    return res.ty;
 }
 
 type sema::resolve_binary_expr(binary_expr* node) {
@@ -189,6 +189,20 @@ type sema::resolve_unary_expr(unary_expr* node) {
 }
 
 type sema::resolve_call_expr(call_expr* node) {
+    if (node->get_callee()->get_ast_type() == ast_type::identifier) {
+        auto n = static_cast<identifier*>(node->get_callee());
+        auto res = ctx.find_intrinsic(n->get_name());
+        if (res.found) {
+            for (auto i : node->get_args()) {
+                resolve_expr(i);
+            }
+            n->set_resolved(ts.get_unknown_type());
+            auto t = res.check(err, node, ts);
+            node->set_resolved(t);
+            return t;
+        }
+    }
+
     auto callee = resolve_expr(node->get_callee());
     if (!type::isa<function_type>(callee)) {
         err.err(node->get_location(), "not a function");

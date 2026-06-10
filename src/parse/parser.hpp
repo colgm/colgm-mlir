@@ -41,6 +41,7 @@ private:
         ptr++;
     }
     void match(tok t);
+    void update_location(ast*);
 
 private:
     type_def* parse_type();

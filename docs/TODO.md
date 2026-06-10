@@ -51,7 +51,7 @@
 - [x] Parse tensor literals: `[[1.0, 2.0], [3.0, 4.0]]`
 - [x] Parse control flow: `if`, `for`
 - [x] Parse tensor literal syntax: `[[1,2],[3,4]]`
-- [ ] Error recovery strategy (at minimum: report the first error and exit)
+- [x] Error recovery strategy (at minimum: report the first error and exit)
 
 ---
 
@@ -60,7 +60,7 @@
 - [x] Write TableGen files for the `tensor_ops` (or `toy2`) dialect
   - **ops**: `AddOp`, `SubOp`, `MulOp`, `DivOp`, `NegOp`, `ReluOp`, `ReshapeOp`
   - Each op has a custom assembly format and a verifier
-- [ ] Define the `ToyTensorType` wrapper (or reuse MLIR's built-in `TensorType`)
+- [x] Define the `ToyTensorType` wrapper (or reuse MLIR's built-in `TensorType`)
 - [ ] Write the `func` operation for the dialect (or reuse the built-in `func.func`)
 - [ ] Register the dialect with MLIR
 
@@ -140,7 +140,6 @@
 ## Phase 11 — Polish & Ecosystem
 
 - [x] Better error messages (point to source location, show context)
-- [ ] `std` library written in the DSL itself (math functions, initializers: `zeros`, `ones`, `rand`)
 - [x] Test suite: run each test case through the full pipeline and compare output values
 - [x] CI (GitHub Actions) with a pinned LLVM build
 - [x] Editor syntax highlighting (VSCode extension)

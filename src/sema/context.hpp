@@ -7,6 +7,7 @@
 #include "utils/span.hpp"
 #include "sema/type.hpp"
 #include "sema/storage.hpp"
+#include "sema/intrinsic.hpp"
 
 namespace colgm_mlir {
 
@@ -26,7 +27,11 @@ struct func_info {
 class context {
 public:
     struct var_find_res {
-        type t;
+        type ty;
+        bool found = false;
+    };
+    struct intrinsic_find_res {
+        infer_func check;
         bool found = false;
     };
 
@@ -36,8 +41,12 @@ private:
 
     std::vector<std::unordered_map<std::string, type>> variables;
 
+    std::unordered_map<std::string, intrinsic> intrinsics;
+
 public:
-    context(type_storage& ts) : ts(ts) {}
+    context(type_storage& ts) : ts(ts) {
+        intrinsics.emplace("relu", intrinsic { "relu", relu_infer });
+    }
     void regist_function(const std::string& name, func_info&& fi) {
         functions.emplace(name, fi);
     }
@@ -51,7 +60,7 @@ public:
     void regist_variable(const std::string& name, type t) {
         variables.back().emplace(name, t);
     }
-    var_find_res find_variable(const std::string& name) {
+    var_find_res find_variable(const std::string& name) const {
         for (auto it = variables.rbegin(); it != variables.rend(); ++it) {
             if (it->find(name) != it->end()) {
                 return var_find_res { it->at(name), true };
@@ -61,6 +70,12 @@ public:
             return var_find_res { functions.at(name).func_type, true };
         }
         return var_find_res { ts.get_unknown_type(), false };
+    }
+    intrinsic_find_res find_intrinsic(const std::string& name) const {
+        if (intrinsics.find(name) != intrinsics.end()) {
+            return intrinsic_find_res { intrinsics.at(name).infer, true };
+        }
+        return intrinsic_find_res { nullptr, false };
     }
     void dump() const;
 };
