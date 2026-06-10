@@ -62,20 +62,47 @@ void sema::resolve_var_decl(var_decl* node) {
 void sema::resolve_assign_stmt(assign_stmt* node) {
     auto lt = resolve_expr(node->get_lhs());
     auto rt = resolve_expr(node->get_rhs());
+    if (lt != rt) {
+        err.err(node->get_location(), "different types in assign statement");
+    }
 }
 
 void sema::resolve_return_stmt(return_stmt* node) {
     if (node->get_value()) {
-        resolve_expr(node->get_value());
+        auto t = resolve_expr(node->get_value());
+        node->set_resolved(t);
+    } else {
+        node->set_resolved(ts.get_void_type());
     }
 }
 
 void sema::resolve_if_stmt(if_stmt* node) {
-    resolve_expr(node->get_condition());
+    auto t = resolve_expr(node->get_condition());
+    if (t != ts.get_bool_type()) {
+        err.err(node->get_location(), "condition type must be bool");
+    }
+
+    resolve_block_stmt(node->get_body());
+    if (node->get_else_body()) {
+        resolve_block_stmt(node->get_else_body());
+    }
 }
 
 void sema::resolve_for_stmt(for_stmt* node) {
-    resolve_range_expr(node->get_range());
+    auto rt = resolve_range_expr(node->get_range());
+    ctx.new_scope();
+    auto iter_type = type::isa<tensor_type>(rt)
+        ? type::as<tensor_type>(rt).get_element_type()
+        : ts.get_unknown_type();
+    if (!type::isa<int_type>(iter_type)) {
+        err.err(node->get_location(),
+            "iterator type must be int but get '" + iter_type.to_string() + "'"
+        );
+    }
+    ctx.regist_variable(node->get_iter(), iter_type);
+    node->set_resolved(iter_type);
+    resolve_block_stmt(node->get_body());
+    ctx.pop_scope();
 }
 
 void sema::resolve_block_stmt(block_stmt* node) {
@@ -148,36 +175,77 @@ type sema::resolve_identifier(identifier* node) {
 type sema::resolve_binary_expr(binary_expr* node) {
     auto lt = resolve_expr(node->get_lhs());
     auto rt = resolve_expr(node->get_rhs());
-    // TODO
+    if (lt != rt) {
+        err.err(node->get_location(), "different types in binary expression");
+    }
+    node->set_resolved(lt);
     return lt;
 }
 
 type sema::resolve_unary_expr(unary_expr* node) {
     auto t = resolve_expr(node->get_operand());
     node->set_resolved(t);
-    // TODO
     return t;
 }
 
 type sema::resolve_call_expr(call_expr* node) {
     auto callee = resolve_expr(node->get_callee());
-    for (const auto& i : node->get_args()) {
-        resolve_expr(i.value);
+    if (!type::isa<function_type>(callee)) {
+        err.err(node->get_location(), "not a function");
+        return ts.get_unknown_type();
     }
-    return ts.get_unknown_type();
+
+    auto ft = type::as<function_type>(callee);
+    if (ft.get_arguments().size() != node->get_args().size()) {
+        err.err(node->get_location(), "different number of arguments");
+        node->set_resolved(ft.get_return_type());
+        return ft.get_return_type();
+    }
+
+    for (usize i = 0; i < ft.get_arguments().size(); ++i) {
+        auto n = node->get_args()[i];
+        auto nt = resolve_expr(n);
+        auto expect = ft.get_arguments()[i];
+        if (nt != expect) {
+            err.err(n->get_location(), "different argument type in call expression");
+        }
+    }
+
+    node->set_resolved(ft.get_return_type());
+    return ft.get_return_type();
 }
 
 type sema::resolve_index_access(index_access* node) {
     auto lt = resolve_expr(node->get_target());
     auto rt = resolve_expr(node->get_index());
-    return ts.get_unknown_type();
+
+    if (!type::isa<tensor_type>(lt)) {
+        err.err(node->get_location(), "not a tensor");
+        return ts.get_unknown_type();
+    }
+
+    if (!type::isa<int_type>(rt)) {
+        err.err(node->get_location(), "not a int type");
+        return ts.get_unknown_type();
+    }
+
+    auto tt = type::as<tensor_type>(lt);
+    std::vector<i64> shape(tt.get_shape().begin() + 1, tt.get_shape().end());
+    auto res = ts.get_tensor_type(tt.get_element_type(), shape);
+    node->set_resolved(res);
+    return res;
 }
 
 type sema::resolve_range_expr(range_expr* node) {
     auto lt = resolve_expr(node->get_start());
     auto rt = resolve_expr(node->get_end());
+    if (lt != rt) {
+        err.err(node->get_location(), "different types in range");
+    }
 
-    return ts.get_unknown_type();
+    auto res = ts.get_tensor_type(lt, {});
+    node->set_resolved(res);
+    return res;
 }
 
 type sema::resolve_expr(expr* node) {
@@ -222,6 +290,8 @@ void sema::resolve_func_decl(func_decl* f) {
         type param_type = ts.get_unknown_type();
         if (param->get_type()) {
             param_type = resolve_type(param->get_type());
+        } else {
+            err.err(param->get_location(), "type not specified");
         }
         param->set_resolved(param_type);
         params.push_back(param_type);
@@ -253,10 +323,7 @@ const error& sema::scan(root* ast_root) {
         if (!ctx.get_functions().count(node->get_name())) {
             continue;
         }
-        const auto& fi = ctx.get_functions().at(node->get_name());
-        if (fi.is_generic_function) {
-            continue;
-        }
+
         resolve_func_block(node);
     }
     return err;

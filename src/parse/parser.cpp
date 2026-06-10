@@ -270,7 +270,9 @@ expr* parser::parse_value() {
     } else if (lookahead(tok::tk_add) || lookahead(tok::tk_sub)) {
         return parse_unary_operator();
     }
+
     err.err(tokens[ptr].loc, "Expected a value");
+    next();
     return nullptr;
 }
 
@@ -297,16 +299,7 @@ expr* parser::parse_call_expr() {
     node->set_callee(callee);
     match(tok::tk_lparen);
     while (!lookahead(tok::tk_rparen)) {
-        if (ptr + 1 < tokens.size() &&
-            lookahead(tok::tk_id) &&
-            lookahead(tok::tk_eq, 1)) {
-            const auto& name = tokens[ptr].str;
-            match(tok::tk_id);
-            match(tok::tk_eq);
-            node->add_named_arg(name, parse_expr());
-        } else {
-            node->add_normal_arg(parse_expr());
-        }
+        node->add_arg(parse_expr());
         if (lookahead(tok::tk_comma)) {
             match(tok::tk_comma);
         } else if (!lookahead(tok::tk_rparen)) {

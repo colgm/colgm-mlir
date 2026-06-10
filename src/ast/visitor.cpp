@@ -75,11 +75,11 @@ bool visitor::visit_call_expr(call_expr* n) {
     if (n->get_callee()) {
         n->get_callee()->accept(this);
     }
-    for (const auto& arg : n->get_args()) {
-        if (!arg.value) {
+    for (auto arg : n->get_args()) {
+        if (!arg) {
             continue;
         }
-        arg.value->accept(this);
+        arg->accept(this);
     }
     return true;
 }

@@ -35,10 +35,9 @@ Root -> test/parse/example_2.colgm:1:1
       |  `--CallExpr -> test/parse/example_2.colgm:11:22
       |     |--identifier test -> test/parse/example_2.colgm:11:18
       |     |--identifier input -> test/parse/example_2.colgm:11:23
-      |     `--Arg target_shape: 
-      |        `--Tensor -> test/parse/example_2.colgm:11:45
-      |           |--IntLiteral 2 -> test/parse/example_2.colgm:11:46
-      |           `--IntLiteral 3 -> test/parse/example_2.colgm:11:49
+      |     `--Tensor -> test/parse/example_2.colgm:11:30
+      |        |--IntLiteral 2 -> test/parse/example_2.colgm:11:31
+      |        `--IntLiteral 3 -> test/parse/example_2.colgm:11:34
       |--VarDecl output2 -> test/parse/example_2.colgm:12:5
       |  `--CallExpr -> test/parse/example_2.colgm:12:38
       |     |--identifier test_specific_shape -> test/parse/example_2.colgm:12:19

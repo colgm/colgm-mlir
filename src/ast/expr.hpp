@@ -125,30 +125,17 @@ public:
 };
 
 class call_expr: public expr {
-public:
-    struct arg {
-        std::optional<std::string> name;
-        expr* value;
-
-        bool operator==(const arg& rhs) const {
-            return name == rhs.name && value == rhs.value;
-        }
-    };
-
 private:
     expr* callee = nullptr;
-    std::vector<arg> args;
+    std::vector<expr*> args;
 
 public:
     call_expr(const span& loc): expr(ast_type::call_expr, loc) {}
     ~call_expr() override;
     void accept(visitor*) override;
     void set_callee(expr* c) { callee = c; }
-    void add_normal_arg(expr* a) {
-        args.push_back({std::nullopt, a});
-    }
-    void add_named_arg(const std::string& name, expr* a) {
-        args.push_back({name, a});
+    void add_arg(expr* a) {
+        args.push_back(a);
     }
     auto get_callee() const { return callee; }
     const auto& get_args() const { return args; }

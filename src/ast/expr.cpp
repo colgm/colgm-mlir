@@ -61,10 +61,9 @@ call_expr::~call_expr() {
     if (callee) {
         delete callee;
     }
-    for (auto& i : args) {
-        if (i.value) {
-            delete i.value;
-            i.value = nullptr;
+    for (auto i : args) {
+        if (i) {
+            delete i;
         }
     }
 }

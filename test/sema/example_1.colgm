@@ -1,0 +1,11 @@
+func main() {
+    var a = [1]
+    var b = [a, a]
+    var c = [b, b, b]
+    var d = c[0]
+
+    for i in 0..2 {
+        
+        // d = relu(c[i])
+    }
+}

@@ -16,16 +16,7 @@ struct func_info {
     type func_type;
     span loc;
 
-    bool is_generic_function = false;
-
-    func_info(const span& l, type ft): func_type(ft), loc(l) {
-        for (const auto& [_, t] : args_types) {
-            if (type::isa<unknown_type>(t)) {
-                is_generic_function = true;
-                break;
-            }
-        }
-    }
+    func_info(const span& l, type ft): func_type(ft), loc(l) {}
     void add_arg(const std::string& name, type t) {
         args.push_back(name);
         args_types.emplace(name, t);

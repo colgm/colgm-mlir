@@ -8,10 +8,6 @@ void context::dump() const {
         auto ft = type::as<function_type>(fi.func_type);
         std::cout << "func " << name << ft;
         std::cout << " [" << fi.loc << "]" << std::endl;
-        for (const auto& arg : fi.args) {
-            std::cout << "  - arg " << arg << ": " << fi.args_types.at(arg) << std::endl;
-        }
-        std::cout << "  - ret: " << ft.get_return_type() << std::endl;
     }
     std::cout << "======================" << std::endl;
 }

@@ -1,71 +1,71 @@
 Error: invalid character '~'
-  --> test/lexer/invalid_operator.colgm:1:1
+  --> test/lexer/example_1.colgm:1:1
   | 
 1 | ~ ` @ #
   | ^
 
 Error: invalid character '`'
-  --> test/lexer/invalid_operator.colgm:1:3
+  --> test/lexer/example_1.colgm:1:3
   | 
 1 | ~ ` @ #
   |   ^
 
 Error: invalid character '@'
-  --> test/lexer/invalid_operator.colgm:1:5
+  --> test/lexer/example_1.colgm:1:5
   | 
 1 | ~ ` @ #
   |     ^
 
 Error: invalid character '#'
-  --> test/lexer/invalid_operator.colgm:1:7
+  --> test/lexer/example_1.colgm:1:7
   | 
 1 | ~ ` @ #
   |       ^
 
 Error: invalid operator `+=`
-  --> test/lexer/invalid_operator.colgm:2:1
+  --> test/lexer/example_1.colgm:2:1
   | 
 2 | += -= /= *= % | ^ &
   | ^^
 
 Error: invalid operator `-=`
-  --> test/lexer/invalid_operator.colgm:2:4
+  --> test/lexer/example_1.colgm:2:4
   | 
 2 | += -= /= *= % | ^ &
   |    ^^
 
 Error: invalid operator `/=`
-  --> test/lexer/invalid_operator.colgm:2:7
+  --> test/lexer/example_1.colgm:2:7
   | 
 2 | += -= /= *= % | ^ &
   |       ^^
 
 Error: invalid operator `*=`
-  --> test/lexer/invalid_operator.colgm:2:10
+  --> test/lexer/example_1.colgm:2:10
   | 
 2 | += -= /= *= % | ^ &
   |          ^^
 
 Error: invalid character '%'
-  --> test/lexer/invalid_operator.colgm:2:13
+  --> test/lexer/example_1.colgm:2:13
   | 
 2 | += -= /= *= % | ^ &
   |             ^
 
 Error: invalid character '|'
-  --> test/lexer/invalid_operator.colgm:2:15
+  --> test/lexer/example_1.colgm:2:15
   | 
 2 | += -= /= *= % | ^ &
   |               ^
 
 Error: invalid character '^'
-  --> test/lexer/invalid_operator.colgm:2:17
+  --> test/lexer/example_1.colgm:2:17
   | 
 2 | += -= /= *= % | ^ &
   |                 ^
 
 Error: invalid character '&'
-  --> test/lexer/invalid_operator.colgm:2:19
+  --> test/lexer/example_1.colgm:2:19
   | 
 2 | += -= /= *= % | ^ &
   |                   ^

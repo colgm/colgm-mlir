@@ -103,16 +103,7 @@ bool dumper::visit_call_expr(call_expr* node) {
         if (i == node->get_args().back()) {
             set_last();
         }
-        if (i.name.has_value()) {
-            dump_indent();
-            std::cout << purple << "Arg " << reset << i.name.value() << ": \n";
-            push_indent();
-            set_last();
-            i.value->accept(this);
-            pop_indent();
-        } else {
-            i.value->accept(this);
-        }
+        i->accept(this);
     }
     pop_indent();
     return true;
