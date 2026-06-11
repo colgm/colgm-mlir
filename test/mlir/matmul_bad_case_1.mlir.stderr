@@ -1,0 +1,3 @@
+test/mlir/matmul_bad_case_1.mlir:4:3: error: custom op 'colgm.matmul' tensor rank must be equal
+  return %0 : tensor<2x24xf32>
+  ^

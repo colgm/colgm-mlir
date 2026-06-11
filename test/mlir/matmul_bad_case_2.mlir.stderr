@@ -1,0 +1,4 @@
+test/mlir/matmul_bad_case_2.mlir:3:8: error: 'colgm.matmul' op lhs[0] must equal rhs[0]
+  %0 = colgm.matmul %arg0, %arg1 : tensor<2x3x4xf32>, tensor<5x4x24xf32>
+       ^
+test/mlir/matmul_bad_case_2.mlir:3:8: note: see current operation: %0 = "colgm.matmul"(%arg0, %arg1) : (tensor<2x3x4xf32>, tensor<5x4x24xf32>) -> tensor<2x3x24xf32>

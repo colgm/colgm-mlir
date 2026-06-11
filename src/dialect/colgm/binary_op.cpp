@@ -133,11 +133,15 @@ void matmul_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs) {
     auto lhs_type = llvm::cast<mlir::RankedTensorType>(lhs.getType());
     auto rhs_type = llvm::cast<mlir::RankedTensorType>(rhs.getType());
-    auto elem_type = lhs_type.getElementType();
-    auto res_type = mlir::RankedTensorType::get({
-        lhs_type.getDimSize(0),
-        rhs_type.getDimSize(1),
-    }, elem_type);
+    
+    llvm::SmallVector<i64> shape;
+    for (usize i = 0; i < lhs_type.getRank() - 2; i++) {
+        shape.push_back(lhs_type.getDimSize(i));
+    }
+    shape.push_back(lhs_type.getDimSize(lhs_type.getRank() - 2));
+    shape.push_back(rhs_type.getDimSize(rhs_type.getRank() - 1));
+
+    auto res_type = mlir::RankedTensorType::get(shape, lhs_type.getElementType());
     state.addOperands({lhs, rhs});
     state.addTypes(res_type);
 }
@@ -159,11 +163,24 @@ mlir::ParseResult matmul_op::parse(mlir::OpAsmParser& parser,
         return mlir::failure();
     }
 
-    auto elem_type = llvm::cast<mlir::RankedTensorType>(lhs_type).getElementType();
-    auto res_type = mlir::RankedTensorType::get({
-        llvm::cast<mlir::RankedTensorType>(lhs_type).getDimSize(0),
-        llvm::cast<mlir::RankedTensorType>(rhs_type).getDimSize(1),
-    }, elem_type);
+    auto lhs_tensor = llvm::cast<mlir::RankedTensorType>(lhs_type);
+    auto rhs_tensor = llvm::cast<mlir::RankedTensorType>(rhs_type);
+
+    if (lhs_tensor.getRank() != rhs_tensor.getRank()) {
+        return parser.emitError(parser.getCurrentLocation(), "tensor rank must be equal");
+    }
+    if (lhs_tensor.getRank() < 2 || rhs_tensor.getRank() < 2) {
+        return parser.emitError(parser.getCurrentLocation(), "tensor rank must be >= 2");
+    }
+
+    llvm::SmallVector<i64> shape;
+    for (usize i = 0; i < lhs_tensor.getRank() - 2; i++) {
+        shape.push_back(lhs_tensor.getDimSize(i));
+    }
+    shape.push_back(lhs_tensor.getDimSize(lhs_tensor.getRank() - 2));
+    shape.push_back(rhs_tensor.getDimSize(rhs_tensor.getRank() - 1));
+
+    auto res_type = mlir::RankedTensorType::get(shape, lhs_tensor.getElementType());
     result.addTypes(res_type);
     return mlir::success();
 }
@@ -176,11 +193,21 @@ void matmul_op::print(mlir::OpAsmPrinter& p) {
 mlir::LogicalResult matmul_op::verify() {
     auto lhs_type = llvm::cast<mlir::RankedTensorType>(get_lhs().getType());
     auto rhs_type = llvm::cast<mlir::RankedTensorType>(get_rhs().getType());
-    if (lhs_type.getRank() != 2 || rhs_type.getRank() != 2) {
-        return emitOpError("only support 2D tensor");
+    if (lhs_type.getRank() < 2 || rhs_type.getRank() < 2) {
+        return emitOpError("tensor rank must be >= 2");
     }
-    if (lhs_type.getDimSize(1) != rhs_type.getDimSize(0)) {
-        return emitOpError("lhs cols must equal rhs rows");
+    if (lhs_type.getRank() != rhs_type.getRank()) {
+        return emitOpError("tensor rank must be equal");
+    }
+
+    for (usize i = 0; i < lhs_type.getRank() - 2; i++) {
+        if (lhs_type.getDimSize(i) != rhs_type.getDimSize(i)) {
+            return emitOpError("lhs[") << i << "] must equal rhs[" << i << "]";
+        }
+    }
+
+    if (lhs_type.getDimSize(lhs_type.getRank() - 1) != rhs_type.getDimSize(rhs_type.getRank() - 2)) {
+        return emitOpError("lhs[-1] must equal rhs[-2]");
     }
     return mlir::success();
 }
