@@ -1,0 +1,42 @@
+Error: relu takes only one argument
+  --> test/sema/example_3.colgm:2:17
+  | 
+2 |     var a = relu(0, 1);
+  |                 ^^^^^^
+
+Error: abs takes only one argument
+  --> test/sema/example_3.colgm:3:16
+  | 
+3 |     var b = abs(1, 2);
+  |                ^^^^^^
+
+Error: exp takes only one argument
+  --> test/sema/example_3.colgm:4:16
+  | 
+4 |     var c = exp(2, 3);
+  |                ^^^^^^
+
+Error: log takes only one argument
+  --> test/sema/example_3.colgm:5:16
+  | 
+5 |     var d = log(3, 4);
+  |                ^^^^^^
+
+Error: sqrt takes only one argument
+  --> test/sema/example_3.colgm:6:17
+  | 
+6 |     var e = sqrt(4, 5);
+  |                 ^^^^^^
+
+Error: tanh takes only one argument
+  --> test/sema/example_3.colgm:7:17
+  | 
+7 |     var f = tanh(5, 6);
+  |                 ^^^^^^
+
+Error: sigmoid takes only one argument
+  --> test/sema/example_3.colgm:8:20
+  | 
+8 |     var g = sigmoid(6, 7);
+  |                    ^^^^^^
+

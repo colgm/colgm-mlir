@@ -46,6 +46,12 @@ private:
 public:
     context(type_storage& ts) : ts(ts) {
         intrinsics.emplace("relu", intrinsic { "relu", relu_infer });
+        intrinsics.emplace("abs", intrinsic { "abs", abs_infer });
+        intrinsics.emplace("exp", intrinsic { "exp", exp_infer });
+        intrinsics.emplace("log", intrinsic { "log", log_infer });
+        intrinsics.emplace("sqrt", intrinsic { "sqrt", sqrt_infer });
+        intrinsics.emplace("tanh", intrinsic { "tanh", tanh_infer });
+        intrinsics.emplace("sigmoid", intrinsic { "sigmoid", sigmoid_infer });
     }
     void regist_function(const std::string& name, func_info&& fi) {
         functions.emplace(name, fi);

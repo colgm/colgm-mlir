@@ -2,23 +2,135 @@
 
 namespace colgm_mlir {
 
+static bool is_calculation_type(const type& t) {
+    return type::isa<tensor_type>(t) ||
+           type::isa<int_type>(t) ||
+           type::isa<float_type>(t);
+}
+
 type relu_infer(error& err, call_expr* node, type_storage& ts) {
     if (node->get_args().size() < 1) {
-        err.err(node->get_location(), "relu function takes one argument");
+        err.err(node->get_location(), "relu takes at least one argument");
         return ts.get_unknown_type();
     } else if (node->get_args().size() > 1) {
-        err.err(node->get_location(), "relu function takes only one argument");
+        err.err(node->get_location(), "relu takes only one argument");
         return ts.get_unknown_type();
     }
 
     auto arg = node->get_args()[0]->get_resolved();
-    if (type::isa<tensor_type>(arg) ||
-        type::isa<int_type>(arg) ||
-        type::isa<float_type>(arg)) {
+    if (is_calculation_type(arg)) {
         return arg;
     }
 
-    err.err(node->get_location(), "relu function takes only tensor, int or float argument");
+    err.err(node->get_location(), "relu takes only tensor, int or float argument");
+    return ts.get_unknown_type();
+}
+
+type abs_infer(error& err, call_expr* node, type_storage& ts) {
+    if (node->get_args().size() < 1) {
+        err.err(node->get_location(), "abs takes at least one argument");
+        return ts.get_unknown_type();
+    } else if (node->get_args().size() > 1) {
+        err.err(node->get_location(), "abs takes only one argument");
+        return ts.get_unknown_type();
+    }
+
+    auto arg = node->get_args()[0]->get_resolved();
+    if (is_calculation_type(arg)) {
+        return arg;
+    }
+
+    err.err(node->get_location(), "abs takes only tensor, int or float argument");
+    return ts.get_unknown_type();
+}
+
+type exp_infer(error& err, call_expr* node, type_storage& ts) {
+    if (node->get_args().size() < 1) {
+        err.err(node->get_location(), "exp takes at least one argument");
+        return ts.get_unknown_type();
+    } else if (node->get_args().size() > 1) {
+        err.err(node->get_location(), "exp takes only one argument");
+        return ts.get_unknown_type();
+    }
+
+    auto arg = node->get_args()[0]->get_resolved();
+    if (is_calculation_type(arg)) {
+        return arg;
+    }
+
+    err.err(node->get_location(), "exp takes only tensor, int or float argument");
+    return ts.get_unknown_type();
+}
+
+type log_infer(error& err, call_expr* node, type_storage& ts) {
+    if (node->get_args().size() < 1) {
+        err.err(node->get_location(), "log takes at least one argument");
+        return ts.get_unknown_type();
+    } else if (node->get_args().size() > 1) {
+        err.err(node->get_location(), "log takes only one argument");
+        return ts.get_unknown_type();
+    }
+
+    auto arg = node->get_args()[0]->get_resolved();
+    if (is_calculation_type(arg)) {
+        return arg;
+    }
+
+    err.err(node->get_location(), "log takes only tensor, int or float argument");
+    return ts.get_unknown_type();
+}
+
+type sqrt_infer(error& err, call_expr* node, type_storage& ts) {
+    if (node->get_args().size() < 1) {
+        err.err(node->get_location(), "sqrt takes at least one argument");
+        return ts.get_unknown_type();
+    } else if (node->get_args().size() > 1) {
+        err.err(node->get_location(), "sqrt takes only one argument");
+        return ts.get_unknown_type();
+    }
+
+    auto arg = node->get_args()[0]->get_resolved();
+    if (is_calculation_type(arg)) {
+        return arg;
+    }
+
+    err.err(node->get_location(), "sqrt takes only tensor, int or float argument");
+    return ts.get_unknown_type();
+}
+
+type tanh_infer(error& err, call_expr* node, type_storage& ts) {
+    if (node->get_args().size() < 1) {
+        err.err(node->get_location(), "tanh takes at least one argument");
+        return ts.get_unknown_type();
+    } else if (node->get_args().size() > 1) {
+        err.err(node->get_location(), "tanh takes only one argument");
+        return ts.get_unknown_type();
+    }
+
+    auto arg = node->get_args()[0]->get_resolved();
+    if (is_calculation_type(arg)) {
+        return arg;
+    }
+
+    err.err(node->get_location(), "tanh takes only tensor, int or float argument");
+    return ts.get_unknown_type();
+}
+
+type sigmoid_infer(error& err, call_expr* node, type_storage& ts) {
+    if (node->get_args().size() < 1) {
+        err.err(node->get_location(), "sigmoid takes at least one argument");
+        return ts.get_unknown_type();
+    } else if (node->get_args().size() > 1) {
+        err.err(node->get_location(), "sigmoid takes only one argument");
+        return ts.get_unknown_type();
+    }
+
+    auto arg = node->get_args()[0]->get_resolved();
+    if (is_calculation_type(arg)) {
+        return arg;
+    }
+
+    err.err(node->get_location(), "sigmoid takes only tensor, int or float argument");
     return ts.get_unknown_type();
 }
 

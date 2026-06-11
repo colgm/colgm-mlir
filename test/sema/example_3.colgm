@@ -1,0 +1,9 @@
+func main() {
+    var a = relu(0, 1);
+    var b = abs(1, 2);
+    var c = exp(2, 3);
+    var d = log(3, 4);
+    var e = sqrt(4, 5);
+    var f = tanh(5, 6);
+    var g = sigmoid(6, 7);
+}

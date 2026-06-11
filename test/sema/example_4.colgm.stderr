@@ -1,0 +1,42 @@
+Error: relu takes at least one argument
+  --> test/sema/example_4.colgm:2:17
+  | 
+2 |     var a = relu();
+  |                 ^^
+
+Error: abs takes at least one argument
+  --> test/sema/example_4.colgm:3:16
+  | 
+3 |     var b = abs();
+  |                ^^
+
+Error: exp takes at least one argument
+  --> test/sema/example_4.colgm:4:16
+  | 
+4 |     var c = exp();
+  |                ^^
+
+Error: log takes at least one argument
+  --> test/sema/example_4.colgm:5:16
+  | 
+5 |     var d = log();
+  |                ^^
+
+Error: sqrt takes at least one argument
+  --> test/sema/example_4.colgm:6:17
+  | 
+6 |     var e = sqrt();
+  |                 ^^
+
+Error: tanh takes at least one argument
+  --> test/sema/example_4.colgm:7:17
+  | 
+7 |     var f = tanh();
+  |                 ^^
+
+Error: sigmoid takes at least one argument
+  --> test/sema/example_4.colgm:8:20
+  | 
+8 |     var g = sigmoid();
+  |                    ^^
+

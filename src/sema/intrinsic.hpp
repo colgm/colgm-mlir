@@ -21,5 +21,11 @@ struct intrinsic {
 };
 
 type relu_infer(error&, call_expr*, type_storage&);
+type abs_infer(error&, call_expr*, type_storage&);
+type exp_infer(error&, call_expr*, type_storage&);
+type log_infer(error&, call_expr*, type_storage&);
+type sqrt_infer(error&, call_expr*, type_storage&);
+type tanh_infer(error&, call_expr*, type_storage&);
+type sigmoid_infer(error&, call_expr*, type_storage&);
 
 }
