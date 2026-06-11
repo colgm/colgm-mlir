@@ -27,7 +27,6 @@ public:
     virtual bool visit_range_expr(range_expr*);
 
     virtual bool visit_var_decl(var_decl*);
-    virtual bool visit_assign_stmt(assign_stmt*);
     virtual bool visit_return_stmt(return_stmt*);
     virtual bool visit_if_stmt(if_stmt*);
     virtual bool visit_for_stmt(for_stmt*);

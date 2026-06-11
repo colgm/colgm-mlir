@@ -122,11 +122,9 @@ stmt* parser::parse_stmt() {
         return parse_for_stmt();
     } else if (lookahead(tok::tk_ret)) {
         return parse_return_stmt();
-    } else if (lookahead(tok::tk_id)) {
-        return parse_assign_stmt();
     } else {
         err.err(tokens[ptr].loc,
-            "Unexpected statement token '" + tokens[ptr].type_to_string() + "'"
+            "Unexpected statement token '" + tokens[ptr].str + "'"
         );
         next();
     }
@@ -187,16 +185,6 @@ return_stmt* parser::parse_return_stmt() {
         lookahead(tok::tk_lparen)) {
         node->set_value(parse_expr());
     }
-    update_location(node);
-    return node;
-}
-
-assign_stmt* parser::parse_assign_stmt() {
-    auto node = new assign_stmt(tokens[ptr].loc);
-    node->set_lhs(parse_expr());
-    match(tok::tk_eq);
-    node->set_rhs(parse_expr());
-
     update_location(node);
     return node;
 }

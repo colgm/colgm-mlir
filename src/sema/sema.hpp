@@ -21,7 +21,6 @@ private:
     type resolve_type(type_def*);
     void resolve_stmt(stmt*);
     void resolve_var_decl(var_decl*);
-    void resolve_assign_stmt(assign_stmt*);
     void resolve_return_stmt(return_stmt*);
     void resolve_if_stmt(if_stmt*);
     void resolve_for_stmt(for_stmt*);

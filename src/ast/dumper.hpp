@@ -67,7 +67,6 @@ private:
     bool visit_range_expr(range_expr*) override;
 
     bool visit_var_decl(var_decl*) override;
-    bool visit_assign_stmt(assign_stmt*) override;
     bool visit_return_stmt(return_stmt*) override;
     bool visit_if_stmt(if_stmt*) override;
     bool visit_for_stmt(for_stmt*) override;

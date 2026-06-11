@@ -22,7 +22,6 @@ enum class ast_type {
     range_expr,
     // statement
     var_decl,
-    assign_stmt,
     return_stmt,
     if_stmt,
     for_stmt,
@@ -72,7 +71,6 @@ class index_access;
 class range_expr;
 
 class var_decl;
-class assign_stmt;
 class return_stmt;
 class if_stmt;
 class for_stmt;

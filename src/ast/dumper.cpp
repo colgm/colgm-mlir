@@ -142,17 +142,6 @@ bool dumper::visit_var_decl(var_decl* node) {
     return true;
 }
 
-bool dumper::visit_assign_stmt(assign_stmt* node) {
-    dump_indent();
-    std::cout << purple << "AssignStmt" << reset << format_info(node);
-    push_indent();
-    node->get_lhs()->accept(this);
-    set_last();
-    node->get_rhs()->accept(this);
-    pop_indent();
-    return true;
-}
-
 bool dumper::visit_return_stmt(return_stmt* node) {
     dump_indent();
     std::cout << purple << "ReturnStmt" << reset << format_info(node);

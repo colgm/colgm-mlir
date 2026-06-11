@@ -111,16 +111,6 @@ bool visitor::visit_var_decl(var_decl* n) {
     return true;
 }
 
-bool visitor::visit_assign_stmt(assign_stmt* n) {
-    if (n->get_lhs()) {
-        n->get_lhs()->accept(this);
-    }
-    if (n->get_rhs()) {
-        n->get_rhs()->accept(this);
-    }
-    return true;
-}
-
 bool visitor::visit_return_stmt(return_stmt* n) {
     if (n->get_value()) {
         n->get_value()->accept(this);

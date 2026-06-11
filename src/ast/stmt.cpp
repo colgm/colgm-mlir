@@ -17,19 +17,6 @@ void var_decl::accept(visitor* v) {
     v->visit_var_decl(this);
 }
 
-assign_stmt::~assign_stmt() {
-    if (lhs) {
-        delete lhs;
-    }
-    if (rhs) {
-        delete rhs;
-    }
-}
-
-void assign_stmt::accept(visitor* v) {
-    v->visit_assign_stmt(this);
-}
-
 return_stmt::~return_stmt() {
     if (value) {
         delete value;

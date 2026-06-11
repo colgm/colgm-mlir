@@ -2,7 +2,7 @@ func main() -> i32 {
     var a = [0, 1, 2, 3];
     var b = [4, 5, 6, 7];
 
-    a = a + a * b;
-    a = a + a * b + (-a) + (+a) + b / a;
-    return reduce(a, [0]);
+    var c = a + a * b;
+    var d = a + a * b + (-a) + (+a) + b / a;
+    return reduce(d, [0]);
 }

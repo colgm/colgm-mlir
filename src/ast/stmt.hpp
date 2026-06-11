@@ -30,21 +30,6 @@ public:
     auto get_init() const { return init; }
 };
 
-class assign_stmt: public stmt {
-private:
-    expr* lhs = nullptr;
-    expr* rhs = nullptr;
-
-public:
-    assign_stmt(const span& loc): stmt(ast_type::assign_stmt, loc) {}
-    ~assign_stmt() override;
-    void accept(visitor*) override;
-    void set_lhs(expr* l) { lhs = l; }
-    auto get_lhs() const { return lhs; }
-    void set_rhs(expr* r) { rhs = r; }
-    auto get_rhs() const { return rhs; }
-};
-
 class return_stmt: public stmt {
 private:
     expr* value = nullptr;

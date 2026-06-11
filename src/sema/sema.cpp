@@ -32,9 +32,6 @@ void sema::resolve_stmt(stmt* node) {
         case ast_type::var_decl:
             resolve_var_decl(static_cast<var_decl*>(node));
             break;
-        case ast_type::assign_stmt:
-            resolve_assign_stmt(static_cast<assign_stmt*>(node));
-            break;
         case ast_type::return_stmt:
             resolve_return_stmt(static_cast<return_stmt*>(node));
             break;
@@ -57,14 +54,6 @@ void sema::resolve_var_decl(var_decl* node) {
     auto ty = resolve_expr(node->get_init());
     node->set_resolved(ty);
     ctx.regist_variable(node->get_name(), ty);
-}
-
-void sema::resolve_assign_stmt(assign_stmt* node) {
-    auto lt = resolve_expr(node->get_lhs());
-    auto rt = resolve_expr(node->get_rhs());
-    if (lt != rt) {
-        err.err(node->get_location(), "different types in assign statement");
-    }
 }
 
 void sema::resolve_return_stmt(return_stmt* node) {
