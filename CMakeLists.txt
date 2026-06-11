@@ -58,6 +58,7 @@ set(COLGM_LIB_SOURCES
     src/ast/stmt.cpp
     src/ast/visitor.cpp
     src/ast/dumper.cpp
+    src/codegen/mlir_generator.cpp
     src/dialect/colgm/binary_op.cpp
     src/dialect/colgm/broadcast.cpp
     src/dialect/colgm/reduce_sum.cpp

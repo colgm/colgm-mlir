@@ -1,3 +1,10 @@
+#include <vector>
+#include <unordered_map>
+#include <thread>
+#include <cstdlib>
+
+#include <mlir/Support/LLVM.h>
+
 #include "utils/colgm.hpp"
 #include "lexer/lexer.hpp"
 #include "ast/dumper.hpp"
@@ -5,13 +12,7 @@
 #include "sema/storage.hpp"
 #include "sema/sema.hpp"
 #include "dialect/dialect.hpp"
-
-#include <vector>
-#include <unordered_map>
-#include <thread>
-#include <cstdlib>
-
-#include <mlir/Support/LLVM.h>
+#include "codegen/mlir_generator.hpp"
 
 using colgm_mlir::u32;
 using colgm_mlir::i32;
@@ -20,6 +21,7 @@ const u32 COMPILE_VIEW_TOKEN = 1;
 const u32 COMPILE_VIEW_AST = 1 << 1;
 const u32 COMPILE_VIEW_SEMA = 1 << 2;
 const u32 COMPILE_VIEW_SEMA_AST = 1 << 3;
+const u32 COMPILE_VIEW_MLIR = 1 << 4;
 
 std::ostream& help(std::ostream& out) {
     out
@@ -33,6 +35,7 @@ std::ostream& help(std::ostream& out) {
     << "   -a,   --ast            | view analysed ast.\n"
     << "   -s,   --sema           | view analysed semantic context.\n"
     << "   -sa,  --sema-ast       | view analysed ast with semantic result.\n"
+    << "   -m,   --mlir           | view generated mlir.\n"
     << "file:\n"
     << "   <filename>             | input file.\n"
     << "\n";
@@ -106,6 +109,14 @@ void execute(const std::string& input_file,
         colgm_mlir::dumper::dump(parser.get_tree());
         return;
     }
+
+    mlir::MLIRContext context;
+    colgm_mlir::mlir_generator gen(context);
+    gen.generate(parser.get_tree());
+    if (cmd & COMPILE_VIEW_MLIR) {
+        gen.dump();
+        return;
+    }
 }
 
 i32 main(i32 argc, const char* argv[]) {
@@ -140,6 +151,8 @@ i32 main(i32 argc, const char* argv[]) {
         { "-s",    COMPILE_VIEW_SEMA },
         { "--sema-ast", COMPILE_VIEW_SEMA_AST },
         { "-sa",    COMPILE_VIEW_SEMA_AST },
+        { "--mlir", COMPILE_VIEW_MLIR },
+        { "-m",    COMPILE_VIEW_MLIR }
     };
     u32 cmd = 0;
     std::string input_file = "";
