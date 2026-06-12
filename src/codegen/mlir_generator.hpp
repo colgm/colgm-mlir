@@ -29,13 +29,25 @@ private:
     mlir::OpBuilder builder;
     mlir::ModuleOp module;
 
+private:
+    mlir::Location to_loc(ast* node) {
+        const auto& loc = node->get_location();
+        return mlir::FileLineColLoc::get(
+            builder.getStringAttr(loc.file),
+            loc.begin_line,
+            loc.begin_column + 1
+        );
+    }
+
 public:
     mlir_generator(mlir::MLIRContext& c): ctx(c), builder(&c) {
         ctx.getOrLoadDialect<mlir::func::FuncDialect>();
     }
     void generate(root*);
     void dump() {
-        module.dump();
+        mlir::OpPrintingFlags flags;
+        flags.enableDebugInfo();
+        module.print(llvm::outs(), flags);
     }
 };
 

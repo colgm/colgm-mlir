@@ -3,7 +3,7 @@
 namespace colgm_mlir {
 
 void mlir_generator::generate(root* r) {
-    module = mlir::ModuleOp::create(builder, builder.getUnknownLoc());
+    module = mlir::ModuleOp::create(builder, to_loc(r));
     builder.setInsertionPointToStart(module.getBody());
 
     auto func = mlir::func::FuncOp::create(
