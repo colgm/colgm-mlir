@@ -39,6 +39,10 @@ private:
         );
     }
 
+    void generate_func(func_decl*);
+    void generate_block(mlir::Block*, block_stmt*);
+    void generate_stmt(mlir::Block*, stmt*);
+
 public:
     mlir_generator(mlir::MLIRContext& c): ctx(c), builder(&c) {
         ctx.getOrLoadDialect<mlir::func::FuncDialect>();

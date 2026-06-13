@@ -44,6 +44,9 @@ public:
     ast(ast_type t, const span& loc):
         ast_type_(t), loc_(loc), resolve_type_(nullptr) {}
     virtual ~ast() = default;
+    bool is(ast_type t) const {
+        return ast_type_ == t;
+    }
     const auto& get_location() const { return loc_; }
     void set_resolved(const type& t) { resolve_type_ = t; }
     const auto get_resolved() const { return resolve_type_; }

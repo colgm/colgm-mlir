@@ -61,6 +61,7 @@ set(COLGM_LIB_SOURCES
     src/codegen/mlir_generator.cpp
     src/dialect/colgm/binary_op.cpp
     src/dialect/colgm/broadcast.cpp
+    src/dialect/colgm/constant_op.cpp
     src/dialect/colgm/reduce_sum.cpp
     src/dialect/colgm/reshape.cpp
     src/dialect/colgm/transpose.cpp

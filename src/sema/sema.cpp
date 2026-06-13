@@ -178,7 +178,7 @@ type sema::resolve_unary_expr(unary_expr* node) {
 }
 
 type sema::resolve_call_expr(call_expr* node) {
-    if (node->get_callee()->get_ast_type() == ast_type::identifier) {
+    if (node->get_callee()->is(ast_type::identifier)) {
         auto n = static_cast<identifier*>(node->get_callee());
         auto res = ctx.find_intrinsic(n->get_name());
         if (res.found) {
