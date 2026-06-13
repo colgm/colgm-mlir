@@ -1,0 +1,4 @@
+test/mlir/yield_bad_case_0.mlir:3:3: error: 'colgm.yield' op yield must be inside if or for
+  colgm.yield
+  ^
+test/mlir/yield_bad_case_0.mlir:3:3: note: see current operation: "colgm.yield"() : () -> ()

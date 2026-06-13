@@ -1,0 +1,16 @@
+module {
+  func.func @for_simple(%arg0: index, %arg1: index) {
+    colgm.for %arg2 = %arg0 to %arg1 {
+      colgm.yield
+    }
+    return
+  }
+  func.func @for_with_body(%arg0: index, %arg1: index, %arg2: tensor<f32>, %arg3: tensor<f32>) {
+    colgm.for %arg4 = %arg0 to %arg1 {
+      %0 = colgm.add %arg2, %arg3 : tensor<f32>
+      colgm.yield
+    }
+    return
+  }
+}
+

@@ -7,6 +7,9 @@
 #include "dialect/colgm/broadcast.hpp"
 #include "dialect/colgm/reduce_sum.hpp"
 #include "dialect/colgm/constant_op.hpp"
+#include "dialect/colgm/yield.hpp"
+#include "dialect/colgm/if_op.hpp"
+#include "dialect/colgm/for_op.hpp"
 
 namespace colgm_mlir {
 
@@ -34,7 +37,10 @@ colgm_dialect::colgm_dialect(mlir::MLIRContext* ctx):
         transpose_op,
         broadcast_op,
         reduce_sum,
-        constant_op
+        constant_op,
+        yield_op,
+        if_op,
+        for_op
     >();
 }
 

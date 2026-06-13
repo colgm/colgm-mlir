@@ -133,7 +133,7 @@ void matmul_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs) {
     auto lhs_type = llvm::cast<mlir::RankedTensorType>(lhs.getType());
     auto rhs_type = llvm::cast<mlir::RankedTensorType>(rhs.getType());
-    
+
     llvm::SmallVector<i64> shape;
     for (usize i = 0; i < lhs_type.getRank() - 2; i++) {
         shape.push_back(lhs_type.getDimSize(i));

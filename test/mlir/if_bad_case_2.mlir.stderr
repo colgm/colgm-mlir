@@ -1,0 +1,6 @@
+test/mlir/if_bad_case_2.mlir:3:12: error: use of value '%cond' expects different type than prior uses: 'i1' vs 'tensor<i1>'
+  colgm.if %cond {
+           ^
+test/mlir/if_bad_case_2.mlir:2:28: note: prior use here
+func.func @bad_cond_tensor(%cond: tensor<i1>) {
+                           ^

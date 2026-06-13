@@ -62,10 +62,13 @@ set(COLGM_LIB_SOURCES
     src/dialect/colgm/binary_op.cpp
     src/dialect/colgm/broadcast.cpp
     src/dialect/colgm/constant_op.cpp
+    src/dialect/colgm/for_op.cpp
+    src/dialect/colgm/if_op.cpp
     src/dialect/colgm/reduce_sum.cpp
     src/dialect/colgm/reshape.cpp
     src/dialect/colgm/transpose.cpp
     src/dialect/colgm/unary_op.cpp
+    src/dialect/colgm/yield.cpp
     src/dialect/dialect.cpp
     src/lexer/lexer.cpp
     src/lexer/token.cpp

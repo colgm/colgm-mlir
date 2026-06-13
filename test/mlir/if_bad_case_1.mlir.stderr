@@ -1,0 +1,6 @@
+test/mlir/if_bad_case_1.mlir:3:12: error: use of value '%cond' expects different type than prior uses: 'i1' vs 'f32'
+  colgm.if %cond {
+           ^
+test/mlir/if_bad_case_1.mlir:2:25: note: prior use here
+func.func @bad_cond_f32(%cond: f32) {
+                        ^

@@ -1,0 +1,6 @@
+test/mlir/for_bad_case_2.mlir:3:18: error: use of value '%lb' expects different type than prior uses: 'index' vs 'i32'
+  colgm.for %i = %lb to %ub {
+                 ^
+test/mlir/for_bad_case_2.mlir:2:25: note: prior use here
+func.func @bad_both_i32(%lb: i32, %ub: i32) {
+                        ^

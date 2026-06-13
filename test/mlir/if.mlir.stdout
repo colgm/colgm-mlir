@@ -1,0 +1,42 @@
+module {
+  func.func @if_then_else(%arg0: i1) {
+    colgm.if %arg0 {
+      colgm.yield
+    } else {
+      colgm.yield
+    }
+    return
+  }
+  func.func @if_then_only(%arg0: i1) {
+    colgm.if %arg0 {
+      colgm.yield
+    } else {
+      colgm.yield
+    }
+    return
+  }
+  func.func @if_with_body(%arg0: i1, %arg1: tensor<f32>, %arg2: tensor<f32>) {
+    colgm.if %arg0 {
+      %0 = colgm.add %arg1, %arg2 : tensor<f32>
+      colgm.yield
+    } else {
+      %0 = colgm.sub %arg1, %arg2 : tensor<f32>
+      colgm.yield
+    }
+    return
+  }
+  func.func @if_nested(%arg0: i1, %arg1: i1) {
+    colgm.if %arg0 {
+      colgm.if %arg1 {
+        colgm.yield
+      } else {
+        colgm.yield
+      }
+      colgm.yield
+    } else {
+      colgm.yield
+    }
+    return
+  }
+}
+

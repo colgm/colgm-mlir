@@ -1,0 +1,6 @@
+test/mlir/if_bad_case_0.mlir:3:12: error: use of value '%cond' expects different type than prior uses: 'i1' vs 'i64'
+  colgm.if %cond {
+           ^
+test/mlir/if_bad_case_0.mlir:2:25: note: prior use here
+func.func @bad_cond_i64(%cond: i64) {
+                        ^
