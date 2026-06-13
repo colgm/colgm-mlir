@@ -1,0 +1,3 @@
+test/mlir/constant_bad_case_0.mlir:3:23: error: inferred shape of elements literal ([2]) does not match type ([3])
+  %0 = colgm.constant dense<[1, 2]> : tensor<3xi64>
+                      ^
