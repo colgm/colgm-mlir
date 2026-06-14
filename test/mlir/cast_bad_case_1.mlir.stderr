@@ -1,0 +1,4 @@
+test/mlir/cast_bad_case_1.mlir:5:8: error: 'colgm.cast' op tensor shape mismatch: 2, 3 vs 6
+  %0 = colgm.cast %arg : tensor<2x3xf32> -> tensor<6xf32>
+       ^
+test/mlir/cast_bad_case_1.mlir:5:8: note: see current operation: %0 = "colgm.cast"(%arg0) : (tensor<2x3xf32>) -> tensor<6xf32>

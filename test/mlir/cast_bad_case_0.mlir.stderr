@@ -1,0 +1,4 @@
+test/mlir/cast_bad_case_0.mlir:5:8: error: 'colgm.cast' op cannot cast from 'i64' to 'f32'
+  %0 = colgm.cast %arg : i64 -> f32
+       ^
+test/mlir/cast_bad_case_0.mlir:5:8: note: see current operation: %0 = "colgm.cast"(%arg0) : (i64) -> f32
