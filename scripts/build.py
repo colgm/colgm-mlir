@@ -10,7 +10,7 @@ def cpu_count():
     if n <= 1:
         return 1
     if n > 8:
-        return n / 2
+        return n // 2
     return n - 1
 
 def main():
