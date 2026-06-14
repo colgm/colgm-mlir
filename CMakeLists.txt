@@ -63,10 +63,12 @@ set(COLGM_LIB_SOURCES
     src/dialect/colgm/broadcast.cpp
     src/dialect/colgm/cast_op.cpp
     src/dialect/colgm/constant_op.cpp
+    src/dialect/colgm/elements.cpp
     src/dialect/colgm/for_op.cpp
     src/dialect/colgm/if_op.cpp
     src/dialect/colgm/reduce_sum.cpp
     src/dialect/colgm/reshape.cpp
+    src/dialect/colgm/slice.cpp
     src/dialect/colgm/transpose.cpp
     src/dialect/colgm/unary_op.cpp
     src/dialect/colgm/yield.cpp

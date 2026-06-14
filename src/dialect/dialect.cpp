@@ -8,6 +8,8 @@
 #include "dialect/colgm/reduce_sum.hpp"
 #include "dialect/colgm/cast_op.hpp"
 #include "dialect/colgm/constant_op.hpp"
+#include "dialect/colgm/elements.hpp"
+#include "dialect/colgm/slice.hpp"
 #include "dialect/colgm/yield.hpp"
 #include "dialect/colgm/if_op.hpp"
 #include "dialect/colgm/for_op.hpp"
@@ -40,6 +42,8 @@ colgm_dialect::colgm_dialect(mlir::MLIRContext* ctx):
         reduce_sum,
         cast_op,
         constant_op,
+        elements_op,
+        slice_op,
         yield_op,
         if_op,
         for_op

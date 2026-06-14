@@ -1,0 +1,11 @@
+module {
+  func.func @slice_axis0(%arg0: tensor<3x4xf32>, %arg1: index) -> tensor<4xf32> {
+    %0 = colgm.slice %arg0, %arg1 {axis = 0} : tensor<3x4xf32>, index -> tensor<4xf32>
+    return %0 : tensor<4xf32>
+  }
+  func.func @slice_axis1(%arg0: tensor<2x3x4xf64>, %arg1: index) -> tensor<2x4xf64> {
+    %0 = colgm.slice %arg0, %arg1 {axis = 1} : tensor<2x3x4xf64>, index -> tensor<2x4xf64>
+    return %0 : tensor<2x4xf64>
+  }
+}
+

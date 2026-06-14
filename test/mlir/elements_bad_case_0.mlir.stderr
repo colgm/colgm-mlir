@@ -1,0 +1,6 @@
+test/mlir/elements_bad_case_0.mlir:5:27: error: use of value '%b' expects different type than prior uses: 'f32' vs 'f64'
+  %0 = colgm.elements(%a, %b) {target_shape = [2]} : f32 -> tensor<2xf32>
+                          ^
+test/mlir/elements_bad_case_0.mlir:4:37: note: prior use here
+func.func @bad_mixed_types(%a: f32, %b: f64) -> tensor<2xf32> {
+                                    ^

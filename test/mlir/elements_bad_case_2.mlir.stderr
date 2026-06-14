@@ -1,0 +1,4 @@
+test/mlir/elements_bad_case_2.mlir:5:8: error: 'colgm.elements' op missing 'target_shape' attribute
+  %0 = colgm.elements(%a) : f32 -> tensor<f32>
+       ^
+test/mlir/elements_bad_case_2.mlir:5:8: note: see current operation: %0 = "colgm.elements"(%arg0) : (f32) -> tensor<f32>

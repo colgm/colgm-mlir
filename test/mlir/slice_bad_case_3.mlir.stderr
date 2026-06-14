@@ -1,0 +1,4 @@
+test/mlir/slice_bad_case_3.mlir:5:8: error: 'colgm.slice' op missing 'axis' attribute
+  %0 = colgm.slice %arg, %idx : tensor<3x4xf32>, index -> tensor<4xf32>
+       ^
+test/mlir/slice_bad_case_3.mlir:5:8: note: see current operation: %0 = "colgm.slice"(%arg0, %arg1) : (tensor<3x4xf32>, index) -> tensor<4xf32>

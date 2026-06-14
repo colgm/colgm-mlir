@@ -1,0 +1,4 @@
+test/mlir/slice_bad_case_0.mlir:5:8: error: 'colgm.slice' op axis 2 out of range [0, 2)
+  %0 = colgm.slice %arg, %idx {axis = 2} : tensor<3x4xf32>, index -> tensor<3xf32>
+       ^
+test/mlir/slice_bad_case_0.mlir:5:8: note: see current operation: %0 = "colgm.slice"(%arg0, %arg1) {axis = 2 : i64} : (tensor<3x4xf32>, index) -> tensor<3xf32>
