@@ -22,7 +22,7 @@ Root -> test/parse/example_1.colgm:1:1
       |        |--identifier a -> test/parse/example_1.colgm:5:17
       |        `--identifier b -> test/parse/example_1.colgm:5:21
       |--VarDecl d -> test/parse/example_1.colgm:6:5
-      |  `--BinaryExpr + -> test/parse/example_1.colgm:6:37
+      |  `--BinaryExpr + -> test/parse/example_1.colgm:6:34
       |     |--BinaryExpr + -> test/parse/example_1.colgm:6:30
       |     |  |--BinaryExpr + -> test/parse/example_1.colgm:6:23
       |     |  |  |--BinaryExpr + -> test/parse/example_1.colgm:6:15
@@ -32,11 +32,10 @@ Root -> test/parse/example_1.colgm:1:1
       |     |  |  |     `--identifier b -> test/parse/example_1.colgm:6:21
       |     |  |  `--UnaryExpr - -> test/parse/example_1.colgm:6:26
       |     |  |     `--identifier a -> test/parse/example_1.colgm:6:27
-      |     |  `--UnaryExpr + -> test/parse/example_1.colgm:6:33
-      |     |     `--identifier a -> test/parse/example_1.colgm:6:34
-      |     `--BinaryExpr / -> test/parse/example_1.colgm:6:41
-      |        |--identifier b -> test/parse/example_1.colgm:6:39
-      |        `--identifier a -> test/parse/example_1.colgm:6:43
+      |     |  `--identifier a -> test/parse/example_1.colgm:6:32
+      |     `--BinaryExpr / -> test/parse/example_1.colgm:6:38
+      |        |--identifier b -> test/parse/example_1.colgm:6:36
+      |        `--identifier a -> test/parse/example_1.colgm:6:40
       `--ReturnStmt -> test/parse/example_1.colgm:7:5
          `--CallExpr -> test/parse/example_1.colgm:7:18
             |--identifier reduce -> test/parse/example_1.colgm:7:12

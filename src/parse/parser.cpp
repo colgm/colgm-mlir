@@ -95,6 +95,14 @@ func_decl* parser::parse_func_decl() {
 
 block_stmt* parser::parse_block() {
     auto node = new block_stmt(tokens[ptr].loc);
+    if (!lookahead(tok::tk_lbrace)) {
+        auto stmt = parse_stmt();
+        if (stmt) {
+            node->add_stmt(stmt);
+        }
+        update_location(node);
+        return node;
+    }
     match(tok::tk_lbrace);
     while (!lookahead(tok::tk_rbrace)) {
         auto stmt = parse_stmt();
@@ -145,9 +153,7 @@ var_decl* parser::parse_var_decl() {
 if_stmt* parser::parse_if_stmt() {
     auto node = new if_stmt(tokens[ptr].loc);
     match(tok::tk_if);
-    match(tok::tk_lparen);
     node->set_condition(parse_expr());
-    match(tok::tk_rparen);
     node->set_body(parse_block());
     if (lookahead(tok::tk_else)) {
         match(tok::tk_else);
@@ -275,7 +281,7 @@ expr* parser::parse_value() {
         auto node = parse_expr();
         match(tok::tk_rparen);
         return node;
-    } else if (lookahead(tok::tk_add) || lookahead(tok::tk_sub)) {
+    } else if (lookahead(tok::tk_sub)) {
         return parse_unary_operator();
     }
 
@@ -286,10 +292,7 @@ expr* parser::parse_value() {
 
 expr* parser::parse_unary_operator() {
     auto node = new unary_expr(tokens[ptr].loc);
-    if (lookahead(tok::tk_add)) {
-        node->set_op_type(unary_expr::op::add);
-        next();
-    } else if (lookahead(tok::tk_sub)) {
+    if (lookahead(tok::tk_sub)) {
         node->set_op_type(unary_expr::op::sub);
         next();
     }
@@ -335,6 +338,31 @@ expr* parser::parse_index_access() {
     return node;
 }
 
+expr* parser::parse_cmp_expr() {
+    auto lhs = parse_add_sub();
+    if (lookahead(tok::tk_cmpeq) ||
+        lookahead(tok::tk_less) ||
+        lookahead(tok::tk_leq) ||
+        lookahead(tok::tk_grt) ||
+        lookahead(tok::tk_geq)) {
+        auto node = new binary_expr(tokens[ptr].loc);
+        switch (tokens[ptr].type) {
+            case tok::tk_cmpeq: node->set_op_type(binary_expr::op::cmp_eq); break;
+            case tok::tk_less: node->set_op_type(binary_expr::op::cmp_lt); break;
+            case tok::tk_leq: node->set_op_type(binary_expr::op::cmp_le); break;
+            case tok::tk_grt: node->set_op_type(binary_expr::op::cmp_gt); break;
+            case tok::tk_geq: node->set_op_type(binary_expr::op::cmp_ge); break;
+            default: break;
+        }
+        next();
+        node->set_lhs(lhs);
+        node->set_rhs(parse_add_sub());
+        update_location(node);
+        return node;
+    }
+    return lhs;
+}
+
 expr* parser::parse_add_sub() {
     auto lhs = parse_mul_div();
     while (lookahead(tok::tk_add) || lookahead(tok::tk_sub)) {
@@ -374,7 +402,7 @@ expr* parser::parse_mul_div() {
 }
 
 expr* parser::parse_expr() {
-    return parse_add_sub();
+    return parse_cmp_expr();
 }
 
 const error& parser::scan() {

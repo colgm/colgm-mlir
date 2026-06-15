@@ -83,7 +83,13 @@ public:
         add,
         sub,
         mul,
-        div
+        div,
+        cmp_eq,
+        cmp_ne,
+        cmp_gt,
+        cmp_ge,
+        cmp_lt,
+        cmp_le
     };
 
 private:
@@ -106,7 +112,6 @@ public:
 class unary_expr: public expr {
 public:
     enum class op {
-        add,
         sub
     };
 

@@ -64,6 +64,7 @@ private:
     expr* parse_unary_operator();
     expr* parse_call_expr();
     expr* parse_index_access();
+    expr* parse_cmp_expr();
     expr* parse_add_sub();
     expr* parse_mul_div();
     expr* parse_expr();

@@ -83,7 +83,6 @@ bool dumper::visit_unary_expr(unary_expr* node) {
     dump_indent();
     std::cout << purple << "UnaryExpr " << reset;
     switch (node->get_op_type()) {
-        case unary_expr::op::add: std::cout << "+"; break;
         case unary_expr::op::sub: std::cout << "-"; break;
     }
     std::cout << format_info(node);
@@ -159,9 +158,12 @@ bool dumper::visit_if_stmt(if_stmt* node) {
     std::cout << purple << "IfStmt" << reset << format_info(node);
     push_indent();
     node->get_condition()->accept(this);
-    set_last();
+    if (!node->get_else_body()) {
+        set_last();
+    }
     node->get_body()->accept(this);
     if (node->get_else_body()) {
+        set_last();
         dump_indent();
         std::cout << purple << "ElseStmt" << reset;
         std::cout << format_info(node->get_else_body());

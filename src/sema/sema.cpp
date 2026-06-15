@@ -68,7 +68,10 @@ void sema::resolve_return_stmt(return_stmt* node) {
 void sema::resolve_if_stmt(if_stmt* node) {
     auto t = resolve_expr(node->get_condition());
     if (t != ts.get_bool_type()) {
-        err.err(node->get_location(), "condition type must be bool");
+        err.err(
+            node->get_condition()->get_location(),
+            "condition type must be bool"
+        );
     }
 
     resolve_block_stmt(node->get_body());
@@ -165,10 +168,24 @@ type sema::resolve_binary_expr(binary_expr* node) {
     auto lt = resolve_expr(node->get_lhs());
     auto rt = resolve_expr(node->get_rhs());
     if (lt != rt) {
-        err.err(node->get_location(), "different types in binary expression");
+        err.err(
+            node->get_location(),
+            "different types in binary expression, lhs: '" +
+            lt.to_string() + "', rhs: '" + rt.to_string() + "'"
+        );
     }
-    node->set_resolved(lt);
-    return lt;
+
+    auto res = lt;
+    switch (node->get_op_type()) {
+        case binary_expr::op::cmp_eq:
+        case binary_expr::op::cmp_lt:
+        case binary_expr::op::cmp_le:
+        case binary_expr::op::cmp_gt:
+        case binary_expr::op::cmp_ge: res = ts.get_bool_type(); break;
+        default: break;
+    }
+    node->set_resolved(res);
+    return res;
 }
 
 type sema::resolve_unary_expr(unary_expr* node) {
@@ -233,8 +250,16 @@ type sema::resolve_index_access(index_access* node) {
     }
 
     auto tt = type::as<tensor_type>(lt);
+    if (tt.get_shape().empty()) {
+        err.err(node->get_location(), "cannot index a scalar");
+        return ts.get_unknown_type();
+    }
+
     std::vector<i64> shape(tt.get_shape().begin() + 1, tt.get_shape().end());
     auto res = ts.get_tensor_type(tt.get_element_type(), shape);
+    if (type::as<tensor_type>(res).get_shape().empty()) {
+        res = type::as<tensor_type>(res).get_element_type();
+    }
     node->set_resolved(res);
     return res;
 }
