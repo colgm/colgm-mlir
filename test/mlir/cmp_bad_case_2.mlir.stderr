@@ -1,0 +1,4 @@
+test/mlir/cmp_bad_case_2.mlir:5:8: error: 'colgm.cmp_eq' op result shape must match operand shape: 4, 5 vs 2, 3
+  %0 = colgm.cmp_eq %a, %b : tensor<2x3xf32> -> tensor<4x5xi1>
+       ^
+test/mlir/cmp_bad_case_2.mlir:5:8: note: see current operation: %0 = "colgm.cmp_eq"(%arg0, %arg1) : (tensor<2x3xf32>, tensor<2x3xf32>) -> tensor<4x5xi1>

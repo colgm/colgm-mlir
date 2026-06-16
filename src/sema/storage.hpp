@@ -18,11 +18,11 @@ private:
     void_type_impl void_type_impl_;
 
     type unknown_type_ = type(&unknown_type_impl_);
-    type i32_type_ = type(&i32_type_impl_);
-    type i64_type_ = type(&i64_type_impl_);
-    type f32_type_ = type(&f32_type_impl_);
-    type f64_type_ = type(&f64_type_impl_);
-    type bool_type_ = type(&bool_type_impl_);
+    type i32_scalar_type_ = type(&i32_type_impl_);
+    type i64_scalar_type_ = type(&i64_type_impl_);
+    type f32_scalar_type_ = type(&f32_type_impl_);
+    type f64_scalar_type_ = type(&f64_type_impl_);
+    type bool_scalar_type_ = type(&bool_type_impl_);
     type void_type_ = type(&void_type_impl_);
 
     std::unordered_map<function_type_impl::key_type,
@@ -35,12 +35,12 @@ private:
 public:
     ~type_storage();
     type get_unknown_type() const { return unknown_type_; }
-    type get_i32_type() const { return i32_type_; }
-    type get_i64_type() const { return i64_type_; }
-    type get_f32_type() const { return f32_type_; }
-    type get_f64_type() const { return f64_type_; }
-    type get_bool_type() const { return bool_type_; }
     type get_void_type() const { return void_type_; }
+    type get_i32_type();
+    type get_i64_type();
+    type get_f32_type();
+    type get_f64_type();
+    type get_bool_type();
     type get_function_type(const std::vector<type>&, type);
     type get_tensor_type(type, const std::vector<i64>&);
 

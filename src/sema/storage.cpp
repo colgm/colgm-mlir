@@ -11,6 +11,26 @@ type_storage::~type_storage() {
     }
 }
 
+type type_storage::get_i32_type() {
+    return get_tensor_type(i32_scalar_type_, {});
+}
+
+type type_storage::get_i64_type() {
+    return get_tensor_type(i64_scalar_type_, {});
+}
+
+type type_storage::get_f32_type() {
+    return get_tensor_type(f32_scalar_type_, {});
+}
+
+type type_storage::get_f64_type() {
+    return get_tensor_type(f64_scalar_type_, {});
+}
+
+type type_storage::get_bool_type() {
+    return get_tensor_type(bool_scalar_type_, {});
+}
+
 type type_storage::get_function_type(const std::vector<type>& args, type ret) {
     function_type_impl::key_type key(args, ret);
     auto [it, inserted] = function_types.insert({std::move(key), nullptr});

@@ -3,9 +3,13 @@
 namespace colgm_mlir {
 
 static bool is_calculation_type(const type& t) {
-    return type::isa<tensor_type>(t) ||
-           type::isa<int_type>(t) ||
-           type::isa<float_type>(t);
+    if (!type::isa<tensor_type>(t)) {
+        return false;
+    }
+
+    auto tt = type::as<tensor_type>(t);
+    return type::isa<int_type>(tt.get_element_type()) ||
+           type::isa<float_type>(tt.get_element_type());
 }
 
 type relu_infer(error& err, call_expr* node, type_storage& ts) {

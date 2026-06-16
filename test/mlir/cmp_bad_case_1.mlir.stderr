@@ -1,0 +1,4 @@
+test/mlir/cmp_bad_case_1.mlir:5:8: error: 'colgm.cmp_eq' op result element type must be i1, got 'f32'
+  %0 = colgm.cmp_eq %a, %b : tensor<f32> -> tensor<f32>
+       ^
+test/mlir/cmp_bad_case_1.mlir:5:8: note: see current operation: %0 = "colgm.cmp_eq"(%arg0, %arg1) : (tensor<f32>, tensor<f32>) -> tensor<f32>

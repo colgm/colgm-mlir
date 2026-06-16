@@ -82,17 +82,15 @@ void sema::resolve_if_stmt(if_stmt* node) {
 
 void sema::resolve_for_stmt(for_stmt* node) {
     auto rt = resolve_range_expr(node->get_range());
-    ctx.new_scope();
-    auto iter_type = type::isa<tensor_type>(rt)
-        ? type::as<tensor_type>(rt).get_element_type()
-        : ts.get_unknown_type();
-    if (!type::isa<int_type>(iter_type)) {
+    if (rt != ts.get_i32_type() && rt != ts.get_i64_type()) {
         err.err(node->get_location(),
-            "iterator type must be int but get '" + iter_type.to_string() + "'"
+            "iterator type must be tensor<int> but get '" + rt.to_string() + "'"
         );
     }
-    ctx.regist_variable(node->get_iter(), iter_type);
-    node->set_resolved(iter_type);
+
+    ctx.new_scope();
+    ctx.regist_variable(node->get_iter(), rt);
+    node->set_resolved(rt);
     resolve_block_stmt(node->get_body());
     ctx.pop_scope();
 }
@@ -244,8 +242,8 @@ type sema::resolve_index_access(index_access* node) {
         return ts.get_unknown_type();
     }
 
-    if (!type::isa<int_type>(rt)) {
-        err.err(node->get_location(), "not a int type");
+    if (rt != ts.get_i32_type() && rt != ts.get_i64_type()) {
+        err.err(node->get_index()->get_location(), "not a tensor<int> type");
         return ts.get_unknown_type();
     }
 
@@ -257,9 +255,6 @@ type sema::resolve_index_access(index_access* node) {
 
     std::vector<i64> shape(tt.get_shape().begin() + 1, tt.get_shape().end());
     auto res = ts.get_tensor_type(tt.get_element_type(), shape);
-    if (type::as<tensor_type>(res).get_shape().empty()) {
-        res = type::as<tensor_type>(res).get_element_type();
-    }
     node->set_resolved(res);
     return res;
 }
@@ -268,12 +263,22 @@ type sema::resolve_range_expr(range_expr* node) {
     auto lt = resolve_expr(node->get_start());
     auto rt = resolve_expr(node->get_end());
     if (lt != rt) {
-        err.err(node->get_location(), "different types in range");
+        err.err(
+            node->get_location(),
+            "different types in range, lhs '" +
+            lt.to_string() + "', rhs '" +
+            rt.to_string() + "'"
+        );
+    }
+    if (lt != ts.get_i32_type() && lt != ts.get_i64_type()) {
+        err.err(node->get_start()->get_location(), "not a tensor<int> type");
+    }
+    if (rt != ts.get_i32_type() && rt != ts.get_i64_type()) {
+        err.err(node->get_end()->get_location(), "not a tensor<int> type");
     }
 
-    auto res = ts.get_tensor_type(lt, {});
-    node->set_resolved(res);
-    return res;
+    node->set_resolved(lt);
+    return lt;
 }
 
 type sema::resolve_expr(expr* node) {

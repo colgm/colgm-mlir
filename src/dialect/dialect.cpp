@@ -2,6 +2,7 @@
 
 #include "dialect/colgm/binary_op.hpp"
 #include "dialect/colgm/unary_op.hpp"
+#include "dialect/colgm/cmp_op.hpp"
 #include "dialect/colgm/reshape.hpp"
 #include "dialect/colgm/transpose.hpp"
 #include "dialect/colgm/broadcast.hpp"
@@ -28,6 +29,12 @@ colgm_dialect::colgm_dialect(mlir::MLIRContext* ctx):
         mul_op,
         div_op,
         matmul_op,
+        cmp_eq_op,
+        cmp_ne_op,
+        cmp_lt_op,
+        cmp_le_op,
+        cmp_gt_op,
+        cmp_ge_op,
         relu_op,
         neg_op,
         abs_op,

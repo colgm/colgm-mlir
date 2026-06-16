@@ -1,0 +1,6 @@
+test/mlir/cmp_bad_case_0.mlir:5:25: error: use of value '%b' expects different type than prior uses: 'tensor<f32>' vs 'tensor<i32>'
+  %0 = colgm.cmp_eq %a, %b : tensor<f32> -> tensor<i1>
+                        ^
+test/mlir/cmp_bad_case_0.mlir:4:50: note: prior use here
+func.func @bad_mismatched_types(%a: tensor<f32>, %b: tensor<i32>) -> tensor<i1> {
+                                                 ^
