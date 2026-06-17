@@ -95,6 +95,8 @@ def test_parser(executable: Path) -> tuple[int, int]:
 def test_sema(executable: Path) -> tuple[int, int]:
     return test(executable, Path("test/sema"), "colgm", ["--sema"])
 
+def test_codegen(executable: Path) -> tuple[int, int]:
+    return test(executable, Path("test/codegen"), "colgm", ["--mlir"])
 def test_colgm_opt(executable: Path) -> tuple[int, int]:
     return test(executable, Path("test/mlir"), "mlir", [])
 
@@ -130,6 +132,13 @@ if __name__ == "__main__":
     sema_passed, len_sema_test = test_sema(colgm_mlir)
     passed += sema_passed
     len_test += len_sema_test
+
+    print("=" * 60)
+    print("Testing colgm-mlir::codegen")
+    print("=" * 60)
+    codegen_passed, len_codegen_test = test_codegen(colgm_mlir)
+    passed += codegen_passed
+    len_test += len_codegen_test
 
     print("=" * 60)
     print("Testing colgm-opt")

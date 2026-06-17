@@ -1,0 +1,6 @@
+Error: return type must be 'tensor<i64>' but get 'tensor<f64>'
+  --> test/sema/example_6.colgm:2:5
+  | 
+2 |     return 0.0;
+  |     ^^^^^^^^^^
+

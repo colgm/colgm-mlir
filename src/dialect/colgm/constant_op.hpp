@@ -29,6 +29,32 @@ public:
                       f64 value, mlir::Type type);
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       bool value, mlir::Type type);
+
+    static constant_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                              mlir::TypedAttr value, mlir::Type type) {
+        mlir::OperationState state(loc, getOperationName());
+        build(builder, state, value, type);
+        return llvm::cast<constant_op>(builder.create(state));
+    }
+    static constant_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                              i64 value, mlir::Type type) {
+        mlir::OperationState state(loc, getOperationName());
+        build(builder, state, value, type);
+        return llvm::cast<constant_op>(builder.create(state));
+    }
+    static constant_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                              f64 value, mlir::Type type) {
+        mlir::OperationState state(loc, getOperationName());
+        build(builder, state, value, type);
+        return llvm::cast<constant_op>(builder.create(state));
+    }
+    static constant_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                              bool value, mlir::Type type) {
+        mlir::OperationState state(loc, getOperationName());
+        build(builder, state, value, type);
+        return llvm::cast<constant_op>(builder.create(state));
+    }
+
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);

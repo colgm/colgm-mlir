@@ -14,6 +14,7 @@
 #include "ast/stmt.hpp"
 #include "ast/expr.hpp"
 #include "dialect/colgm/binary_op.hpp"
+#include "dialect/colgm/constant_op.hpp"
 #include "dialect/colgm/unary_op.hpp"
 #include "dialect/colgm/broadcast.hpp"
 #include "dialect/colgm/transpose.hpp"
@@ -39,12 +40,20 @@ private:
         );
     }
 
+    mlir::Type convert_type(const type&);
+
     void generate_func(func_decl*);
     void generate_block(mlir::Block*, block_stmt*);
+    void generate_var_decl(mlir::Block*, var_decl*);
     void generate_stmt(mlir::Block*, stmt*);
+    mlir::Value generate_int_literal(int_literal*);
+    mlir::Value generate_float_literal(float_literal*);
+    mlir::Value generate_bool_literal(bool_literal*);
+    mlir::Value generate_expr(mlir::Block*, expr*);
 
 public:
     mlir_generator(mlir::MLIRContext& c): ctx(c), builder(&c) {
+        ctx.getOrLoadDialect<colgm_dialect>();
         ctx.getOrLoadDialect<mlir::func::FuncDialect>();
     }
     void generate(root*);

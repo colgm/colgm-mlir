@@ -16,6 +16,7 @@ private:
     error& err;
     type_storage& ts;
     context ctx;
+    type func_ret_type;
 
 private:
     type resolve_type(type_def*);
@@ -40,7 +41,8 @@ private:
     void resolve_func_block(func_decl*);
 
 public:
-    sema(error& e, type_storage& t): err(e), ts(t), ctx(t) {}
+    sema(error& e, type_storage& t):
+        err(e), ts(t), ctx(t), func_ret_type(ts.get_void_type()) {}
     const error& scan(root*);
     void dump() const;
 };

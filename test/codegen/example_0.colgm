@@ -1,0 +1,11 @@
+func test_int_literal() {
+    var a = 1
+}
+
+func test_float_literal() {
+    var a = 1.0
+}
+
+func test_bool_literal() {
+    var a = true
+}

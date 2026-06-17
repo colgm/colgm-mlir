@@ -57,11 +57,17 @@ void sema::resolve_var_decl(var_decl* node) {
 }
 
 void sema::resolve_return_stmt(return_stmt* node) {
+    auto t = ts.get_void_type();
     if (node->get_value()) {
-        auto t = resolve_expr(node->get_value());
-        node->set_resolved(t);
-    } else {
-        node->set_resolved(ts.get_void_type());
+        t = resolve_expr(node->get_value());
+    }
+    node->set_resolved(t);
+    if (t != func_ret_type) {
+        err.err(
+            node->get_location(),
+            "return type must be '" + func_ret_type.to_string() + "' but get '" +
+            t.to_string() + "'"
+        );
     }
 }
 
@@ -341,9 +347,17 @@ void sema::resolve_func_decl(func_decl* f) {
 
 void sema::resolve_func_block(func_decl* f) {
     const auto& fi = ctx.get_functions().at(f->get_name());
+    func_ret_type = type::as<function_type>(fi.func_type).get_return_type();
+    bool func_has_ret = false;
     ctx.new_scope();
     for (auto node : f->get_body()->get_stmts()) {
         resolve_stmt(node);
+        if (node->is(ast_type::return_stmt)) {
+            func_has_ret = true;
+        }
+    }
+    if (!func_has_ret && func_ret_type != ts.get_void_type()) {
+        err.err(f->get_location(), "function '" + f->get_name() + "' does not return a value");
     }
     ctx.pop_scope();
 }

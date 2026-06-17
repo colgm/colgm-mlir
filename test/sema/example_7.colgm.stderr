@@ -1,0 +1,6 @@
+Error: function 'main' does not return a value
+  --> test/sema/example_7.colgm:1:1
+  | 
+1 | func main() -> i64 {}
+  | ^^^^^^^^^^^^^^^^^^^^^
+
