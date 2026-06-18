@@ -35,7 +35,7 @@ void error::warn(const std::string& info) {
 
 void error::err(const span& loc, const std::string& info, const std::string& note) {
     // load error occurred file into string lines
-    load(loc.file);
+    load(loc.get_file());
 
     ++cnt;
 
@@ -113,7 +113,7 @@ void error::err(const span& loc, const std::string& info, const std::string& not
 
 void error::warn(const span& loc, const std::string& info, const std::string& note) {
     // load error occurred file into string lines
-    load(loc.file);
+    load(loc.get_file());
 
     std::cerr
     << orange << "Warning: " << white << info << reset

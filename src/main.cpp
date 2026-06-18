@@ -6,6 +6,7 @@
 #include <mlir/Support/LLVM.h>
 
 #include "utils/colgm.hpp"
+#include "utils/source_manager.hpp"
 #include "lexer/lexer.hpp"
 #include "ast/dumper.hpp"
 #include "parse/parser.hpp"
@@ -81,10 +82,11 @@ void execute(const std::string& input_file,
              const u32 cmd = 0) {
     // main components of compiler
     colgm_mlir::error err;
+    colgm_mlir::source_manager sm;
     colgm_mlir::lexer lexer(err);
 
     // lexer scans file to get tokens
-    lexer.scan(input_file).chkerr();
+    lexer.scan(sm.intern(input_file)).chkerr();
     if (cmd & COMPILE_VIEW_TOKEN) {
         for (const auto& token : lexer.result()) {
             std::cout << token.loc << ": " << token.str << "\n";

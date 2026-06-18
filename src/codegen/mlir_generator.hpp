@@ -34,7 +34,7 @@ private:
     mlir::Location to_loc(ast* node) {
         const auto& loc = node->get_location();
         return mlir::FileLineColLoc::get(
-            builder.getStringAttr(loc.file),
+            builder.getStringAttr(loc.get_file()),
             loc.begin_line,
             loc.begin_column + 1
         );

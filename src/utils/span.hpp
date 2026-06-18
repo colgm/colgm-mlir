@@ -14,10 +14,10 @@ struct span {
     u32 begin_column;
     u32 end_line;
     u32 end_column;
-    std::string file;
+    const std::string* file;
 
-    static const span null() {
-        return {0, 0, 0, 0, ""};
+    const auto& get_file() const {
+        return *file;
     }
 };
 

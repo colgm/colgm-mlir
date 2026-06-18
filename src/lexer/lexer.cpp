@@ -107,7 +107,6 @@ void lexer::open(const std::string& file) {
     }
 
     // load
-    filename = file;
     std::ifstream in(file, std::ios::binary);
     if (in.fail()) {
         err.err("failed to open <" + file + ">");
@@ -331,12 +330,13 @@ token lexer::calc_opr() {
     };
 }
 
-const error& lexer::scan(const std::string& file) {
+const error& lexer::scan(const std::string* file) {
     line = 1;
     column = 0;
     ptr = 0;
     toks = {};
-    open(file);
+    filename = file;
+    open(*file);
 
     while (ptr < res.size()) {
         while (ptr < res.size() && skip(res[ptr])) {
