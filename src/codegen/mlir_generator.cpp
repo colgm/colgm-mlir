@@ -31,27 +31,53 @@ mlir::Type mlir_generator::convert_type(const type& t) {
 }
 
 void mlir_generator::generate_func(func_decl* f) {
+    auto func_ty = type::as<function_type>(f->get_resolved());
+    llvm::SmallVector<mlir::Type> args;
+    for (auto i : func_ty.get_arguments()) {
+        args.push_back(convert_type(i));
+    }
+
+    auto ret_ty = convert_type(func_ty.get_return_type());
+    llvm::SmallVector<mlir::Type> result_types;
+    if (ret_ty) {
+        result_types.push_back(ret_ty);
+    }
+
     builder.setInsertionPointToStart(module.getBody());
     auto func = mlir::func::FuncOp::create(
         builder, to_loc(f), f->get_name(),
-        builder.getFunctionType({}, {}));
+        builder.getFunctionType(args, result_types));
 
     auto* entry = func.addEntryBlock();
     builder.setInsertionPointToStart(entry);
     generate_block(entry, f->get_body());
 
-    builder.setInsertionPointToEnd(entry);
-    mlir::func::ReturnOp::create(builder, to_loc(f));
-}
-
-void mlir_generator::generate_block(mlir::Block* entry, block_stmt* b) {
-    for (auto i : b->get_stmts()) {
-        generate_stmt(entry, i);
+    if (entry->empty() || !entry->back().hasTrait<mlir::OpTrait::IsTerminator>()) {
+        builder.setInsertionPointToEnd(entry);
+        mlir::func::ReturnOp::create(builder, to_loc(f));
     }
 }
 
+void mlir_generator::generate_block(mlir::Block* entry, block_stmt* b) {
+    vars.add_scope();
+    for (auto i : b->get_stmts()) {
+        generate_stmt(entry, i);
+    }
+    vars.remove_scope();
+}
+
 void mlir_generator::generate_var_decl(mlir::Block* entry, var_decl* v) {
-    generate_expr(entry, v->get_init());
+    auto value = generate_expr(entry, v->get_init());
+    vars.add_var(v->get_name(), value);
+}
+
+void mlir_generator::generate_return_stmt(mlir::Block* entry, return_stmt* r) {
+    if (r->get_value()) {
+        auto value = generate_expr(entry, r->get_value());
+        mlir::func::ReturnOp::create(builder, to_loc(r), value);
+    } else {
+        mlir::func::ReturnOp::create(builder, to_loc(r));
+    }
 }
 
 void mlir_generator::generate_stmt(mlir::Block* entry, stmt* s) {
@@ -59,6 +85,14 @@ void mlir_generator::generate_stmt(mlir::Block* entry, stmt* s) {
         generate_block(entry, static_cast<block_stmt*>(s));
     } else if (s->is(ast_type::var_decl)) {
         generate_var_decl(entry, static_cast<var_decl*>(s));
+    } else if (s->is(ast_type::return_stmt)) {
+        generate_return_stmt(entry, static_cast<return_stmt*>(s));
+    } else if (s->is(ast_type::if_stmt)) {
+
+    } else if (s->is(ast_type::for_stmt)) {
+
+    } else {
+        assert(false && "not implemented");
     }
 }
 
@@ -96,9 +130,23 @@ mlir::Value mlir_generator::generate_expr(mlir::Block* entry, expr* e) {
         return generate_float_literal(static_cast<float_literal*>(e));
     } else if (e->is(ast_type::bool_literal)) {
         return generate_bool_literal(static_cast<bool_literal*>(e));
-    }
+    } else if (e->is(ast_type::tensor)) {
 
-    assert(false && "not implemented");
+    } else if (e->is(ast_type::identifier)) {
+        return vars.get_var(static_cast<identifier*>(e)->get_name());
+    } else if (e->is(ast_type::binary_expr)) {
+
+    } else if (e->is(ast_type::unary_expr)) {
+
+    } else if (e->is(ast_type::call_expr)) {
+
+    } else if (e->is(ast_type::index_access)) {
+
+    } else if (e->is(ast_type::range_expr)) {
+
+    } else {
+        assert(false && "not implemented");
+    }
     return mlir::Value();
 }
 
