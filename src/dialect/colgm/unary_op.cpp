@@ -11,6 +11,13 @@ void relu_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
     state.addTypes(input.getType());
 }
 
+relu_op relu_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                        mlir::Value input) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input);
+    return llvm::cast<relu_op>(builder.create(state));
+}
+
 mlir::ParseResult relu_op::parse(mlir::OpAsmParser& parser,
                                  mlir::OperationState& result) {
     mlir::OpAsmParser::UnresolvedOperand input;
@@ -38,6 +45,13 @@ void neg_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                    mlir::Value input) {
     state.addOperands({input});
     state.addTypes(input.getType());
+}
+
+neg_op neg_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                      mlir::Value input) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input);
+    return llvm::cast<neg_op>(builder.create(state));
 }
 
 mlir::ParseResult neg_op::parse(mlir::OpAsmParser& parser,
@@ -68,6 +82,13 @@ void abs_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
     state.addTypes(input.getType());
 }
 
+abs_op abs_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                      mlir::Value input) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input);
+    return llvm::cast<abs_op>(builder.create(state));
+}
+
 mlir::ParseResult abs_op::parse(mlir::OpAsmParser& parser,
                                 mlir::OperationState& result) {
     mlir::OpAsmParser::UnresolvedOperand input;
@@ -94,6 +115,13 @@ void exp_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                    mlir::Value input) {
     state.addOperands({input});
     state.addTypes(input.getType());
+}
+
+exp_op exp_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                      mlir::Value input) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input);
+    return llvm::cast<exp_op>(builder.create(state));
 }
 
 mlir::ParseResult exp_op::parse(mlir::OpAsmParser& parser,
@@ -124,6 +152,13 @@ void log_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
     state.addTypes(input.getType());
 }
 
+log_op log_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                      mlir::Value input) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input);
+    return llvm::cast<log_op>(builder.create(state));
+}
+
 mlir::ParseResult log_op::parse(mlir::OpAsmParser& parser,
                                 mlir::OperationState& result) {
     mlir::OpAsmParser::UnresolvedOperand input;
@@ -150,6 +185,13 @@ void sqrt_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                     mlir::Value input) {
     state.addOperands({input});
     state.addTypes(input.getType());
+}
+
+sqrt_op sqrt_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                        mlir::Value input) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input);
+    return llvm::cast<sqrt_op>(builder.create(state));
 }
 
 mlir::ParseResult sqrt_op::parse(mlir::OpAsmParser& parser,
@@ -180,6 +222,13 @@ void sigmoid_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
     state.addTypes(input.getType());
 }
 
+sigmoid_op sigmoid_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                              mlir::Value input) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input);
+    return llvm::cast<sigmoid_op>(builder.create(state));
+}
+
 mlir::ParseResult sigmoid_op::parse(mlir::OpAsmParser& parser,
                                     mlir::OperationState& result) {
     mlir::OpAsmParser::UnresolvedOperand input;
@@ -206,6 +255,13 @@ void tanh_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                     mlir::Value input) {
     state.addOperands({input});
     state.addTypes(input.getType());
+}
+
+tanh_op tanh_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                        mlir::Value input) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input);
+    return llvm::cast<tanh_op>(builder.create(state));
 }
 
 mlir::ParseResult tanh_op::parse(mlir::OpAsmParser& parser,

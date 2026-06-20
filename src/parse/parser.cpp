@@ -341,6 +341,7 @@ expr* parser::parse_index_access() {
 expr* parser::parse_cmp_expr() {
     auto lhs = parse_add_sub();
     if (lookahead(tok::tk_cmpeq) ||
+        lookahead(tok::tk_neq) ||
         lookahead(tok::tk_less) ||
         lookahead(tok::tk_leq) ||
         lookahead(tok::tk_grt) ||
@@ -348,6 +349,7 @@ expr* parser::parse_cmp_expr() {
         auto node = new binary_expr(tokens[ptr].loc);
         switch (tokens[ptr].type) {
             case tok::tk_cmpeq: node->set_op_type(binary_expr::op::cmp_eq); break;
+            case tok::tk_neq: node->set_op_type(binary_expr::op::cmp_ne); break;
             case tok::tk_less: node->set_op_type(binary_expr::op::cmp_lt); break;
             case tok::tk_leq: node->set_op_type(binary_expr::op::cmp_le); break;
             case tok::tk_grt: node->set_op_type(binary_expr::op::cmp_gt); break;

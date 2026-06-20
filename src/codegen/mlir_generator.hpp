@@ -19,7 +19,10 @@
 #include "ast/stmt.hpp"
 #include "ast/expr.hpp"
 #include "dialect/colgm/binary_op.hpp"
+#include "dialect/colgm/cast_op.hpp"
+#include "dialect/colgm/cmp_op.hpp"
 #include "dialect/colgm/constant_op.hpp"
+#include "dialect/colgm/elements.hpp"
 #include "dialect/colgm/unary_op.hpp"
 #include "dialect/colgm/broadcast.hpp"
 #include "dialect/colgm/transpose.hpp"
@@ -75,6 +78,7 @@ private:
     }
 
     mlir::Type convert_type(const type&);
+    void flatten_tensor(std::vector<expr*>&, tensor*);
 
     void generate_func(func_decl*);
     void generate_block(mlir::Block*, block_stmt*);
@@ -84,7 +88,11 @@ private:
     mlir::Value generate_int_literal(int_literal*);
     mlir::Value generate_float_literal(float_literal*);
     mlir::Value generate_bool_literal(bool_literal*);
-    mlir::Value generate_expr(mlir::Block*, expr*);
+    mlir::Value generate_tensor(tensor*);
+    mlir::Value generate_identifier(identifier*);
+    mlir::Value generate_binary_expr(binary_expr*);
+    mlir::Value generate_unary_expr(unary_expr*);
+    mlir::Value generate_expr(expr*);
 
 public:
     mlir_generator(mlir::MLIRContext& c): ctx(c), builder(&c) {

@@ -21,6 +21,8 @@ public:
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs);
+    static add_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                         mlir::Value lhs, mlir::Value rhs);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
@@ -41,6 +43,8 @@ public:
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs);
+    static sub_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                         mlir::Value lhs, mlir::Value rhs);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
@@ -61,6 +65,8 @@ public:
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs);
+    static mul_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                         mlir::Value lhs, mlir::Value rhs);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
@@ -81,6 +87,8 @@ public:
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs);
+    static div_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                         mlir::Value lhs, mlir::Value rhs);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
@@ -100,6 +108,8 @@ public:
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs);
+    static matmul_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                            mlir::Value lhs, mlir::Value rhs);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);

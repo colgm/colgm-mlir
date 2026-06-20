@@ -1,4 +1,4 @@
 test/mlir/elements_bad_case_1.mlir:5:8: error: 'colgm.elements' op operand count 2 != target_shape element count 3
-  %0 = colgm.elements(%a, %b) {target_shape = [3]} : f32 -> tensor<3xf32>
+  %0 = colgm.elements(%a, %b) {target_shape = [3]} : tensor<f32> -> tensor<3xf32>
        ^
-test/mlir/elements_bad_case_1.mlir:5:8: note: see current operation: %0 = "colgm.elements"(%arg0, %arg1) {target_shape = [3]} : (f32, f32) -> tensor<3xf32>
+test/mlir/elements_bad_case_1.mlir:5:8: note: see current operation: %0 = "colgm.elements"(%arg0, %arg1) {target_shape = [3]} : (tensor<f32>, tensor<f32>) -> tensor<3xf32>

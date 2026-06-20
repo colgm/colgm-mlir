@@ -9,11 +9,20 @@ void elements_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                         mlir::ValueRange values, mlir::ArrayRef<int64_t> shape) {
     state.addOperands(values);
 
-    auto elt_type = values[0].getType();
+    auto operand_type = values[0].getType();
+    auto op_rtt = llvm::cast<mlir::RankedTensorType>(operand_type);
+    auto elt_type = op_rtt.getElementType();
     auto res_type = mlir::RankedTensorType::get(shape, elt_type);
     state.addTypes(res_type);
 
     state.addAttribute("target_shape", builder.getI64ArrayAttr(shape));
+}
+
+elements_op elements_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                                mlir::ValueRange values, mlir::ArrayRef<int64_t> shape) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, values, shape);
+    return llvm::cast<elements_op>(builder.create(state));
 }
 
 mlir::ParseResult elements_op::parse(mlir::OpAsmParser& parser,
@@ -53,12 +62,19 @@ mlir::LogicalResult elements_op::verify() {
         return emitOpError("requires at least one operand");
     }
 
-    auto elt_type = (*this)->getOperand(0).getType();
+    auto operand_type = (*this)->getOperand(0).getType();
+    auto op_rtt = llvm::dyn_cast<mlir::RankedTensorType>(operand_type);
+    if (!op_rtt || op_rtt.getRank() != 0) {
+        return emitOpError("operands must be rank-0 tensors, got ")
+               << operand_type;
+    }
+    auto elt_type = op_rtt.getElementType();
+
     for (unsigned i = 1; i < num_operands; ++i) {
-        if ((*this)->getOperand(i).getType() != elt_type) {
+        if ((*this)->getOperand(i).getType() != operand_type) {
             return emitOpError("operand ") << i << " type "
                    << (*this)->getOperand(i).getType()
-                   << " != operand 0 type " << elt_type;
+                   << " != operand 0 type " << operand_type;
         }
     }
 
@@ -69,7 +85,7 @@ mlir::LogicalResult elements_op::verify() {
     auto output_rt = llvm::cast<mlir::RankedTensorType>(output_type);
 
     if (elt_type != output_rt.getElementType()) {
-        return emitOpError("operand type ") << elt_type
+        return emitOpError("element type ") << elt_type
                << " != result element type " << output_rt.getElementType();
     }
 

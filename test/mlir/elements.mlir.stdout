@@ -1,10 +1,10 @@
 module {
-  func.func @test_1d(%arg0: f32, %arg1: f32, %arg2: f32) -> tensor<3xf32> {
-    %0 = colgm.elements(%arg0, %arg1, %arg2) {target_shape = [3]} : f32 -> tensor<3xf32>
+  func.func @test_1d(%arg0: tensor<f32>, %arg1: tensor<f32>, %arg2: tensor<f32>) -> tensor<3xf32> {
+    %0 = colgm.elements(%arg0, %arg1, %arg2) {target_shape = [3]} : tensor<f32> -> tensor<3xf32>
     return %0 : tensor<3xf32>
   }
-  func.func @test_2d(%arg0: f64, %arg1: f64, %arg2: f64, %arg3: f64) -> tensor<2x2xf64> {
-    %0 = colgm.elements(%arg0, %arg1, %arg2, %arg3) {target_shape = [2, 2]} : f64 -> tensor<2x2xf64>
+  func.func @test_2d(%arg0: tensor<f64>, %arg1: tensor<f64>, %arg2: tensor<f64>, %arg3: tensor<f64>) -> tensor<2x2xf64> {
+    %0 = colgm.elements(%arg0, %arg1, %arg2, %arg3) {target_shape = [2, 2]} : tensor<f64> -> tensor<2x2xf64>
     return %0 : tensor<2x2xf64>
   }
 }

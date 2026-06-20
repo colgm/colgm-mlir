@@ -1,0 +1,17 @@
+func main() {
+    var tensor = [0, 1, 2, 3]
+    var a = tensor + tensor
+    var b = tensor - tensor
+    var c = tensor / tensor
+    var d = tensor * tensor
+
+    var e = tensor == tensor
+    var f = tensor != tensor
+    var g = tensor > tensor
+    var h = tensor < tensor
+    var i = tensor >= tensor
+    var j = tensor <= tensor
+
+    var k = -tensor
+    return
+}

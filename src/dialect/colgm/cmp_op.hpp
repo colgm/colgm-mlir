@@ -20,6 +20,8 @@ public:
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs, mlir::Type result_type);
+    static cmp_eq_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                            mlir::Value lhs, mlir::Value rhs, mlir::Type result_type);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
@@ -39,6 +41,8 @@ public:
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs, mlir::Type result_type);
+    static cmp_ne_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                            mlir::Value lhs, mlir::Value rhs, mlir::Type result_type);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
@@ -58,6 +62,8 @@ public:
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs, mlir::Type result_type);
+    static cmp_lt_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                            mlir::Value lhs, mlir::Value rhs, mlir::Type result_type);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
@@ -77,6 +83,8 @@ public:
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs, mlir::Type result_type);
+    static cmp_le_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                            mlir::Value lhs, mlir::Value rhs, mlir::Type result_type);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
@@ -96,6 +104,8 @@ public:
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs, mlir::Type result_type);
+    static cmp_gt_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                            mlir::Value lhs, mlir::Value rhs, mlir::Type result_type);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
@@ -115,6 +125,8 @@ public:
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs, mlir::Type result_type);
+    static cmp_ge_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                            mlir::Value lhs, mlir::Value rhs, mlir::Type result_type);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);

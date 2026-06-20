@@ -11,6 +11,13 @@ void add_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
   state.addTypes(lhs.getType()); // SameOperandsAndResultType requires this
 }
 
+add_op add_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                      mlir::Value lhs, mlir::Value rhs) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, lhs, rhs);
+    return llvm::cast<add_op>(builder.create(state));
+}
+
 mlir::ParseResult add_op::parse(mlir::OpAsmParser& parser,
                                 mlir::OperationState& result) {
     mlir::OpAsmParser::UnresolvedOperand lhs, rhs;
@@ -40,6 +47,13 @@ void sub_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                    mlir::Value lhs, mlir::Value rhs) {
   state.addOperands({lhs, rhs});
   state.addTypes(lhs.getType()); // SameOperandsAndResultType requires this
+}
+
+sub_op sub_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                      mlir::Value lhs, mlir::Value rhs) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, lhs, rhs);
+    return llvm::cast<sub_op>(builder.create(state));
 }
 
 mlir::ParseResult sub_op::parse(mlir::OpAsmParser& parser,
@@ -73,6 +87,13 @@ void mul_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
   state.addTypes(lhs.getType()); // SameOperandsAndResultType requires this
 }
 
+mul_op mul_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                      mlir::Value lhs, mlir::Value rhs) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, lhs, rhs);
+    return llvm::cast<mul_op>(builder.create(state));
+}
+
 mlir::ParseResult mul_op::parse(mlir::OpAsmParser& parser,
                                 mlir::OperationState& result) {
     mlir::OpAsmParser::UnresolvedOperand lhs, rhs;
@@ -102,6 +123,13 @@ void div_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                    mlir::Value lhs, mlir::Value rhs) {
   state.addOperands({lhs, rhs});
   state.addTypes(lhs.getType()); // SameOperandsAndResultType requires this
+}
+
+div_op div_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                      mlir::Value lhs, mlir::Value rhs) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, lhs, rhs);
+    return llvm::cast<div_op>(builder.create(state));
 }
 
 mlir::ParseResult div_op::parse(mlir::OpAsmParser& parser,
@@ -144,6 +172,13 @@ void matmul_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
     auto res_type = mlir::RankedTensorType::get(shape, lhs_type.getElementType());
     state.addOperands({lhs, rhs});
     state.addTypes(res_type);
+}
+
+matmul_op matmul_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                            mlir::Value lhs, mlir::Value rhs) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, lhs, rhs);
+    return llvm::cast<matmul_op>(builder.create(state));
 }
 
 mlir::ParseResult matmul_op::parse(mlir::OpAsmParser& parser,

@@ -1,4 +1,4 @@
 test/mlir/elements_bad_case_3.mlir:5:8: error: 'colgm.elements' op target_shape size 1 != output rank 2
-  %0 = colgm.elements(%a, %b, %c, %d) {target_shape = [4]} : f32 -> tensor<2x2xf32>
+  %0 = colgm.elements(%a, %b, %c, %d) {target_shape = [4]} : tensor<f32> -> tensor<2x2xf32>
        ^
-test/mlir/elements_bad_case_3.mlir:5:8: note: see current operation: %0 = "colgm.elements"(%arg0, %arg1, %arg2, %arg3) {target_shape = [4]} : (f32, f32, f32, f32) -> tensor<2x2xf32>
+test/mlir/elements_bad_case_3.mlir:5:8: note: see current operation: %0 = "colgm.elements"(%arg0, %arg1, %arg2, %arg3) {target_shape = [4]} : (tensor<f32>, tensor<f32>, tensor<f32>, tensor<f32>) -> tensor<2x2xf32>

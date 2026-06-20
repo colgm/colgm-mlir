@@ -182,10 +182,19 @@ type sema::resolve_binary_expr(binary_expr* node) {
     auto res = lt;
     switch (node->get_op_type()) {
         case binary_expr::op::cmp_eq:
+        case binary_expr::op::cmp_ne:
         case binary_expr::op::cmp_lt:
         case binary_expr::op::cmp_le:
         case binary_expr::op::cmp_gt:
-        case binary_expr::op::cmp_ge: res = ts.get_bool_type(); break;
+        case binary_expr::op::cmp_ge: {
+            res = ts.get_bool_type();
+            if (type::isa<tensor_type>(lt)) {
+                auto bool_base = type::as<tensor_type>(ts.get_bool_type()).get_element_type();
+                auto ltt = type::as<tensor_type>(lt);
+                res = ts.get_tensor_type(bool_base, ltt.get_shape());
+            }
+            break;
+        }
         default: break;
     }
     node->set_resolved(res);

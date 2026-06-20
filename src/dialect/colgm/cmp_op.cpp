@@ -27,12 +27,17 @@ static mlir::LogicalResult verify_cmp(mlir::Operation* op) {
     return mlir::success();
 }
 
-// ---- cmp_eq_op ----
-
 void cmp_eq_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs, mlir::Type result_type) {
     state.addOperands({lhs, rhs});
     state.addTypes(result_type);
+}
+
+cmp_eq_op cmp_eq_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                            mlir::Value lhs, mlir::Value rhs, mlir::Type result_type) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, lhs, rhs, result_type);
+    return llvm::cast<cmp_eq_op>(builder.create(state));
 }
 
 mlir::ParseResult cmp_eq_op::parse(mlir::OpAsmParser& parser,
@@ -61,12 +66,17 @@ void cmp_eq_op::print(mlir::OpAsmPrinter& p) {
 
 mlir::LogicalResult cmp_eq_op::verify() { return verify_cmp(*this); }
 
-// ---- cmp_ne_op ----
-
 void cmp_ne_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs, mlir::Type result_type) {
     state.addOperands({lhs, rhs});
     state.addTypes(result_type);
+}
+
+cmp_ne_op cmp_ne_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                            mlir::Value lhs, mlir::Value rhs, mlir::Type result_type) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, lhs, rhs, result_type);
+    return llvm::cast<cmp_ne_op>(builder.create(state));
 }
 
 mlir::ParseResult cmp_ne_op::parse(mlir::OpAsmParser& parser,
@@ -95,12 +105,17 @@ void cmp_ne_op::print(mlir::OpAsmPrinter& p) {
 
 mlir::LogicalResult cmp_ne_op::verify() { return verify_cmp(*this); }
 
-// ---- cmp_lt_op ----
-
 void cmp_lt_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs, mlir::Type result_type) {
     state.addOperands({lhs, rhs});
     state.addTypes(result_type);
+}
+
+cmp_lt_op cmp_lt_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                            mlir::Value lhs, mlir::Value rhs, mlir::Type result_type) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, lhs, rhs, result_type);
+    return llvm::cast<cmp_lt_op>(builder.create(state));
 }
 
 mlir::ParseResult cmp_lt_op::parse(mlir::OpAsmParser& parser,
@@ -129,12 +144,17 @@ void cmp_lt_op::print(mlir::OpAsmPrinter& p) {
 
 mlir::LogicalResult cmp_lt_op::verify() { return verify_cmp(*this); }
 
-// ---- cmp_le_op ----
-
 void cmp_le_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs, mlir::Type result_type) {
     state.addOperands({lhs, rhs});
     state.addTypes(result_type);
+}
+
+cmp_le_op cmp_le_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                            mlir::Value lhs, mlir::Value rhs, mlir::Type result_type) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, lhs, rhs, result_type);
+    return llvm::cast<cmp_le_op>(builder.create(state));
 }
 
 mlir::ParseResult cmp_le_op::parse(mlir::OpAsmParser& parser,
@@ -163,12 +183,17 @@ void cmp_le_op::print(mlir::OpAsmPrinter& p) {
 
 mlir::LogicalResult cmp_le_op::verify() { return verify_cmp(*this); }
 
-// ---- cmp_gt_op ----
-
 void cmp_gt_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs, mlir::Type result_type) {
     state.addOperands({lhs, rhs});
     state.addTypes(result_type);
+}
+
+cmp_gt_op cmp_gt_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                            mlir::Value lhs, mlir::Value rhs, mlir::Type result_type) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, lhs, rhs, result_type);
+    return llvm::cast<cmp_gt_op>(builder.create(state));
 }
 
 mlir::ParseResult cmp_gt_op::parse(mlir::OpAsmParser& parser,
@@ -197,12 +222,17 @@ void cmp_gt_op::print(mlir::OpAsmPrinter& p) {
 
 mlir::LogicalResult cmp_gt_op::verify() { return verify_cmp(*this); }
 
-// ---- cmp_ge_op ----
-
 void cmp_ge_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lhs, mlir::Value rhs, mlir::Type result_type) {
     state.addOperands({lhs, rhs});
     state.addTypes(result_type);
+}
+
+cmp_ge_op cmp_ge_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                            mlir::Value lhs, mlir::Value rhs, mlir::Type result_type) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, lhs, rhs, result_type);
+    return llvm::cast<cmp_ge_op>(builder.create(state));
 }
 
 mlir::ParseResult cmp_ge_op::parse(mlir::OpAsmParser& parser,
