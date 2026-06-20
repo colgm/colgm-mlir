@@ -16,15 +16,37 @@ Totally designed manually, documented with DeepSeek.
 
 ### Download LLVM
 
-`script/download_llvm.py` allows you to fetch the package of LLVM.
+Fetch the package of LLVM, `--github` will use the release from GitHub.
+
+```bash
+python3 script/download_llvm.py
+
+python3 script/download_llvm.py --github
+```
 
 ### Build Script
 
-`script/build.py` automatically build all things.
+Use this command to automatically build all things.
+
+```bash
+python3 script/build.py
+```
 
 ### Test
 
-`script/test.py` automatically test all tests listed in `test` directory.
+Use this command automatically test all tests listed in `test` directory.
+
+```bash
+python3 script/test.py
+```
+
+All tests should have `stdout` and `stderr` files, for example:
+
+```bash
+test/test_add.colgm
+test/test_add.colgm.stdout
+test/test_add.colgm.stderr
+```
 
 ## TODO
 

@@ -304,4 +304,3 @@ func main() {
 - **No closures / lambdas** — only top-level named functions
 - **No enums / tagged unions** — just tensors and scalars
 - **No pointers / references** — value semantics only
-- **No `defer`** — plain return-based control flow

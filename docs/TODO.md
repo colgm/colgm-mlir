@@ -61,17 +61,17 @@
   - **ops**: `AddOp`, `SubOp`, `MulOp`, `DivOp`, `NegOp`, `ReluOp`, `ReshapeOp`
   - Each op has a custom assembly format and a verifier
 - [x] Define the `ToyTensorType` wrapper (or reuse MLIR's built-in `TensorType`)
-- [ ] Write the `func` operation for the dialect (or reuse the built-in `func.func`)
-- [ ] Register the dialect with MLIR
+- [x] Write the `func` operation for the dialect (or reuse the built-in `func.func`)
+- [x] Register the dialect with MLIR
 
 ---
 
 ## Phase 5 — AST → MLIR Lowering
 
-- [ ] Write `MLIRGen` visitor class (analogous to Toy tutorial's `MLIRGen`)
-- [ ] Expression lowering: each AST expression node → MLIR `Value` (via op builder)
-- [ ] Statement lowering: var declarations → `tensor_ops.constant` + SSA values
-- [ ] Control flow lowering: `if` / `for` → `scf.if` / `scf.for`
+- [x] Write `MLIRGen` visitor class (analogous to Toy tutorial's `MLIRGen`)
+- [x] Expression lowering: each AST expression node → MLIR `Value` (via op builder)
+- [x] Statement lowering: var declarations → `colgm.constant` + SSA values
+- [ ] Control flow lowering: `if` / `for` → `colgm.if` / `colgm.for`
 - [ ] Function lowering: `func_decl` → `func.func` with body region
 - [ ] Shape propagation: infer result tensor shapes from input shapes
 
@@ -100,20 +100,20 @@
 
 ## Phase 8 — Operators: Batch 1 (element-wise)
 
-- [ ] `add` — element-wise tensor addition (broadcasting not required yet)
-- [ ] `sub` — element-wise tensor subtraction
-- [ ] `mul` — element-wise tensor multiplication
-- [ ] `div` — element-wise tensor division
-- [ ] `neg` — element-wise negation
-- [ ] `relu` — `max(0, x)` element-wise
-- [ ] `sigmoid` — `1 / (1 + exp(-x))` element-wise
-- [ ] `tanh` — element-wise hyperbolic tangent
-- [ ] `exp` — element-wise exponential
-- [ ] `log` — element-wise natural logarithm
-- [ ] `sqrt` — element-wise square root
-- [ ] `abs` — element-wise absolute value
-- [ ] `reshape` — reshape tensor to new dimensions (total elements must match)
-- [ ] `transpose` — permute tensor axes
+- [x] `add` — element-wise tensor addition (broadcasting not required yet)
+- [x] `sub` — element-wise tensor subtraction
+- [x] `mul` — element-wise tensor multiplication
+- [x] `div` — element-wise tensor division
+- [x] `neg` — element-wise negation
+- [x] `relu` — `max(0, x)` element-wise
+- [x] `sigmoid` — `1 / (1 + exp(-x))` element-wise
+- [x] `tanh` — element-wise hyperbolic tangent
+- [x] `exp` — element-wise exponential
+- [x] `log` — element-wise natural logarithm
+- [x] `sqrt` — element-wise square root
+- [x] `abs` — element-wise absolute value
+- [x] `reshape` — reshape tensor to new dimensions (total elements must match)
+- [x] `transpose` — permute tensor axes
 
 ---
 
@@ -123,9 +123,9 @@
 - [ ] `mean` — reduce along specified axis
 - [ ] `max` — reduce along specified axis
 - [ ] `min` — reduce along specified axis
-- [ ] `matmul` — matrix multiplication (2-D only initially)
-- [ ] `broadcast` — broadcast a tensor to a larger shape
-- [ ] `reduce_sum` — reduce along specified axis
+- [x] `matmul` — matrix multiplication (2-D only initially)
+- [x] `broadcast` — broadcast a tensor to a larger shape
+- [x] `reduce_sum` — reduce along specified axis
 
 ---
 

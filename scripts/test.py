@@ -25,14 +25,10 @@ def test_binary() -> tuple[int, int]:
             passed += 1
     return passed, len(tests)
 
-def get_test_suite(dirpath: Path, suffix: str) -> tuple[list[Path], list[Path], list[Path]]:
+def get_test_suite(dirpath: Path, suffix: str) -> list[Path]:
     tests = [f for f in dirpath.rglob(f"**/*.{suffix}")]
-    stdouts = [f for f in dirpath.rglob("**/*.stdout")]
-    stderrs = [f for f in dirpath.rglob("**/*.stderr")]
     tests.sort()
-    stdouts.sort()
-    stderrs.sort()
-    return tests, stdouts, stderrs
+    return tests
 
 def de_color(text: str) -> str:
     color = [
@@ -70,13 +66,19 @@ def check(cmd: list[str], expect_stdout: str, expect_stderr: str) -> bool:
     return True
 
 def test(executable: Path, directory: Path, suffix: str, options: list[str]) -> tuple[int, int]:
-    stage_test, stage_stdout, stage_stderr = get_test_suite(directory, suffix)
+    stage_test = get_test_suite(directory, suffix)
     passed = 0
     for i in range(len(stage_test)):
-        cmd = [str(executable), str(stage_test[i])] + options
-        with open(stage_stdout[i], "r") as f:
+        test_file = stage_test[i]
+        test_file_stdout = Path(str(test_file) + ".stdout")
+        test_file_stderr = Path(str(test_file) + ".stderr")
+        if not test_file_stdout.exists() or not test_file_stderr.exists():
+            print(f"[FAILED] cannot find stdout/stderr file of {test_file}")
+            continue
+        cmd = [str(executable), str(test_file)] + options
+        with open(test_file_stdout, "r") as f:
             stdout = f.read()
-        with open(stage_stderr[i], "r") as f:
+        with open(test_file_stderr, "r") as f:
             stderr = f.read()
         res = check(cmd, stdout, stderr)
         passed += 1 if res else 0
