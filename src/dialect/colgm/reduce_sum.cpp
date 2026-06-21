@@ -6,7 +6,7 @@
 namespace colgm_mlir {
 
 void reduce_sum::build(mlir::OpBuilder& builder, mlir::OperationState& state,
-                       mlir::Value input, mlir::ArrayRef<int64_t> axes) {
+                       mlir::Value input, mlir::ArrayRef<i64> axes) {
     state.addOperands({input});
 
     auto input_type = llvm::cast<mlir::RankedTensorType>(input.getType());
@@ -18,7 +18,7 @@ void reduce_sum::build(mlir::OpBuilder& builder, mlir::OperationState& state,
         reduced.set(static_cast<unsigned>(axis));
     }
 
-    llvm::SmallVector<int64_t> output_shape;
+    llvm::SmallVector<i64> output_shape;
     for (u64 i = 0; i < input_shape.size(); ++i) {
         if (!reduced.test(i)) {
             output_shape.push_back(input_shape[i]);
@@ -106,7 +106,7 @@ mlir::LogicalResult reduce_sum::verify() {
         reduced.set(i);
     }
 
-    llvm::SmallVector<int64_t> expected_shape;
+    llvm::SmallVector<i64> expected_shape;
     for (u64 i = 0; i < input_shape.size(); ++i) {
         if (!reduced.test(i)) {
             expected_shape.push_back(input_shape[i]);

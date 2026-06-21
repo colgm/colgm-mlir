@@ -23,6 +23,7 @@
 #include "dialect/colgm/cmp_op.hpp"
 #include "dialect/colgm/constant_op.hpp"
 #include "dialect/colgm/elements.hpp"
+#include "dialect/colgm/slice.hpp"
 #include "dialect/colgm/unary_op.hpp"
 #include "dialect/colgm/broadcast.hpp"
 #include "dialect/colgm/transpose.hpp"
@@ -92,6 +93,8 @@ private:
     mlir::Value generate_identifier(identifier*);
     mlir::Value generate_binary_expr(binary_expr*);
     mlir::Value generate_unary_expr(unary_expr*);
+    mlir::Value generate_call_expr(call_expr*);
+    mlir::Value generate_index_access(index_access*);
     mlir::Value generate_expr(expr*);
 
 public:

@@ -188,7 +188,8 @@ return_stmt* parser::parse_return_stmt() {
         lookahead(tok::tk_false) ||
         lookahead(tok::tk_add) ||
         lookahead(tok::tk_sub) ||
-        lookahead(tok::tk_lparen)) {
+        lookahead(tok::tk_lparen) ||
+        lookahead(tok::tk_lbracket)) {
         node->set_value(parse_expr());
     }
     update_location(node);

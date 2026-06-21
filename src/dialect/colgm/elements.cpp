@@ -6,7 +6,7 @@
 namespace colgm_mlir {
 
 void elements_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
-                        mlir::ValueRange values, mlir::ArrayRef<int64_t> shape) {
+                        mlir::ValueRange values, mlir::ArrayRef<i64> shape) {
     state.addOperands(values);
 
     auto operand_type = values[0].getType();
@@ -19,7 +19,7 @@ void elements_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
 }
 
 elements_op elements_op::create(mlir::OpBuilder& builder, mlir::Location loc,
-                                mlir::ValueRange values, mlir::ArrayRef<int64_t> shape) {
+                                mlir::ValueRange values, mlir::ArrayRef<i64> shape) {
     mlir::OperationState state(loc, getOperationName());
     build(builder, state, values, shape);
     return llvm::cast<elements_op>(builder.create(state));

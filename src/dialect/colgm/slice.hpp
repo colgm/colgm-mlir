@@ -5,6 +5,8 @@
 #include <mlir/IR/Builders.h>
 #include <mlir/Interfaces/SideEffectInterfaces.h>
 
+#include "utils/type.hpp"
+
 namespace colgm_mlir {
 
 class slice_op: public mlir::Op<slice_op,
@@ -18,12 +20,14 @@ public:
     mlir::Value get_input() { return getOperand(0); }
     mlir::Value get_index() { return getOperand(1); }
 
-    int64_t get_axis() {
+    i64 get_axis() {
         return llvm::cast<mlir::IntegerAttr>((*this)->getAttr("axis")).getInt();
     }
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
-                      mlir::Value input, mlir::Value index, int64_t axis);
+                      mlir::Value input, mlir::Value index, i64 axis);
+    static slice_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                           mlir::Value input, mlir::Value index, i64 axis);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);

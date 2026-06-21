@@ -6,13 +6,13 @@
 namespace colgm_mlir {
 
 void transpose_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
-                         mlir::Value input, mlir::ArrayRef<int64_t> permutation) {
+                         mlir::Value input, mlir::ArrayRef<i64> permutation) {
     state.addOperands({input});
 
     auto input_type = llvm::cast<mlir::RankedTensorType>(input.getType());
     auto input_shape = input_type.getShape();
 
-    llvm::SmallVector<int64_t> output_shape;
+    llvm::SmallVector<i64> output_shape;
     for (auto p : permutation) {
         output_shape.push_back(input_shape[p]);
     }
@@ -83,7 +83,7 @@ mlir::LogicalResult transpose_op::verify() {
     }
 
     auto rank = input_rt.getRank();
-    if (target.size() != static_cast<size_t>(rank)) {
+    if (target.size() != static_cast<usize>(rank)) {
         return emitOpError("permutation size ")
                << target.size() << " != input rank " << rank;
     }

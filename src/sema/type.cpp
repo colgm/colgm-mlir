@@ -9,7 +9,7 @@ std::ostream& operator<<(std::ostream& os, const type& t) {
 
 std::string function_type_impl::to_string() const {
     std::string res = "(";
-    for (size_t i = 0; i < args.size(); i++) {
+    for (usize i = 0; i < args.size(); i++) {
         res += args[i].to_string();
         if (i != args.size() - 1) {
             res += ", ";
@@ -30,8 +30,8 @@ std::string tensor_type_impl::to_string() const {
     return res;
 }
 
-size_t function_key_type_hash::operator()(const function_type_impl::key_type& key) const {
-    size_t hash = 0;
+usize function_key_type_hash::operator()(const function_type_impl::key_type& key) const {
+    usize hash = 0;
     for (const auto& t : std::get<0>(key)) {
         hash ^= std::hash<const void*>{}(t.get_impl()) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
     }
@@ -39,8 +39,8 @@ size_t function_key_type_hash::operator()(const function_type_impl::key_type& ke
     return hash;
 }
 
-size_t tensor_key_type_hash::operator()(const tensor_type_impl::key_type& key) const {
-    size_t hash = std::hash<const void*>{}(std::get<0>(key).get_impl());
+usize tensor_key_type_hash::operator()(const tensor_type_impl::key_type& key) const {
+    usize hash = std::hash<const void*>{}(std::get<0>(key).get_impl());
     for (const auto& t : std::get<1>(key)) {
         hash ^= std::hash<i64>{}(t) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
     }

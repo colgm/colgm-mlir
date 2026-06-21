@@ -6,7 +6,7 @@
 namespace colgm_mlir {
 
 void broadcast_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
-                         mlir::Value input, mlir::ArrayRef<int64_t> shape) {
+                         mlir::Value input, mlir::ArrayRef<i64> shape) {
     state.addOperands({input});
 
     auto input_type = llvm::cast<mlir::RankedTensorType>(input.getType());

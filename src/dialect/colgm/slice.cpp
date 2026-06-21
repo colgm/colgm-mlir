@@ -6,14 +6,14 @@
 namespace colgm_mlir {
 
 void slice_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
-                     mlir::Value input, mlir::Value index, int64_t axis) {
+                     mlir::Value input, mlir::Value index, i64 axis) {
     state.addOperands({input, index});
 
     auto input_type = llvm::cast<mlir::RankedTensorType>(input.getType());
     auto input_shape = input_type.getShape();
 
-    llvm::SmallVector<int64_t> output_shape;
-    for (int64_t i = 0; i < static_cast<int64_t>(input_shape.size()); ++i) {
+    llvm::SmallVector<i64> output_shape;
+    for (i64 i = 0; i < static_cast<i64>(input_shape.size()); ++i) {
         if (i != axis)
             output_shape.push_back(input_shape[i]);
     }
@@ -22,6 +22,13 @@ void slice_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                                                 input_type.getElementType());
     state.addTypes(res_type);
     state.addAttribute("axis", builder.getI64IntegerAttr(axis));
+}
+
+slice_op slice_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                           mlir::Value input, mlir::Value index, i64 axis) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input, index, axis);
+    return llvm::cast<slice_op>(builder.create(state));
 }
 
 mlir::ParseResult slice_op::parse(mlir::OpAsmParser& parser,
@@ -70,8 +77,19 @@ mlir::LogicalResult slice_op::verify() {
     }
 
     auto index_type = get_index().getType();
-    if (!llvm::isa<mlir::IndexType>(index_type)) {
-        return emitOpError("index must be of type index, got ") << index_type;
+    if (auto idx_tensor = llvm::dyn_cast<mlir::RankedTensorType>(index_type)) {
+        if (idx_tensor.getRank() != 0) {
+            return emitOpError("index must be a scalar (rank-0 tensor), got rank ")
+                   << idx_tensor.getRank();
+        }
+        auto et = idx_tensor.getElementType();
+        if (!llvm::isa<mlir::IntegerType>(et)) {
+            return emitOpError("index tensor element type must be integer, got ")
+                   << et;
+        }
+    } else if (!llvm::isa<mlir::IndexType>(index_type)) {
+        return emitOpError("index must be of type index or tensor<i32/i64>, got ")
+               << index_type;
     }
 
     if (!(*this)->hasAttr("axis")) {
@@ -96,12 +114,12 @@ mlir::LogicalResult slice_op::verify() {
                << output_rt.getElementType();
     }
 
-    if (static_cast<int64_t>(output_rt.getRank()) != rank - 1) {
+    if (static_cast<i64>(output_rt.getRank()) != rank - 1) {
         return emitOpError("output rank ") << output_rt.getRank()
                << " != input rank " << rank << " - 1";
     }
 
-    for (int64_t i = 0, j = 0; i < rank; ++i) {
+    for (i64 i = 0, j = 0; i < rank; ++i) {
         if (i == axis) continue;
         if (input_rt.getDimSize(i) != output_rt.getDimSize(j)) {
             return emitOpError("output dim ") << j << " = "

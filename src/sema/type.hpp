@@ -231,11 +231,11 @@ public:
 };
 
 struct function_key_type_hash {
-    size_t operator()(const function_type_impl::key_type& key) const;
+    usize operator()(const function_type_impl::key_type& key) const;
 };
 
 struct tensor_key_type_hash {
-    size_t operator()(const tensor_type_impl::key_type& key) const;
+    usize operator()(const tensor_type_impl::key_type& key) const;
 };
 
 }

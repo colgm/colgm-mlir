@@ -318,7 +318,7 @@ std::string mangle(const std::string& name) {
         suffix = temp.substr(pos);
         temp = temp.substr(0, pos);
     }
-    for (size_t i = 0; i < temp.length(); ++i) {
+    for (usize i = 0; i < temp.length(); ++i) {
         if (temp[i] == ':' && i + 1 < temp.length() && temp[i + 1] == ':') {
             copy += ".";
             i++;

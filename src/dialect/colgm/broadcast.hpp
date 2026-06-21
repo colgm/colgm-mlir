@@ -5,6 +5,8 @@
 #include <mlir/IR/Builders.h>
 #include <mlir/Interfaces/SideEffectInterfaces.h>
 
+#include "utils/type.hpp"
+
 namespace colgm_mlir {
 
 class broadcast_op: public mlir::Op<broadcast_op,
@@ -22,7 +24,7 @@ public:
     }
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
-                      mlir::Value input, mlir::ArrayRef<int64_t> shape);
+                      mlir::Value input, mlir::ArrayRef<i64> shape);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);

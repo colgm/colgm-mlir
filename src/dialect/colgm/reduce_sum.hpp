@@ -5,6 +5,8 @@
 #include <mlir/IR/Builders.h>
 #include <mlir/Interfaces/SideEffectInterfaces.h>
 
+#include "utils/type.hpp"
+
 namespace colgm_mlir {
 
 class reduce_sum: public mlir::Op<reduce_sum,
@@ -22,7 +24,7 @@ public:
     }
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
-                      mlir::Value input, mlir::ArrayRef<int64_t> axes);
+                      mlir::Value input, mlir::ArrayRef<i64> axes);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);

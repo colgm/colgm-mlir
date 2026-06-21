@@ -24,6 +24,11 @@ type sema::resolve_type(type_def* t) {
     if (t->get_dims().empty()) {
         return base;
     }
+
+    if (type::isa<tensor_type>(base)) {
+        auto elem = type::as<tensor_type>(base).get_element_type();
+        return ts.get_tensor_type(elem, t->get_dims());
+    }
     return ts.get_tensor_type(base, t->get_dims());
 }
 
@@ -359,6 +364,12 @@ void sema::resolve_func_block(func_decl* f) {
     func_ret_type = type::as<function_type>(fi.func_type).get_return_type();
     bool func_has_ret = false;
     ctx.new_scope();
+
+    // load parameters
+    for (auto& name: fi.args) {
+        ctx.regist_variable(name, fi.args_types.at(name));
+    }
+
     for (auto node : f->get_body()->get_stmts()) {
         resolve_stmt(node);
         if (node->is(ast_type::return_stmt)) {

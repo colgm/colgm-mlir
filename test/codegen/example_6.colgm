@@ -1,0 +1,15 @@
+func zero_init() -> i64[2, 3] {
+    return [[0, 0, 0], [0, 0, 0]]
+}
+
+func add_mul(a: i64[2, 3], b: i64[2, 3], c: i64[2, 3]) -> i64[2, 3] {
+    return (a + b) * c
+}
+
+func main() {
+    var a = zero_init();
+    var b = [[7, 8, 9], [10, 11, 12]];
+    var c = [[13, 14, 15], [16, 17, 18]];
+
+    var d = add_mul(a, b, c);
+}

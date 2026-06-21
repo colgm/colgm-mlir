@@ -41,6 +41,8 @@ void mlir_generator::flatten_tensor(std::vector<expr*>& v, tensor* n) {
 }
 
 void mlir_generator::generate_func(func_decl* f) {
+    vars.add_scope();
+
     auto func_ty = type::as<function_type>(f->get_resolved());
     llvm::SmallVector<mlir::Type> args;
     for (auto i : func_ty.get_arguments()) {
@@ -60,12 +62,22 @@ void mlir_generator::generate_func(func_decl* f) {
 
     auto* entry = func.addEntryBlock();
     builder.setInsertionPointToStart(entry);
+
+    // load arguments value
+    auto block_args = entry->getArguments();
+    auto& params = f->get_params();
+    for (usize i = 0; i < params.size(); i++) {
+        vars.add_var(params[i]->get_name(), block_args[i]);
+    }
+
     generate_block(entry, f->get_body());
 
     if (entry->empty() || !entry->back().hasTrait<mlir::OpTrait::IsTerminator>()) {
         builder.setInsertionPointToEnd(entry);
         mlir::func::ReturnOp::create(builder, to_loc(f));
     }
+
+    vars.remove_scope();
 }
 
 void mlir_generator::generate_block(mlir::Block* entry, block_stmt* b) {
@@ -153,68 +165,68 @@ mlir::Value mlir_generator::generate_identifier(identifier* i) {
     return vars.get_var(i->get_name());
 }
 
-mlir::Value mlir_generator::generate_binary_expr(binary_expr* e) {
-    auto lhs = generate_expr(e->get_lhs());
-    auto rhs = generate_expr(e->get_rhs());
+mlir::Value mlir_generator::generate_binary_expr(binary_expr* n) {
+    auto lhs = generate_expr(n->get_lhs());
+    auto rhs = generate_expr(n->get_rhs());
 
     
-    switch (e->get_op_type()) {
+    switch (n->get_op_type()) {
         case binary_expr::op::add: {
-            auto op = add_op::create(builder, to_loc(e), lhs, rhs);
+            auto op = add_op::create(builder, to_loc(n), lhs, rhs);
             return op->getResult(0);
         }
         case binary_expr::op::sub: {
-            auto op = sub_op::create(builder, to_loc(e), lhs, rhs);
+            auto op = sub_op::create(builder, to_loc(n), lhs, rhs);
             return op->getResult(0);
         }
         case binary_expr::op::mul: {
-            auto op = mul_op::create(builder, to_loc(e), lhs, rhs);
+            auto op = mul_op::create(builder, to_loc(n), lhs, rhs);
             return op->getResult(0);
         }
         case binary_expr::op::div: {
-            auto op = div_op::create(builder, to_loc(e), lhs, rhs);
+            auto op = div_op::create(builder, to_loc(n), lhs, rhs);
             return op->getResult(0);
         }
         case binary_expr::op::cmp_eq: {
-            auto op = cmp_eq_op::create(builder, to_loc(e), lhs, rhs,
-                                        convert_type(e->get_resolved()));
+            auto op = cmp_eq_op::create(builder, to_loc(n), lhs, rhs,
+                                        convert_type(n->get_resolved()));
             return op->getResult(0);
         }
         case binary_expr::op::cmp_ne: {
-            auto op = cmp_ne_op::create(builder, to_loc(e), lhs, rhs,
-                                        convert_type(e->get_resolved()));
+            auto op = cmp_ne_op::create(builder, to_loc(n), lhs, rhs,
+                                        convert_type(n->get_resolved()));
             return op->getResult(0);
         }
         case binary_expr::op::cmp_lt: {
-            auto op = cmp_lt_op::create(builder, to_loc(e), lhs, rhs,
-                                        convert_type(e->get_resolved()));
+            auto op = cmp_lt_op::create(builder, to_loc(n), lhs, rhs,
+                                        convert_type(n->get_resolved()));
             return op->getResult(0);
         }
         case binary_expr::op::cmp_gt: {
-            auto op = cmp_gt_op::create(builder, to_loc(e), lhs, rhs,
-                                        convert_type(e->get_resolved()));
+            auto op = cmp_gt_op::create(builder, to_loc(n), lhs, rhs,
+                                        convert_type(n->get_resolved()));
             return op->getResult(0);
         }
         case binary_expr::op::cmp_le: {
-            auto op = cmp_le_op::create(builder, to_loc(e), lhs, rhs,
-                                        convert_type(e->get_resolved()));
+            auto op = cmp_le_op::create(builder, to_loc(n), lhs, rhs,
+                                        convert_type(n->get_resolved()));
             return op->getResult(0);
         }
         case binary_expr::op::cmp_ge: {
-            auto op = cmp_ge_op::create(builder, to_loc(e), lhs, rhs,
-                                        convert_type(e->get_resolved()));
+            auto op = cmp_ge_op::create(builder, to_loc(n), lhs, rhs,
+                                        convert_type(n->get_resolved()));
             return op->getResult(0);
         }
     }
     return mlir::Value();
 }
 
-mlir::Value mlir_generator::generate_unary_expr(unary_expr* e) {
-    auto v = generate_expr(e->get_operand());
+mlir::Value mlir_generator::generate_unary_expr(unary_expr* n) {
+    auto v = generate_expr(n->get_operand());
 
-    switch (e->get_op_type()) {
+    switch (n->get_op_type()) {
         case unary_expr::op::sub: {
-            auto op = neg_op::create(builder, to_loc(e), v);
+            auto op = neg_op::create(builder, to_loc(n), v);
             return op->getResult(0);
         }
     }
@@ -222,6 +234,32 @@ mlir::Value mlir_generator::generate_unary_expr(unary_expr* e) {
     return mlir::Value();
 }
 
+mlir::Value mlir_generator::generate_call_expr(call_expr* n) {
+    if (type::isa<unknown_type>(n->get_callee()->get_resolved())) {
+        assert(false && "not implemented");
+    }
+
+    if (!n->get_callee()->is(ast_type::identifier)) {
+        assert(false && "not implemented");
+    }
+
+    llvm::SmallVector<mlir::Value> args;
+    for (auto i : n->get_args()) {
+        args.push_back(generate_expr(i));
+    }
+
+    auto f = static_cast<identifier*>(n->get_callee())->get_name();
+    auto ret_type = convert_type(n->get_resolved());
+    auto call = mlir::func::CallOp::create(builder, to_loc(n), f, { ret_type }, args);
+    return call.getResult(0);
+}
+
+mlir::Value mlir_generator::generate_index_access(index_access* n) {
+    auto target = generate_expr(n->get_target());
+    auto index = generate_expr(n->get_index());
+    auto op = slice_op::create(builder, to_loc(n), target, index, 0);
+    return op->getResult(0);
+}
 mlir::Value mlir_generator::generate_expr(expr* e) {
     if (e->is(ast_type::int_literal)) {
         return generate_int_literal(static_cast<int_literal*>(e));
@@ -238,9 +276,9 @@ mlir::Value mlir_generator::generate_expr(expr* e) {
     } else if (e->is(ast_type::unary_expr)) {
         return generate_unary_expr(static_cast<unary_expr*>(e));
     } else if (e->is(ast_type::call_expr)) {
-
+        return generate_call_expr(static_cast<call_expr*>(e));
     } else if (e->is(ast_type::index_access)) {
-
+        return generate_index_access(static_cast<index_access*>(e));
     } else if (e->is(ast_type::range_expr)) {
 
     } else {
