@@ -16,6 +16,7 @@ const char* token::to_string(tok t) {
         case tok::tk_stct:         return "struct";
         case tok::tk_func:         return "func";
         case tok::tk_ret:          return "return";
+        case tok::tk_yield:        return "yield";
         case tok::tk_if:           return "if";
         case tok::tk_else:         return "else";
         case tok::tk_lparen:       return "(";

@@ -17,6 +17,11 @@ public:
     static llvm::ArrayRef<llvm::StringRef> getAttributeNames() { return {}; }
 
     static void build(mlir::OpBuilder&, mlir::OperationState&) {}
+    static yield_op create(mlir::OpBuilder& builder, mlir::Location loc) {
+        mlir::OperationState state(loc, getOperationName());
+        build(builder, state);
+        return llvm::cast<yield_op>(builder.create(state));
+    }
 
     static mlir::ParseResult parse(mlir::OpAsmParser&, mlir::OperationState&) {
         return mlir::success();

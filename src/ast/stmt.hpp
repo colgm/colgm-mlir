@@ -42,6 +42,18 @@ public:
     auto get_value() const { return value; }
 };
 
+class yield_stmt: public stmt {
+private:
+    expr* value = nullptr;
+
+public:
+    yield_stmt(const span& loc): stmt(ast_type::yield_stmt, loc) {}
+    ~yield_stmt() override;
+    void accept(visitor*) override;
+    void set_value(expr* v) { value = v; }
+    auto get_value() const { return value; }
+};
+
 class if_stmt: public stmt {
 private:
     expr* condition = nullptr;

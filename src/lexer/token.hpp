@@ -20,6 +20,7 @@ enum class tok: u32 {
     tk_stct,         // keyword for struct
     tk_func,         // keyword for definition of function
     tk_ret,          // function keyword return
+    tk_yield,        // keyword yield
     tk_if,           // condition expression keyword if
     tk_else,         // condition expression keyword else
     tk_lparen,       // (

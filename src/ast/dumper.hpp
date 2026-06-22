@@ -68,6 +68,7 @@ private:
 
     bool visit_var_decl(var_decl*) override;
     bool visit_return_stmt(return_stmt*) override;
+    bool visit_yield_stmt(yield_stmt*) override;
     bool visit_if_stmt(if_stmt*) override;
     bool visit_for_stmt(for_stmt*) override;
     bool visit_block_stmt(block_stmt*) override;

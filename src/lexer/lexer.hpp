@@ -33,6 +33,7 @@ private:
         {"struct"  , tok::tk_stct        },
         {"func"    , tok::tk_func        },
         {"return"  , tok::tk_ret         },
+        {"yield"   , tok::tk_yield       },
         {"if"      , tok::tk_if          },
         {"else"    , tok::tk_else        },
         {"("       , tok::tk_lparen      },

@@ -1,0 +1,18 @@
+Error: return statement not allowed in this scope
+  --> test/sema/example_8.colgm:4:9
+  | 
+4 |         return 1
+  |         ^^^^^^^^
+
+Error: return statement not allowed in this scope
+  --> test/sema/example_8.colgm:6:9
+  | 
+6 |         return 2
+  |         ^^^^^^^^
+
+Error: return statement not allowed in this scope
+  --> test/sema/example_8.colgm:8:9
+  | 
+8 |         return 3
+  |         ^^^^^^^^
+

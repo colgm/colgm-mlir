@@ -20,9 +20,10 @@ private:
 
 private:
     type resolve_type(type_def*);
-    void resolve_stmt(stmt*);
+    void resolve_stmt(stmt*, bool);
     void resolve_var_decl(var_decl*);
     void resolve_return_stmt(return_stmt*);
+    void resolve_yield_stmt(yield_stmt*);
     void resolve_if_stmt(if_stmt*);
     void resolve_for_stmt(for_stmt*);
     void resolve_block_stmt(block_stmt*);

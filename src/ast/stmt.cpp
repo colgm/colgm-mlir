@@ -27,6 +27,16 @@ void return_stmt::accept(visitor* v) {
     v->visit_return_stmt(this);
 }
 
+yield_stmt::~yield_stmt() {
+    if (value) {
+        delete value;
+    }
+}
+
+void yield_stmt::accept(visitor* v) {
+    v->visit_yield_stmt(this);
+}
+
 if_stmt::~if_stmt() {
     if (condition) {
         delete condition;

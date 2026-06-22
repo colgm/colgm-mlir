@@ -93,6 +93,44 @@ void mlir_generator::generate_var_decl(mlir::Block* entry, var_decl* v) {
     vars.add_var(v->get_name(), value);
 }
 
+void mlir_generator::generate_if_stmt(mlir::Block* entry, if_stmt* i) {
+    auto cond = generate_expr(i->get_condition());
+
+    auto i1_ty = mlir::IntegerType::get(&ctx, 1);
+    auto cast = cast_op::create(builder, to_loc(i), cond, i1_ty);
+    auto cond_i1 = cast->getResult(0);
+
+    auto op = if_op::create(builder, to_loc(i), cond_i1);
+
+    // then
+    {
+        auto& block = op.get_then_region().front();
+        builder.setInsertionPointToEnd(&block);
+        vars.add_scope();
+        generate_block(&block, i->get_body());
+        if (block.empty() || !block.back().hasTrait<mlir::OpTrait::IsTerminator>()) {
+            yield_op::create(builder, to_loc(i));
+        }
+        vars.remove_scope();
+    }
+
+    if (auto* else_body = i->get_else_body()) {
+        auto& block = op.get_else_region().front();
+        builder.setInsertionPointToEnd(&block);
+        vars.add_scope();
+        generate_block(&block, else_body);
+        if (block.empty() || !block.back().hasTrait<mlir::OpTrait::IsTerminator>()) {
+            yield_op::create(builder, to_loc(i));
+        }
+        vars.remove_scope();
+    }
+
+    builder.setInsertionPointAfter(op);
+}
+
+void mlir_generator::generate_for_stmt(mlir::Block* entry, for_stmt* f) {
+}
+
 void mlir_generator::generate_return_stmt(mlir::Block* entry, return_stmt* r) {
     if (r->get_value()) {
         auto value = generate_expr(r->get_value());
@@ -109,10 +147,12 @@ void mlir_generator::generate_stmt(mlir::Block* entry, stmt* s) {
         generate_var_decl(entry, static_cast<var_decl*>(s));
     } else if (s->is(ast_type::return_stmt)) {
         generate_return_stmt(entry, static_cast<return_stmt*>(s));
+    } else if (s->is(ast_type::yield_stmt)) {
+        // TODO
     } else if (s->is(ast_type::if_stmt)) {
-
+        generate_if_stmt(entry, static_cast<if_stmt*>(s));
     } else if (s->is(ast_type::for_stmt)) {
-
+        generate_for_stmt(entry, static_cast<for_stmt*>(s));
     } else {
         assert(false && "not implemented");
     }

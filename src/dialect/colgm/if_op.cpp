@@ -15,6 +15,13 @@ void if_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
     else_body->emplaceBlock();
 }
 
+if_op if_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                    mlir::Value condition) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, condition);
+    return llvm::cast<if_op>(builder.create(state));
+}
+
 mlir::ParseResult if_op::parse(mlir::OpAsmParser& parser,
                                mlir::OperationState& result) {
     mlir::OpAsmParser::UnresolvedOperand condition;

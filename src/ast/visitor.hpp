@@ -28,6 +28,7 @@ public:
 
     virtual bool visit_var_decl(var_decl*);
     virtual bool visit_return_stmt(return_stmt*);
+    virtual bool visit_yield_stmt(yield_stmt*);
     virtual bool visit_if_stmt(if_stmt*);
     virtual bool visit_for_stmt(for_stmt*);
     virtual bool visit_block_stmt(block_stmt*);

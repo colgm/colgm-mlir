@@ -23,12 +23,15 @@
 #include "dialect/colgm/cmp_op.hpp"
 #include "dialect/colgm/constant_op.hpp"
 #include "dialect/colgm/elements.hpp"
+#include "dialect/colgm/if_op.hpp"
+#include "dialect/colgm/for_op.hpp"
 #include "dialect/colgm/slice.hpp"
 #include "dialect/colgm/unary_op.hpp"
 #include "dialect/colgm/broadcast.hpp"
 #include "dialect/colgm/transpose.hpp"
 #include "dialect/colgm/reduce_sum.hpp"
 #include "dialect/colgm/reshape.hpp"
+#include "dialect/colgm/yield.hpp"
 #include "dialect/dialect.hpp"
 
 namespace colgm_mlir {
@@ -84,6 +87,8 @@ private:
     void generate_func(func_decl*);
     void generate_block(mlir::Block*, block_stmt*);
     void generate_var_decl(mlir::Block*, var_decl*);
+    void generate_if_stmt(mlir::Block*, if_stmt*);
+    void generate_for_stmt(mlir::Block*, for_stmt*);
     void generate_return_stmt(mlir::Block*, return_stmt*);
     void generate_stmt(mlir::Block*, stmt*);
     mlir::Value generate_int_literal(int_literal*);

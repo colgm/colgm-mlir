@@ -24,6 +24,13 @@ void cast_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
     state.addTypes(result_type);
 }
 
+cast_op cast_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                        mlir::Value input, mlir::Type result_type) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input, result_type);
+    return llvm::cast<cast_op>(builder.create(state));
+}
+
 mlir::ParseResult cast_op::parse(mlir::OpAsmParser& parser,
                                   mlir::OperationState& result) {
     mlir::OpAsmParser::UnresolvedOperand input;

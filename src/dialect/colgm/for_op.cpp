@@ -13,6 +13,13 @@ void for_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
   block.addArgument(builder.getIndexType(), builder.getUnknownLoc());
 }
 
+for_op for_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                      mlir::Value lower_bound, mlir::Value upper_bound) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, lower_bound, upper_bound);
+    return llvm::cast<for_op>(builder.create(state));
+}
+
 mlir::ParseResult for_op::parse(mlir::OpAsmParser& parser,
                                 mlir::OperationState& result) {
     mlir::OpAsmParser::UnresolvedOperand lower_bound, upper_bound;

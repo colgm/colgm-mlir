@@ -153,6 +153,18 @@ bool dumper::visit_return_stmt(return_stmt* node) {
     return true;
 }
 
+bool dumper::visit_yield_stmt(yield_stmt* node) {
+    dump_indent();
+    std::cout << purple << "YieldStmt" << reset << format_info(node);
+    push_indent();
+    if (node->get_value()) {
+        set_last();
+        node->get_value()->accept(this);
+    }
+    pop_indent();
+    return true;
+}
+
 bool dumper::visit_if_stmt(if_stmt* node) {
     dump_indent();
     std::cout << purple << "IfStmt" << reset << format_info(node);

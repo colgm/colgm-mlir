@@ -118,6 +118,13 @@ bool visitor::visit_return_stmt(return_stmt* n) {
     return true;
 }
 
+bool visitor::visit_yield_stmt(yield_stmt* n) {
+    if (n->get_value()) {
+        n->get_value()->accept(this);
+    }
+    return true;
+}
+
 bool visitor::visit_if_stmt(if_stmt* n) {
     if (n->get_condition()) {
         n->get_condition()->accept(this);

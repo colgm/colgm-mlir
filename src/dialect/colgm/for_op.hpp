@@ -27,6 +27,8 @@ public:
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value lower_bound, mlir::Value upper_bound);
+    static for_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                         mlir::Value lower_bound, mlir::Value upper_bound);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);

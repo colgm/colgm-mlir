@@ -52,6 +52,7 @@ private:
     if_stmt* parse_if_stmt();
     for_stmt* parse_for_stmt();
     return_stmt* parse_return_stmt();
+    yield_stmt* parse_yield_stmt();
     stmt* parse_stmt();
     int_literal* parse_int_literal();
     float_literal* parse_float_literal();

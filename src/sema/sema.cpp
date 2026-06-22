@@ -32,13 +32,20 @@ type sema::resolve_type(type_def* t) {
     return ts.get_tensor_type(base, t->get_dims());
 }
 
-void sema::resolve_stmt(stmt* node) {
+void sema::resolve_stmt(stmt* node, bool allow_return) {
     switch (node->get_ast_type()) {
         case ast_type::var_decl:
             resolve_var_decl(static_cast<var_decl*>(node));
             break;
         case ast_type::return_stmt:
+            if (!allow_return) {
+                err.err(node->get_location(), "return statement not allowed in this scope");
+                return;
+            }
             resolve_return_stmt(static_cast<return_stmt*>(node));
+            break;
+        case ast_type::yield_stmt:
+            resolve_yield_stmt(static_cast<yield_stmt*>(node));
             break;
         case ast_type::if_stmt:
             resolve_if_stmt(static_cast<if_stmt*>(node));
@@ -76,6 +83,16 @@ void sema::resolve_return_stmt(return_stmt* node) {
     }
 }
 
+void sema::resolve_yield_stmt(yield_stmt* node) {
+    if (!node->get_value()) {
+        err.err(node->get_location(), "yield statement must have a value");
+        return;
+    }
+
+    auto t = resolve_expr(node->get_value());
+    node->set_resolved(t);
+}
+
 void sema::resolve_if_stmt(if_stmt* node) {
     auto t = resolve_expr(node->get_condition());
     if (t != ts.get_bool_type()) {
@@ -109,7 +126,7 @@ void sema::resolve_for_stmt(for_stmt* node) {
 void sema::resolve_block_stmt(block_stmt* node) {
     ctx.new_scope();
     for (auto node: node->get_stmts()) {
-        resolve_stmt(node);
+        resolve_stmt(node, false);
     }
     ctx.pop_scope();
 }
@@ -371,7 +388,7 @@ void sema::resolve_func_block(func_decl* f) {
     }
 
     for (auto node : f->get_body()->get_stmts()) {
-        resolve_stmt(node);
+        resolve_stmt(node, true);
         if (node->is(ast_type::return_stmt)) {
             func_has_ret = true;
         }

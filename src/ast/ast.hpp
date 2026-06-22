@@ -23,6 +23,7 @@ enum class ast_type {
     // statement
     var_decl,
     return_stmt,
+    yield_stmt,
     if_stmt,
     for_stmt,
     block_stmt,
@@ -75,6 +76,7 @@ class range_expr;
 
 class var_decl;
 class return_stmt;
+class yield_stmt;
 class if_stmt;
 class for_stmt;
 class block_stmt;
