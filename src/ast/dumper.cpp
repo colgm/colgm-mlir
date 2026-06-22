@@ -130,6 +130,41 @@ bool dumper::visit_range_expr(range_expr* node) {
     return true;
 }
 
+bool dumper::visit_if_expr(if_expr* node) {
+    dump_indent();
+    std::cout << purple << "IfExpr" << reset << format_info(node);
+    push_indent();
+    node->get_condition()->accept(this);
+    if (!node->get_else_body()) {
+        set_last();
+    }
+    node->get_body()->accept(this);
+    if (node->get_else_body()) {
+        set_last();
+        dump_indent();
+        std::cout << purple << "ElseExpr" << reset;
+        std::cout << format_info(node->get_else_body());
+        push_indent();
+        set_last();
+        node->get_else_body()->accept(this);
+        pop_indent();
+    }
+    pop_indent();
+    return true;
+}
+
+bool dumper::visit_for_expr(for_expr* node) {
+    dump_indent();
+    std::cout << purple << "ForExpr " << reset;
+    std::cout << node->get_iter() << format_info(node);
+    push_indent();
+    node->get_range()->accept(this);
+    set_last();
+    node->get_body()->accept(this);
+    pop_indent();
+    return true;
+}
+
 bool dumper::visit_var_decl(var_decl* node) {
     dump_indent();
     std::cout << purple << "VarDecl " << reset;
@@ -165,37 +200,12 @@ bool dumper::visit_yield_stmt(yield_stmt* node) {
     return true;
 }
 
-bool dumper::visit_if_stmt(if_stmt* node) {
+bool dumper::visit_expr_stmt(expr_stmt* node) {
     dump_indent();
-    std::cout << purple << "IfStmt" << reset << format_info(node);
+    std::cout << purple << "ExprStmt" << reset << format_info(node);
     push_indent();
-    node->get_condition()->accept(this);
-    if (!node->get_else_body()) {
-        set_last();
-    }
-    node->get_body()->accept(this);
-    if (node->get_else_body()) {
-        set_last();
-        dump_indent();
-        std::cout << purple << "ElseStmt" << reset;
-        std::cout << format_info(node->get_else_body());
-        push_indent();
-        set_last();
-        node->get_else_body()->accept(this);
-        pop_indent();
-    }
-    pop_indent();
-    return true;
-}
-
-bool dumper::visit_for_stmt(for_stmt* node) {
-    dump_indent();
-    std::cout << purple << "ForStmt " << reset;
-    std::cout << node->get_iter() << format_info(node);
-    push_indent();
-    node->get_range()->accept(this);
     set_last();
-    node->get_body()->accept(this);
+    node->get_inner()->accept(this);
     pop_indent();
     return true;
 }

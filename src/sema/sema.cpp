@@ -2,6 +2,24 @@
 
 namespace colgm_mlir {
 
+bool sema::block_contains_return(block_stmt* node) {
+    for (auto i : node->get_stmts()) {
+        if (i->is(ast_type::return_stmt)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+yield_stmt* sema::find_yield(block_stmt* node) {
+    for (auto i : node->get_stmts()) {
+        if (i->is(ast_type::yield_stmt)) {
+            return static_cast<yield_stmt*>(i);
+        }
+    }
+    return nullptr;
+}
+
 type sema::resolve_type(type_def* t) {
     type base = ts.get_void_type();
     if (t->get_base() == "i32") {
@@ -47,11 +65,8 @@ void sema::resolve_stmt(stmt* node, bool allow_return) {
         case ast_type::yield_stmt:
             resolve_yield_stmt(static_cast<yield_stmt*>(node));
             break;
-        case ast_type::if_stmt:
-            resolve_if_stmt(static_cast<if_stmt*>(node));
-            break;
-        case ast_type::for_stmt:
-            resolve_for_stmt(static_cast<for_stmt*>(node));
+        case ast_type::expr_stmt:
+            resolve_expr_stmt(static_cast<expr_stmt*>(node));
             break;
         case ast_type::block_stmt:
             resolve_block_stmt(static_cast<block_stmt*>(node));
@@ -85,7 +100,7 @@ void sema::resolve_return_stmt(return_stmt* node) {
 
 void sema::resolve_yield_stmt(yield_stmt* node) {
     if (!node->get_value()) {
-        err.err(node->get_location(), "yield statement must have a value");
+        err.err(node->get_location(), "yield statement must have value");
         return;
     }
 
@@ -93,34 +108,11 @@ void sema::resolve_yield_stmt(yield_stmt* node) {
     node->set_resolved(t);
 }
 
-void sema::resolve_if_stmt(if_stmt* node) {
-    auto t = resolve_expr(node->get_condition());
-    if (t != ts.get_bool_type()) {
-        err.err(
-            node->get_condition()->get_location(),
-            "condition type must be bool"
-        );
-    }
-
-    resolve_block_stmt(node->get_body());
-    if (node->get_else_body()) {
-        resolve_block_stmt(node->get_else_body());
-    }
-}
-
-void sema::resolve_for_stmt(for_stmt* node) {
-    auto rt = resolve_range_expr(node->get_range());
-    if (rt != ts.get_i32_type() && rt != ts.get_i64_type()) {
-        err.err(node->get_location(),
-            "iterator type must be tensor<int> but get '" + rt.to_string() + "'"
-        );
-    }
-
-    ctx.new_scope();
-    ctx.regist_variable(node->get_iter(), rt);
-    node->set_resolved(rt);
-    resolve_block_stmt(node->get_body());
-    ctx.pop_scope();
+void sema::resolve_expr_stmt(expr_stmt* node) {
+    auto e = node->get_inner();
+    if (!e) return;
+    resolve_expr(e);
+    node->set_resolved(e->get_resolved());
 }
 
 void sema::resolve_block_stmt(block_stmt* node) {
@@ -318,6 +310,92 @@ type sema::resolve_range_expr(range_expr* node) {
     return lt;
 }
 
+type sema::resolve_if_expr(if_expr* node) {
+    auto t = resolve_expr(node->get_condition());
+    if (t != ts.get_bool_type()) {
+        err.err(
+            node->get_condition()->get_location(),
+            "condition type must be bool"
+        );
+    }
+
+    resolve_block_stmt(node->get_body());
+    if (block_contains_return(node->get_body())) {
+        err.err(node->get_location(),
+            "cannot return in if expression",
+            "maybe you mean 'yield'?"
+        );
+    }
+    auto if_yield = find_yield(node->get_body());
+    if (!if_yield) {
+        err.err(node->get_location(),
+            "expect yield in if expression"
+        );
+    } else {
+        node->set_resolved(if_yield->get_resolved());
+        node->get_body()->set_resolved(if_yield->get_resolved());
+    }
+
+    if (node->get_else_body()) {
+        resolve_block_stmt(node->get_else_body());
+        if (block_contains_return(node->get_else_body())) {
+            err.err(node->get_location(),
+                "cannot return in if expression",
+                "maybe you mean 'yield'?"
+            );
+        }
+        auto else_yield = find_yield(node->get_else_body());
+        if (!else_yield) {
+            err.err(node->get_location(),
+                "expect yield in if expression"
+            );
+        } else {
+            node->get_else_body()->set_resolved(else_yield->get_resolved());
+        }
+
+        if (if_yield && else_yield &&
+            else_yield->get_resolved() != if_yield->get_resolved()) {
+            err.err(node->get_location(),
+                "different yield types in if-else expression"
+            );
+        }
+    }
+
+    return node->get_resolved();
+}
+
+type sema::resolve_for_expr(for_expr* node) {
+    auto rt = resolve_range_expr(node->get_range());
+    if (rt != ts.get_i32_type() && rt != ts.get_i64_type()) {
+        err.err(node->get_location(),
+            "iterator type must be tensor<int> but get '" + rt.to_string() + "'"
+        );
+    }
+
+    ctx.new_scope();
+    ctx.regist_variable(node->get_iter(), rt);
+    node->set_resolved(rt);
+    resolve_block_stmt(node->get_body());
+    if (block_contains_return(node->get_body())) {
+        err.err(node->get_location(),
+            "cannot return in for expression",
+            "maybe you mean 'yield'?"
+        );
+    }
+
+    auto yield_node = find_yield(node->get_body());
+    if (!yield_node) {
+        err.err(node->get_location(),
+            "expect yield in for expression"
+        );
+    } else {
+        node->set_resolved(yield_node->get_resolved());
+    }
+    ctx.pop_scope();
+
+    return node->get_resolved();
+}
+
 type sema::resolve_expr(expr* node) {
     switch (node->get_ast_type()) {
         case ast_type::int_literal:
@@ -340,6 +418,10 @@ type sema::resolve_expr(expr* node) {
             return resolve_index_access(static_cast<index_access*>(node));
         case ast_type::range_expr:
             return resolve_range_expr(static_cast<range_expr*>(node));
+        case ast_type::if_expr:
+            return resolve_if_expr(static_cast<if_expr*>(node));
+        case ast_type::for_expr:
+            return resolve_for_expr(static_cast<for_expr*>(node));
         default:
             assert(false && "unsupported ast type");
             break;
@@ -379,7 +461,6 @@ void sema::resolve_func_decl(func_decl* f) {
 void sema::resolve_func_block(func_decl* f) {
     const auto& fi = ctx.get_functions().at(f->get_name());
     func_ret_type = type::as<function_type>(fi.func_type).get_return_type();
-    bool func_has_ret = false;
     ctx.new_scope();
 
     // load parameters
@@ -389,12 +470,12 @@ void sema::resolve_func_block(func_decl* f) {
 
     for (auto node : f->get_body()->get_stmts()) {
         resolve_stmt(node, true);
-        if (node->is(ast_type::return_stmt)) {
-            func_has_ret = true;
-        }
     }
-    if (!func_has_ret && func_ret_type != ts.get_void_type()) {
-        err.err(f->get_location(), "function '" + f->get_name() + "' does not return a value");
+
+    if (!block_contains_return(f->get_body()) && func_ret_type != ts.get_void_type()) {
+        err.err(f->get_location(),
+            "function '" + f->get_name() + "' does not return value"
+        );
     }
     ctx.pop_scope();
 }

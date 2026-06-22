@@ -1,0 +1,9 @@
+test/mlir/if_bad_case_3.mlir:3:8: error: 'colgm.if' op branches yield different number of values: 1 vs 0
+  %0 = colgm.if %cond -> tensor<f32> {
+       ^
+test/mlir/if_bad_case_3.mlir:3:8: note: see current operation: 
+%0 = "colgm.if"(%arg0) ({
+  "colgm.yield"(%arg1) : (tensor<f32>) -> ()
+}, {
+  "colgm.yield"() : () -> ()
+}) : (i1) -> tensor<f32>

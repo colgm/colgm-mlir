@@ -1,8 +1,9 @@
 Root -> test/parse/example_3.colgm:1:1
 `--FuncDecl main -> test/parse/example_3.colgm:1:1
    `--BlockStmt -> test/parse/example_3.colgm:1:13
-      `--ForStmt i -> test/parse/example_3.colgm:2:5
-         |--RangeExpr -> test/parse/example_3.colgm:2:14
-         |  |--IntLiteral 0 -> test/parse/example_3.colgm:2:14
-         |  `--IntLiteral 10 -> test/parse/example_3.colgm:2:17
-         `--BlockStmt -> test/parse/example_3.colgm:2:20
+      `--ExprStmt -> test/parse/example_3.colgm:3:1
+         `--ForExpr i -> test/parse/example_3.colgm:2:5
+            |--RangeExpr -> test/parse/example_3.colgm:2:14
+            |  |--IntLiteral 0 -> test/parse/example_3.colgm:2:14
+            |  `--IntLiteral 10 -> test/parse/example_3.colgm:2:17
+            `--BlockStmt -> test/parse/example_3.colgm:2:20

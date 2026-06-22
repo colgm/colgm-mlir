@@ -176,4 +176,40 @@ public:
     auto get_end() const { return end; }
 };
 
+class if_expr: public expr {
+private:
+    expr* condition = nullptr;
+    block_stmt* body = nullptr;
+    block_stmt* else_body = nullptr;
+
+public:
+    if_expr(const span& loc): expr(ast_type::if_expr, loc) {}
+    ~if_expr() override;
+    void accept(visitor*) override;
+    void set_condition(expr* c) { condition = c; }
+    auto get_condition() const { return condition; }
+    void set_body(block_stmt* b) { body = b; }
+    auto get_body() const { return body; }
+    void set_else_body(block_stmt* b) { else_body = b; }
+    auto get_else_body() const { return else_body; }
+};
+
+class for_expr: public expr {
+private:
+    std::string iter;
+    range_expr* range = nullptr;
+    block_stmt* body = nullptr;
+
+public:
+    for_expr(const span& loc): expr(ast_type::for_expr, loc) {}
+    ~for_expr() override;
+    void accept(visitor*) override;
+    void set_iter(const std::string& i) { iter = i; }
+    const auto& get_iter() const { return iter; }
+    void set_range(range_expr* r) { range = r; }
+    auto get_range() const { return range; }
+    void set_body(block_stmt* b) { body = b; }
+    auto get_body() const { return body; }
+};
+
 }

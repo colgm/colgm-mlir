@@ -49,10 +49,11 @@ private:
     func_decl* parse_func_decl();
     block_stmt* parse_block();
     var_decl* parse_var_decl();
-    if_stmt* parse_if_stmt();
-    for_stmt* parse_for_stmt();
+    if_expr* parse_if_expr();
+    for_expr* parse_for_expr();
     return_stmt* parse_return_stmt();
     yield_stmt* parse_yield_stmt();
+    expr_stmt* parse_expr_stmt();
     stmt* parse_stmt();
     int_literal* parse_int_literal();
     float_literal* parse_float_literal();

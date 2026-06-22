@@ -87,9 +87,9 @@ private:
     void generate_func(func_decl*);
     void generate_block(mlir::Block*, block_stmt*);
     void generate_var_decl(mlir::Block*, var_decl*);
-    void generate_if_stmt(mlir::Block*, if_stmt*);
-    void generate_for_stmt(mlir::Block*, for_stmt*);
     void generate_return_stmt(mlir::Block*, return_stmt*);
+    void generate_yield_stmt(mlir::Block*, yield_stmt*);
+    void generate_expr_stmt(mlir::Block*, expr_stmt*);
     void generate_stmt(mlir::Block*, stmt*);
     mlir::Value generate_int_literal(int_literal*);
     mlir::Value generate_float_literal(float_literal*);
@@ -100,6 +100,8 @@ private:
     mlir::Value generate_unary_expr(unary_expr*);
     mlir::Value generate_call_expr(call_expr*);
     mlir::Value generate_index_access(index_access*);
+    mlir::Value generate_if_expr(if_expr*);
+    mlir::Value generate_for_expr(for_expr*);
     mlir::Value generate_expr(expr*);
 
 public:

@@ -196,7 +196,7 @@ func main() {
 ### if / else
 
 ```rs
-if x == y {
+var a = if x == y {
     // ...
 } else {
     // ...
@@ -206,7 +206,7 @@ if x == y {
 No `elsif` keyword. Nested `if` / `else` only:
 
 ```rs
-if a {
+var x = if a {
     // ...
 } else if b {
     // ...
@@ -227,11 +227,13 @@ for i in 0..N {
 }
 ```
 
-### return
+### return/yield
 
 ```rs
 return expr
 return                       // for void functions
+
+var a = if x == y { yield x } else { yield y }
 ```
 
 ---

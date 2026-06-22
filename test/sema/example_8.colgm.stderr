@@ -4,15 +4,88 @@ Error: return statement not allowed in this scope
 4 |         return 1
   |         ^^^^^^^^
 
+Error: cannot return in if expression
+  --> test/sema/example_8.colgm:3:5
+  | 
+3 |     if (a == 1) {
+  |     ^^^^^^^^^^^^^^
+  | ...
+  | 
+9 |     }
+  | ^^^^^
+ note: maybe you mean 'yield'?
+
+Error: expect yield in if expression
+  --> test/sema/example_8.colgm:3:5
+  | 
+3 |     if (a == 1) {
+  |     ^^^^^^^^^^^^^^
+  | ...
+  | 
+9 |     }
+  | ^^^^^
+
 Error: return statement not allowed in this scope
   --> test/sema/example_8.colgm:6:9
   | 
 6 |         return 2
   |         ^^^^^^^^
 
+Error: cannot return in if expression
+  --> test/sema/example_8.colgm:5:12
+  | 
+5 |     } else if (a == 2) {
+  |            ^^^^^^^^^^^^^^
+  | ...
+  | 
+9 |     }
+  | ^^^^^
+ note: maybe you mean 'yield'?
+
+Error: expect yield in if expression
+  --> test/sema/example_8.colgm:5:12
+  | 
+5 |     } else if (a == 2) {
+  |            ^^^^^^^^^^^^^^
+  | ...
+  | 
+9 |     }
+  | ^^^^^
+
 Error: return statement not allowed in this scope
   --> test/sema/example_8.colgm:8:9
   | 
 8 |         return 3
   |         ^^^^^^^^
+
+Error: cannot return in if expression
+  --> test/sema/example_8.colgm:5:12
+  | 
+5 |     } else if (a == 2) {
+  |            ^^^^^^^^^^^^^^
+  | ...
+  | 
+9 |     }
+  | ^^^^^
+ note: maybe you mean 'yield'?
+
+Error: expect yield in if expression
+  --> test/sema/example_8.colgm:5:12
+  | 
+5 |     } else if (a == 2) {
+  |            ^^^^^^^^^^^^^^
+  | ...
+  | 
+9 |     }
+  | ^^^^^
+
+Error: expect yield in if expression
+  --> test/sema/example_8.colgm:3:5
+  | 
+3 |     if (a == 1) {
+  |     ^^^^^^^^^^^^^^
+  | ...
+  | 
+9 |     }
+  | ^^^^^
 

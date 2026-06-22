@@ -1,0 +1,9 @@
+func main() -> i64 {
+    var a = [0, 1, 2, 3];
+    var d = if a[0] > 0 {
+        yield -1
+    } else {
+        yield 0
+    }
+    return d
+}

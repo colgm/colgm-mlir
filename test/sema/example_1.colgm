@@ -6,5 +6,6 @@ func main() {
 
     for i in 0..2 {
         var e = relu(c[i])
+        yield e
     }
 }

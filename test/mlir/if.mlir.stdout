@@ -38,5 +38,23 @@ module {
     }
     return
   }
+  func.func @if_with_result(%arg0: i1, %arg1: tensor<f32>, %arg2: tensor<f32>) -> tensor<f32> {
+    %0 = colgm.if %arg0 -> tensor<f32> {
+      colgm.yield %arg1 : tensor<f32>
+    } else {
+      colgm.yield %arg2 : tensor<f32>
+    }
+    return %0 : tensor<f32>
+  }
+  func.func @if_result_with_ops(%arg0: i1, %arg1: tensor<f32>, %arg2: tensor<f32>) -> tensor<f32> {
+    %0 = colgm.if %arg0 -> tensor<f32> {
+      %1 = colgm.add %arg1, %arg2 : tensor<f32>
+      colgm.yield %1 : tensor<f32>
+    } else {
+      %1 = colgm.sub %arg1, %arg2 : tensor<f32>
+      colgm.yield %1 : tensor<f32>
+    }
+    return %0 : tensor<f32>
+  }
 }
 

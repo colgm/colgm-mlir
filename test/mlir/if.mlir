@@ -43,3 +43,25 @@ func.func @if_nested(%x: i1, %y: i1) {
   }
   func.return
 }
+
+// if with result (then/else)
+func.func @if_with_result(%cond: i1, %a: tensor<f32>, %b: tensor<f32>) -> tensor<f32> {
+  %0 = colgm.if %cond -> tensor<f32> {
+    colgm.yield %a : tensor<f32>
+  } else {
+    colgm.yield %b : tensor<f32>
+  }
+  func.return %0 : tensor<f32>
+}
+
+// if with result, nested blocks
+func.func @if_result_with_ops(%cond: i1, %x: tensor<f32>, %y: tensor<f32>) -> tensor<f32> {
+  %0 = colgm.if %cond -> tensor<f32> {
+    %1 = colgm.add %x, %y : tensor<f32>
+    colgm.yield %1 : tensor<f32>
+  } else {
+    %2 = colgm.sub %x, %y : tensor<f32>
+    colgm.yield %2 : tensor<f32>
+  }
+  func.return %0 : tensor<f32>
+}

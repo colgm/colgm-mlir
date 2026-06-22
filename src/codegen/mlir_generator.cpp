@@ -93,42 +93,10 @@ void mlir_generator::generate_var_decl(mlir::Block* entry, var_decl* v) {
     vars.add_var(v->get_name(), value);
 }
 
-void mlir_generator::generate_if_stmt(mlir::Block* entry, if_stmt* i) {
-    auto cond = generate_expr(i->get_condition());
-
-    auto i1_ty = mlir::IntegerType::get(&ctx, 1);
-    auto cast = cast_op::create(builder, to_loc(i), cond, i1_ty);
-    auto cond_i1 = cast->getResult(0);
-
-    auto op = if_op::create(builder, to_loc(i), cond_i1);
-
-    // then
-    {
-        auto& block = op.get_then_region().front();
-        builder.setInsertionPointToEnd(&block);
-        vars.add_scope();
-        generate_block(&block, i->get_body());
-        if (block.empty() || !block.back().hasTrait<mlir::OpTrait::IsTerminator>()) {
-            yield_op::create(builder, to_loc(i));
-        }
-        vars.remove_scope();
-    }
-
-    if (auto* else_body = i->get_else_body()) {
-        auto& block = op.get_else_region().front();
-        builder.setInsertionPointToEnd(&block);
-        vars.add_scope();
-        generate_block(&block, else_body);
-        if (block.empty() || !block.back().hasTrait<mlir::OpTrait::IsTerminator>()) {
-            yield_op::create(builder, to_loc(i));
-        }
-        vars.remove_scope();
-    }
-
-    builder.setInsertionPointAfter(op);
-}
-
-void mlir_generator::generate_for_stmt(mlir::Block* entry, for_stmt* f) {
+void mlir_generator::generate_expr_stmt(mlir::Block* entry, expr_stmt* s) {
+    auto inner = s->get_inner();
+    if (!inner) return;
+    generate_expr(inner);
 }
 
 void mlir_generator::generate_return_stmt(mlir::Block* entry, return_stmt* r) {
@@ -140,6 +108,11 @@ void mlir_generator::generate_return_stmt(mlir::Block* entry, return_stmt* r) {
     }
 }
 
+void mlir_generator::generate_yield_stmt(mlir::Block* entry, yield_stmt* y) {
+    auto value = generate_expr(y->get_value());
+    yield_op::create(builder, to_loc(y), value);
+}
+
 void mlir_generator::generate_stmt(mlir::Block* entry, stmt* s) {
     if (s->is(ast_type::block_stmt)) {
         generate_block(entry, static_cast<block_stmt*>(s));
@@ -148,11 +121,9 @@ void mlir_generator::generate_stmt(mlir::Block* entry, stmt* s) {
     } else if (s->is(ast_type::return_stmt)) {
         generate_return_stmt(entry, static_cast<return_stmt*>(s));
     } else if (s->is(ast_type::yield_stmt)) {
-        // TODO
-    } else if (s->is(ast_type::if_stmt)) {
-        generate_if_stmt(entry, static_cast<if_stmt*>(s));
-    } else if (s->is(ast_type::for_stmt)) {
-        generate_for_stmt(entry, static_cast<for_stmt*>(s));
+        generate_yield_stmt(entry, static_cast<yield_stmt*>(s));
+    } else if (s->is(ast_type::expr_stmt)) {
+        generate_expr_stmt(entry, static_cast<expr_stmt*>(s));
     } else {
         assert(false && "not implemented");
     }
@@ -209,7 +180,6 @@ mlir::Value mlir_generator::generate_binary_expr(binary_expr* n) {
     auto lhs = generate_expr(n->get_lhs());
     auto rhs = generate_expr(n->get_rhs());
 
-    
     switch (n->get_op_type()) {
         case binary_expr::op::add: {
             auto op = add_op::create(builder, to_loc(n), lhs, rhs);
@@ -300,6 +270,49 @@ mlir::Value mlir_generator::generate_index_access(index_access* n) {
     auto op = slice_op::create(builder, to_loc(n), target, index, 0);
     return op->getResult(0);
 }
+
+mlir::Value mlir_generator::generate_if_expr(if_expr* i) {
+    auto cond = generate_expr(i->get_condition());
+
+    auto i1_ty = mlir::IntegerType::get(&ctx, 1);
+    auto cast = cast_op::create(builder, to_loc(i), cond, i1_ty);
+    auto cond_i1 = cast->getResult(0);
+
+    auto result_type = convert_type(i->get_resolved());
+    auto op = if_op::create(builder, to_loc(i), cond_i1, result_type);
+
+    // then
+    {
+        auto& block = op.get_then_region().front();
+        builder.setInsertionPointToEnd(&block);
+        vars.add_scope();
+        generate_block(&block, i->get_body());
+        if (block.empty() || !block.back().hasTrait<mlir::OpTrait::IsTerminator>()) {
+            yield_op::create(builder, to_loc(i));
+        }
+        vars.remove_scope();
+    }
+
+    if (auto* else_body = i->get_else_body()) {
+        auto& block = op.get_else_region().front();
+        builder.setInsertionPointToEnd(&block);
+        vars.add_scope();
+        generate_block(&block, else_body);
+        if (block.empty() || !block.back().hasTrait<mlir::OpTrait::IsTerminator>()) {
+            yield_op::create(builder, to_loc(i));
+        }
+        vars.remove_scope();
+    }
+
+    builder.setInsertionPointAfter(op);
+
+    return op.getResult(0);
+}
+
+mlir::Value mlir_generator::generate_for_expr(for_expr* f) {
+    // TODO
+    return mlir::Value();
+}
 mlir::Value mlir_generator::generate_expr(expr* e) {
     if (e->is(ast_type::int_literal)) {
         return generate_int_literal(static_cast<int_literal*>(e));
@@ -321,6 +334,10 @@ mlir::Value mlir_generator::generate_expr(expr* e) {
         return generate_index_access(static_cast<index_access*>(e));
     } else if (e->is(ast_type::range_expr)) {
 
+    } else if (e->is(ast_type::if_expr)) {
+        return generate_if_expr(static_cast<if_expr*>(e));
+    } else if (e->is(ast_type::for_expr)) {
+        return generate_for_expr(static_cast<for_expr*>(e));
     } else {
         assert(false && "not implemented");
     }

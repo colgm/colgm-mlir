@@ -65,12 +65,13 @@ private:
     bool visit_call_expr(call_expr*) override;
     bool visit_index_access(index_access*) override;
     bool visit_range_expr(range_expr*) override;
+    bool visit_if_expr(if_expr*) override;
+    bool visit_for_expr(for_expr*) override;
 
     bool visit_var_decl(var_decl*) override;
     bool visit_return_stmt(return_stmt*) override;
     bool visit_yield_stmt(yield_stmt*) override;
-    bool visit_if_stmt(if_stmt*) override;
-    bool visit_for_stmt(for_stmt*) override;
+    bool visit_expr_stmt(expr_stmt*) override;
     bool visit_block_stmt(block_stmt*) override;
 
     bool visit_func_decl(func_decl*) override;

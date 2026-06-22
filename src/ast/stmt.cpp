@@ -37,33 +37,14 @@ void yield_stmt::accept(visitor* v) {
     v->visit_yield_stmt(this);
 }
 
-if_stmt::~if_stmt() {
-    if (condition) {
-        delete condition;
-    }
-    if (body) {
-        delete body;
-    }
-    if (else_body) {
-        delete else_body;
+expr_stmt::~expr_stmt() {
+    if (inner) {
+        delete inner;
     }
 }
 
-void if_stmt::accept(visitor* v) {
-    v->visit_if_stmt(this);
-}
-
-for_stmt::~for_stmt() {
-    if (range) {
-        delete range;
-    }
-    if (body) {
-        delete body;
-    }
-}
-
-void for_stmt::accept(visitor* v) {
-    v->visit_for_stmt(this);
+void expr_stmt::accept(visitor* v) {
+    v->visit_expr_stmt(this);
 }
 
 block_stmt::~block_stmt() {

@@ -104,6 +104,29 @@ bool visitor::visit_range_expr(range_expr* n) {
     return true;
 }
 
+bool visitor::visit_if_expr(if_expr* n) {
+    if (n->get_condition()) {
+        n->get_condition()->accept(this);
+    }
+    if (n->get_body()) {
+        n->get_body()->accept(this);
+    }
+    if (n->get_else_body()) {
+        n->get_else_body()->accept(this);
+    }
+    return true;
+}
+
+bool visitor::visit_for_expr(for_expr* n) {
+    if (n->get_range()) {
+        n->get_range()->accept(this);
+    }
+    if (n->get_body()) {
+        n->get_body()->accept(this);
+    }
+    return true;
+}
+
 bool visitor::visit_var_decl(var_decl* n) {
     if (n->get_init()) {
         n->get_init()->accept(this);
@@ -125,25 +148,9 @@ bool visitor::visit_yield_stmt(yield_stmt* n) {
     return true;
 }
 
-bool visitor::visit_if_stmt(if_stmt* n) {
-    if (n->get_condition()) {
-        n->get_condition()->accept(this);
-    }
-    if (n->get_body()) {
-        n->get_body()->accept(this);
-    }
-    if (n->get_else_body()) {
-        n->get_else_body()->accept(this);
-    }
-    return true;
-}
-
-bool visitor::visit_for_stmt(for_stmt* n) {
-    if (n->get_range()) {
-        n->get_range()->accept(this);
-    }
-    if (n->get_body()) {
-        n->get_body()->accept(this);
+bool visitor::visit_expr_stmt(expr_stmt* n) {
+    if (n->get_inner()) {
+        n->get_inner()->accept(this);
     }
     return true;
 }

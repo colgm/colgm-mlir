@@ -19,13 +19,16 @@ private:
     type func_ret_type;
 
 private:
+    bool block_contains_return(block_stmt*);
+    yield_stmt* find_yield(block_stmt*);
+
+private:
     type resolve_type(type_def*);
     void resolve_stmt(stmt*, bool);
     void resolve_var_decl(var_decl*);
     void resolve_return_stmt(return_stmt*);
     void resolve_yield_stmt(yield_stmt*);
-    void resolve_if_stmt(if_stmt*);
-    void resolve_for_stmt(for_stmt*);
+    void resolve_expr_stmt(expr_stmt*);
     void resolve_block_stmt(block_stmt*);
     type resolve_int_literal(int_literal*);
     type resolve_float_literal(float_literal*);
@@ -37,6 +40,8 @@ private:
     type resolve_call_expr(call_expr*);
     type resolve_index_access(index_access*);
     type resolve_range_expr(range_expr*);
+    type resolve_if_expr(if_expr*);
+    type resolve_for_expr(for_expr*);
     type resolve_expr(expr*);
     void resolve_func_decl(func_decl*);
     void resolve_func_block(func_decl*);

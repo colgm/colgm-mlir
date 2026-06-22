@@ -98,4 +98,33 @@ void range_expr::accept(visitor* v) {
     v->visit_range_expr(this);
 }
 
+if_expr::~if_expr() {
+    if (condition) {
+        delete condition;
+    }
+    if (body) {
+        delete body;
+    }
+    if (else_body) {
+        delete else_body;
+    }
+}
+
+void if_expr::accept(visitor* v) {
+    v->visit_if_expr(this);
+}
+
+for_expr::~for_expr() {
+    if (range) {
+        delete range;
+    }
+    if (body) {
+        delete body;
+    }
+}
+
+void for_expr::accept(visitor* v) {
+    v->visit_for_expr(this);
+}
+
 }

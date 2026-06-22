@@ -20,12 +20,13 @@ enum class ast_type {
     call_expr,
     index_access,
     range_expr,
+    if_expr,
+    for_expr,
     // statement
     var_decl,
     return_stmt,
     yield_stmt,
-    if_stmt,
-    for_stmt,
+    expr_stmt,
     block_stmt,
     // declaration
     func_decl,
@@ -73,12 +74,13 @@ class unary_expr;
 class call_expr;
 class index_access;
 class range_expr;
+class if_expr;
+class for_expr;
 
 class var_decl;
 class return_stmt;
 class yield_stmt;
-class if_stmt;
-class for_stmt;
+class expr_stmt;
 class block_stmt;
 
 class func_decl;

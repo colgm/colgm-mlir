@@ -17,3 +17,11 @@ func.func @for_with_body(%lb: index, %ub: index, %a: tensor<f32>, %b: tensor<f32
   }
   func.return
 }
+
+// for with result
+func.func @for_with_result(%lb: index, %ub: index, %a: tensor<f32>) -> tensor<f32> {
+  %0 = colgm.for %i = %lb to %ub -> tensor<f32> {
+    colgm.yield %a : tensor<f32>
+  }
+  func.return %0 : tensor<f32>
+}

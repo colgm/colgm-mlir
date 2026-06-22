@@ -1,0 +1,8 @@
+test/mlir/for_bad_case_3.mlir:3:8: error: 'colgm.for' op yield has no value but op has 1 results
+  %0 = colgm.for %i = %lb to %ub -> tensor<f32> {
+       ^
+test/mlir/for_bad_case_3.mlir:3:8: note: see current operation: 
+%0 = "colgm.for"(%arg0, %arg1) ({
+^bb0(%arg2: index):
+  "colgm.yield"() : () -> ()
+}) : (index, index) -> tensor<f32>

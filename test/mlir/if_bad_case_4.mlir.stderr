@@ -1,0 +1,9 @@
+test/mlir/if_bad_case_4.mlir:3:8: error: 'colgm.if' op else branch yield type 'tensor<i64>' does not match result type 'tensor<f32>'
+  %0 = colgm.if %cond -> tensor<f32> {
+       ^
+test/mlir/if_bad_case_4.mlir:3:8: note: see current operation: 
+%0 = "colgm.if"(%arg0) ({
+  "colgm.yield"(%arg1) : (tensor<f32>) -> ()
+}, {
+  "colgm.yield"(%arg2) : (tensor<i64>) -> ()
+}) : (i1) -> tensor<f32>

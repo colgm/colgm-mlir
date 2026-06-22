@@ -124,10 +124,8 @@ block_stmt* parser::parse_block() {
 stmt* parser::parse_stmt() {
     if (lookahead(tok::tk_var)) {
         return parse_var_decl();
-    } else if (lookahead(tok::tk_if)) {
-        return parse_if_stmt();
-    } else if (lookahead(tok::tk_for)) {
-        return parse_for_stmt();
+    } else if (lookahead(tok::tk_if) || lookahead(tok::tk_for)) {
+        return parse_expr_stmt();
     } else if (lookahead(tok::tk_ret)) {
         return parse_return_stmt();
     } else if (lookahead(tok::tk_yield)) {
@@ -152,8 +150,8 @@ var_decl* parser::parse_var_decl() {
     return node;
 }
 
-if_stmt* parser::parse_if_stmt() {
-    auto node = new if_stmt(tokens[ptr].loc);
+if_expr* parser::parse_if_expr() {
+    auto node = new if_expr(tokens[ptr].loc);
     match(tok::tk_if);
     node->set_condition(parse_expr());
     node->set_body(parse_block());
@@ -165,14 +163,27 @@ if_stmt* parser::parse_if_stmt() {
     return node;
 }
 
-for_stmt* parser::parse_for_stmt() {
-    auto node = new for_stmt(tokens[ptr].loc);
+for_expr* parser::parse_for_expr() {
+    auto node = new for_expr(tokens[ptr].loc);
     match(tok::tk_for);
     node->set_iter(tokens[ptr].str);
     match(tok::tk_id);
     match(tok::tk_in);
     node->set_range(parse_range_expr());
     node->set_body(parse_block());
+    update_location(node);
+    return node;
+}
+
+expr_stmt* parser::parse_expr_stmt() {
+    expr* inner = nullptr;
+    if (lookahead(tok::tk_if)) {
+        inner = parse_if_expr();
+    } else if (lookahead(tok::tk_for)) {
+        inner = parse_for_expr();
+    }
+    auto node = new expr_stmt(tokens[ptr].loc);
+    node->set_inner(inner);
     update_location(node);
     return node;
 }
@@ -307,6 +318,10 @@ expr* parser::parse_value() {
         return node;
     } else if (lookahead(tok::tk_sub)) {
         return parse_unary_operator();
+    } else if (lookahead(tok::tk_if)) {
+        return parse_if_expr();
+    } else if (lookahead(tok::tk_for)) {
+        return parse_for_expr();
     }
 
     err.err(tokens[ptr].loc, "Expected a value");

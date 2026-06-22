@@ -11,7 +11,7 @@ namespace colgm_mlir {
 
 class for_op: public mlir::Op<for_op,
                               mlir::OpTrait::NOperands<2>::Impl,
-                              mlir::OpTrait::ZeroResults,
+                              mlir::OpTrait::VariadicResults,
                               mlir::OpTrait::SingleBlockImplicitTerminator<yield_op>::Impl> {
 public:
     using Op::Op;
@@ -26,9 +26,11 @@ public:
     }
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
-                      mlir::Value lower_bound, mlir::Value upper_bound);
+                      mlir::Value lower_bound, mlir::Value upper_bound,
+                      mlir::Type result_type = {});
     static for_op create(mlir::OpBuilder& builder, mlir::Location loc,
-                         mlir::Value lower_bound, mlir::Value upper_bound);
+                         mlir::Value lower_bound, mlir::Value upper_bound,
+                         mlir::Type result_type = {});
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);

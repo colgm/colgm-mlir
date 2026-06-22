@@ -25,12 +25,13 @@ public:
     virtual bool visit_call_expr(call_expr*);
     virtual bool visit_index_access(index_access*);
     virtual bool visit_range_expr(range_expr*);
+    virtual bool visit_if_expr(if_expr*);
+    virtual bool visit_for_expr(for_expr*);
 
     virtual bool visit_var_decl(var_decl*);
     virtual bool visit_return_stmt(return_stmt*);
     virtual bool visit_yield_stmt(yield_stmt*);
-    virtual bool visit_if_stmt(if_stmt*);
-    virtual bool visit_for_stmt(for_stmt*);
+    virtual bool visit_expr_stmt(expr_stmt*);
     virtual bool visit_block_stmt(block_stmt*);
 
     virtual bool visit_func_decl(func_decl*);
