@@ -76,6 +76,30 @@ mlir::LogicalResult cast_op::verify() {
         return mlir::success();
     }
 
+    if (src_tensor && !dst_tensor) {
+        if (src_tensor.getRank() != 0) {
+            return emitOpError("only rank-0 tensor can be cast to scalar, got rank ")
+                   << src_tensor.getRank();
+        }
+        if (!is_valid_cast(src_tensor.getElementType(), dst)) {
+            return emitOpError("cannot cast tensor element type from ")
+                   << src_tensor.getElementType() << " to " << dst;
+        }
+        return mlir::success();
+    }
+
+    if (!src_tensor && dst_tensor) {
+        if (dst_tensor.getRank() != 0) {
+            return emitOpError("scalar can only be cast to rank-0 tensor, got rank ")
+                   << dst_tensor.getRank();
+        }
+        if (!is_valid_cast(src, dst_tensor.getElementType())) {
+            return emitOpError("cannot cast scalar to tensor element type ")
+                   << dst_tensor.getElementType();
+        }
+        return mlir::success();
+    }
+
     return emitOpError("cannot cast between scalar and tensor type");
 }
 

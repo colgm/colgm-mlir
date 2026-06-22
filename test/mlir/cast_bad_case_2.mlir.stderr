@@ -1,4 +1,4 @@
-test/mlir/cast_bad_case_2.mlir:5:8: error: 'colgm.cast' op cannot cast between scalar and tensor type
+test/mlir/cast_bad_case_2.mlir:5:8: error: 'colgm.cast' op cannot cast scalar to tensor element type 'f32'
   %0 = colgm.cast %arg : i64 -> tensor<f32>
        ^
 test/mlir/cast_bad_case_2.mlir:5:8: note: see current operation: %0 = "colgm.cast"(%arg0) : (i64) -> tensor<f32>
