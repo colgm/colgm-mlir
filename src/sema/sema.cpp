@@ -80,6 +80,10 @@ void sema::resolve_stmt(stmt* node, bool allow_return) {
 void sema::resolve_var_decl(var_decl* node) {
     auto ty = resolve_expr(node->get_init());
     node->set_resolved(ty);
+
+    if (ty == ts.get_void_type()) {
+        err.err(node->get_location(), "variable must have type");
+    }
     ctx.regist_variable(node->get_name(), ty);
 }
 
@@ -328,9 +332,8 @@ type sema::resolve_if_expr(if_expr* node) {
     }
     auto if_yield = find_yield(node->get_body());
     if (!if_yield) {
-        err.err(node->get_location(),
-            "expect yield in if expression"
-        );
+        node->set_resolved(ts.get_void_type());
+        node->get_body()->set_resolved(ts.get_void_type());
     } else {
         node->set_resolved(if_yield->get_resolved());
         node->get_body()->set_resolved(if_yield->get_resolved());
@@ -346,9 +349,7 @@ type sema::resolve_if_expr(if_expr* node) {
         }
         auto else_yield = find_yield(node->get_else_body());
         if (!else_yield) {
-            err.err(node->get_location(),
-                "expect yield in if expression"
-            );
+            node->set_resolved(ts.get_void_type());
         } else {
             node->get_else_body()->set_resolved(else_yield->get_resolved());
         }
@@ -385,11 +386,11 @@ type sema::resolve_for_expr(for_expr* node) {
 
     auto yield_node = find_yield(node->get_body());
     if (!yield_node) {
-        err.err(node->get_location(),
-            "expect yield in for expression"
-        );
+        node->set_resolved(ts.get_void_type());
+        node->get_body()->set_resolved(ts.get_void_type());
     } else {
         node->set_resolved(yield_node->get_resolved());
+        node->get_body()->set_resolved(yield_node->get_resolved());
     }
     ctx.pop_scope();
 

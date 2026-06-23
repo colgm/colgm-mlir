@@ -1,0 +1,10 @@
+Error: variable must have type
+  --> test/sema/example_9.colgm:3:5
+  | 
+3 |     var a = if x == 1 {
+  |     ^^^^^^^^^^^^^^^^^^^^
+  | ...
+  | 
+7 |     }
+  | ^^^^^
+

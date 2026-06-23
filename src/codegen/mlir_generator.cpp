@@ -306,6 +306,11 @@ mlir::Value mlir_generator::generate_if_expr(if_expr* i) {
 
     builder.setInsertionPointAfter(op);
 
+    // if if_expr returns void, there's no result
+    if (op.getNumResults() == 0) {
+        return mlir::Value();
+    }
+
     return op.getResult(0);
 }
 

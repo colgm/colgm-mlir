@@ -1,0 +1,23 @@
+module {
+  func.func @main() {
+    %0 = colgm.constant dense<1> : tensor<i64> loc(#loc1)
+    %1 = colgm.constant dense<1> : tensor<i64> loc(#loc2)
+    %2 = colgm.cmp_eq %0, %1 : tensor<i64> -> tensor<i1> loc(#loc3)
+    %3 = colgm.cast %2 : tensor<i1> -> i1 loc(#loc4)
+    colgm.if %3 {
+      %4 = colgm.constant dense<2> : tensor<i64> loc(#loc5)
+      colgm.yield loc(#loc4)
+    } else {
+      %4 = colgm.constant dense<3> : tensor<i64> loc(#loc6)
+      colgm.yield loc(#loc4)
+    } loc(#loc4)
+    return loc(#loc)
+  } loc(#loc)
+} loc(#loc)
+#loc = loc("test/codegen/example_8.colgm":1:1)
+#loc1 = loc("test/codegen/example_8.colgm":2:13)
+#loc2 = loc("test/codegen/example_8.colgm":3:13)
+#loc3 = loc("test/codegen/example_8.colgm":3:10)
+#loc4 = loc("test/codegen/example_8.colgm":3:5)
+#loc5 = loc("test/codegen/example_8.colgm":4:17)
+#loc6 = loc("test/codegen/example_8.colgm":6:17)
