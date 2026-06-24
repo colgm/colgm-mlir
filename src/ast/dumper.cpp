@@ -159,6 +159,24 @@ bool dumper::visit_for_expr(for_expr* node) {
     std::cout << node->get_iter() << format_info(node);
     push_indent();
     node->get_range()->accept(this);
+    if (!node->get_init_pairs().empty()) {
+        dump_indent();
+        std::cout << purple << "InitPairs" << reset << "\n";
+        push_indent();
+        for (auto i : node->get_init_pairs()) {
+            if (i == node->get_init_pairs().back()) {
+                set_last();
+            }
+            dump_indent();
+            std::cout << purple << "InitPair " << reset;
+            std::cout << green << std::get<0>(i) << reset << "\n";
+            push_indent();
+            set_last();
+            std::get<1>(i)->accept(this);
+            pop_indent();
+        }
+        pop_indent();
+    }
     set_last();
     node->get_body()->accept(this);
     pop_indent();

@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <tuple>
 #include <optional>
 
 namespace colgm_mlir {
@@ -200,6 +201,8 @@ private:
     range_expr* range = nullptr;
     block_stmt* body = nullptr;
 
+    std::vector<std::tuple<std::string, expr*>> init_pairs;
+
 public:
     for_expr(const span& loc): expr(ast_type::for_expr, loc) {}
     ~for_expr() override;
@@ -208,6 +211,10 @@ public:
     const auto& get_iter() const { return iter; }
     void set_range(range_expr* r) { range = r; }
     auto get_range() const { return range; }
+    void add_init_pair(const std::string& k, expr* v) {
+        init_pairs.emplace_back(k, v);
+    }
+    const auto& get_init_pairs() const { return init_pairs; }
     void set_body(block_stmt* b) { body = b; }
     auto get_body() const { return body; }
 };

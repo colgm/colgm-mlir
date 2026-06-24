@@ -12,6 +12,7 @@ const char* token::to_string(tok t) {
         case tok::tk_use:          return "use";
         case tok::tk_for:          return "for";
         case tok::tk_in:           return "in";
+        case tok::tk_init:         return "init";
         case tok::tk_var:          return "var";
         case tok::tk_stct:         return "struct";
         case tok::tk_func:         return "func";

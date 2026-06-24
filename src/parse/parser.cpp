@@ -170,6 +170,23 @@ for_expr* parser::parse_for_expr() {
     match(tok::tk_id);
     match(tok::tk_in);
     node->set_range(parse_range_expr());
+    if (lookahead(tok::tk_init)) {
+        match(tok::tk_init);
+        match(tok::tk_lparen);
+
+        while (!lookahead(tok::tk_rparen)) {
+            const auto& name = tokens[ptr].str;
+            match(tok::tk_id);
+            match(tok::tk_eq);
+            node->add_init_pair(name, parse_expr());
+            if (lookahead(tok::tk_comma)) {
+                match(tok::tk_comma);
+            } else if (lookahead(tok::tk_rparen)) {
+                break;
+            }
+        }
+        match(tok::tk_rparen);
+    }
     node->set_body(parse_block());
     update_location(node);
     return node;

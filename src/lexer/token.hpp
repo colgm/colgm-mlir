@@ -16,6 +16,7 @@ enum class tok: u32 {
     tk_use,          // keyword use
     tk_for,          // loop keyword for
     tk_in,           // loop keyword in
+    tk_init,         // keyword init
     tk_var,          // keyword for definition
     tk_stct,         // keyword for struct
     tk_func,         // keyword for definition of function

@@ -376,6 +376,12 @@ type sema::resolve_for_expr(for_expr* node) {
     ctx.new_scope();
     ctx.regist_variable(node->get_iter(), rt);
     node->set_resolved(rt);
+
+    for (const auto& i : node->get_init_pairs()) {
+        auto t = resolve_expr(std::get<1>(i));
+        ctx.regist_variable(std::get<0>(i), t);
+    }
+
     resolve_block_stmt(node->get_body());
     if (block_contains_return(node->get_body())) {
         err.err(node->get_location(),

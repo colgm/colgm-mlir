@@ -29,6 +29,7 @@ private:
         {"false"   , tok::tk_false       },
         {"for"     , tok::tk_for         },
         {"in"      , tok::tk_in          },
+        {"init"    , tok::tk_init        },
         {"var"     , tok::tk_var         },
         {"struct"  , tok::tk_stct        },
         {"func"    , tok::tk_func        },

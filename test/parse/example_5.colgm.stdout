@@ -1,0 +1,28 @@
+Root -> test/parse/example_5.colgm:1:1
+`--FuncDecl main -> test/parse/example_5.colgm:1:1
+   `--BlockStmt -> test/parse/example_5.colgm:1:13
+      `--VarDecl a -> test/parse/example_5.colgm:2:5
+         `--ForExpr i -> test/parse/example_5.colgm:2:13
+            |--RangeExpr -> test/parse/example_5.colgm:2:22
+            |  |--IntLiteral 0 -> test/parse/example_5.colgm:2:22
+            |  `--IntLiteral 10 -> test/parse/example_5.colgm:2:25
+            |--InitPairs
+            |  |--InitPair acc
+            |  |  `--IntLiteral 0 -> test/parse/example_5.colgm:2:39
+            |  |--InitPair foo
+            |  |  `--BinaryExpr - -> test/parse/example_5.colgm:2:54
+            |  |     |--BinaryExpr + -> test/parse/example_5.colgm:2:50
+            |  |     |  |--IntLiteral 1 -> test/parse/example_5.colgm:2:48
+            |  |     |  `--IntLiteral 1 -> test/parse/example_5.colgm:2:52
+            |  |     `--IntLiteral 1 -> test/parse/example_5.colgm:2:56
+            |  `--InitPair bar
+            |     `--BinaryExpr - -> test/parse/example_5.colgm:2:71
+            |        |--BinaryExpr * -> test/parse/example_5.colgm:2:67
+            |        |  |--IntLiteral 2 -> test/parse/example_5.colgm:2:65
+            |        |  `--IntLiteral 2 -> test/parse/example_5.colgm:2:69
+            |        `--IntLiteral 2 -> test/parse/example_5.colgm:2:73
+            `--BlockStmt -> test/parse/example_5.colgm:2:76
+               `--VarDecl b -> test/parse/example_5.colgm:3:9
+                  `--BinaryExpr + -> test/parse/example_5.colgm:3:21
+                     |--identifier acc -> test/parse/example_5.colgm:3:17
+                     `--identifier i -> test/parse/example_5.colgm:3:23

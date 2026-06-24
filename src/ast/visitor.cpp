@@ -121,6 +121,9 @@ bool visitor::visit_for_expr(for_expr* n) {
     if (n->get_range()) {
         n->get_range()->accept(this);
     }
+    for (const auto& i : n->get_init_pairs()) {
+        std::get<1>(i)->accept(this);
+    }
     if (n->get_body()) {
         n->get_body()->accept(this);
     }

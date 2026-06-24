@@ -118,6 +118,12 @@ for_expr::~for_expr() {
     if (range) {
         delete range;
     }
+    for (const auto& i : init_pairs) {
+        auto v = std::get<1>(i);
+        if (v) {
+            delete v;
+        }
+    }
     if (body) {
         delete body;
     }
