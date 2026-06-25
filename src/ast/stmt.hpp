@@ -44,14 +44,14 @@ public:
 
 class yield_stmt: public stmt {
 private:
-    expr* value = nullptr;
+    std::vector<expr*> values;
 
 public:
     yield_stmt(const span& loc): stmt(ast_type::yield_stmt, loc) {}
     ~yield_stmt() override;
     void accept(visitor*) override;
-    void set_value(expr* v) { value = v; }
-    auto get_value() const { return value; }
+    void add_value(expr* v) { values.push_back(v); }
+    const auto& get_values() const { return values; }
 };
 
 class expr_stmt: public stmt {

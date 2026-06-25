@@ -28,8 +28,10 @@ void return_stmt::accept(visitor* v) {
 }
 
 yield_stmt::~yield_stmt() {
-    if (value) {
-        delete value;
+    for (auto i : values) {
+        if (i) {
+            delete i;
+        }
     }
 }
 

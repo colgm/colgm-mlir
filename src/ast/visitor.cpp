@@ -145,8 +145,8 @@ bool visitor::visit_return_stmt(return_stmt* n) {
 }
 
 bool visitor::visit_yield_stmt(yield_stmt* n) {
-    if (n->get_value()) {
-        n->get_value()->accept(this);
+    for (auto i : n->get_values()) {
+        i->accept(this);
     }
     return true;
 }

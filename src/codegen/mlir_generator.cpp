@@ -109,8 +109,11 @@ void mlir_generator::generate_return_stmt(mlir::Block* entry, return_stmt* r) {
 }
 
 void mlir_generator::generate_yield_stmt(mlir::Block* entry, yield_stmt* y) {
-    auto value = generate_expr(y->get_value());
-    yield_op::create(builder, to_loc(y), value);
+    llvm::SmallVector<mlir::Value> elems;
+    for (auto i : y->get_values()) {
+        elems.push_back(generate_expr(i));
+    }
+    yield_op::create(builder, to_loc(y), elems);
 }
 
 void mlir_generator::generate_stmt(mlir::Block* entry, stmt* s) {

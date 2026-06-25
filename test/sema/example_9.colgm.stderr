@@ -1,4 +1,4 @@
-Error: variable must have type
+Error: variable must have type but get void type
   --> test/sema/example_9.colgm:3:5
   | 
 3 |     var a = if x == 1 {

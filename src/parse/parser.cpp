@@ -233,7 +233,7 @@ yield_stmt* parser::parse_yield_stmt() {
         return node;
     }
 
-    if (lookahead(tok::tk_id) ||
+    while (lookahead(tok::tk_id) ||
         lookahead(tok::tk_num) ||
         lookahead(tok::tk_true) ||
         lookahead(tok::tk_false) ||
@@ -241,7 +241,12 @@ yield_stmt* parser::parse_yield_stmt() {
         lookahead(tok::tk_sub) ||
         lookahead(tok::tk_lparen) ||
         lookahead(tok::tk_lbracket)) {
-        node->set_value(parse_expr());
+        node->add_value(parse_expr());
+        if (lookahead(tok::tk_comma)) {
+            match(tok::tk_comma);
+        } else if (lookahead(tok::tk_semi) || this_token_in_next_line()) {
+            break;
+        }
     }
     update_location(node);
     return node;

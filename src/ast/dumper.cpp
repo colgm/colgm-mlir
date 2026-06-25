@@ -210,9 +210,11 @@ bool dumper::visit_yield_stmt(yield_stmt* node) {
     dump_indent();
     std::cout << purple << "YieldStmt" << reset << format_info(node);
     push_indent();
-    if (node->get_value()) {
-        set_last();
-        node->get_value()->accept(this);
+    for (auto i : node->get_values()) {
+        if (i == node->get_values().back()) {
+            set_last();
+        }
+        i->accept(this);
     }
     pop_indent();
     return true;

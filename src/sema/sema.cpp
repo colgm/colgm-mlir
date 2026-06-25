@@ -79,10 +79,21 @@ void sema::resolve_stmt(stmt* node, bool allow_return) {
 
 void sema::resolve_var_decl(var_decl* node) {
     auto ty = resolve_expr(node->get_init());
+    if (type::isa<tuple_type>(ty)) {
+        auto tup = type::as<tuple_type>(ty);
+        // TODO: should support multiple yields
+        if (tup.get_types().size() != 1) {
+            err.err(node->get_location(), "tuple type must have one element");
+            ty = ts.get_unknown_type();
+        } else {
+            ty = tup.get_types().front();
+        }
+    }
+
     node->set_resolved(ty);
 
     if (ty == ts.get_void_type()) {
-        err.err(node->get_location(), "variable must have type");
+        err.err(node->get_location(), "variable must have type but get void type");
     }
     ctx.regist_variable(node->get_name(), ty);
 }
@@ -103,13 +114,19 @@ void sema::resolve_return_stmt(return_stmt* node) {
 }
 
 void sema::resolve_yield_stmt(yield_stmt* node) {
-    if (!node->get_value()) {
+    if (node->get_values().empty()) {
         err.err(node->get_location(), "yield statement must have value");
         return;
     }
 
-    auto t = resolve_expr(node->get_value());
-    node->set_resolved(t);
+    std::vector<type> values;
+    for (auto i : node->get_values()) {
+        auto t = resolve_expr(i);
+        values.push_back(t);
+    }
+
+    auto res = ts.get_tuple_type(values);
+    node->set_resolved(res);
 }
 
 void sema::resolve_expr_stmt(expr_stmt* node) {
@@ -335,8 +352,10 @@ type sema::resolve_if_expr(if_expr* node) {
         node->set_resolved(ts.get_void_type());
         node->get_body()->set_resolved(ts.get_void_type());
     } else {
-        node->set_resolved(if_yield->get_resolved());
-        node->get_body()->set_resolved(if_yield->get_resolved());
+        // TODO: if should support multiple yields
+        auto tup = type::as<tuple_type>(if_yield->get_resolved());
+        node->set_resolved(tup.get_types().front());
+        node->get_body()->set_resolved(tup.get_types().front());
     }
 
     if (node->get_else_body()) {
@@ -351,7 +370,9 @@ type sema::resolve_if_expr(if_expr* node) {
         if (!else_yield) {
             node->set_resolved(ts.get_void_type());
         } else {
-            node->get_else_body()->set_resolved(else_yield->get_resolved());
+            // TODO: if should support multiple yields
+            auto tup = type::as<tuple_type>(else_yield->get_resolved());
+            node->get_else_body()->set_resolved(tup.get_types().front());
         }
 
         if (if_yield && else_yield &&
