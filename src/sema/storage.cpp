@@ -9,6 +9,9 @@ type_storage::~type_storage() {
     for (auto& [_, impl] : tensor_types) {
         delete impl;
     }
+    for (auto& [_, impl] : tuple_types) {
+        delete impl;
+    }
 }
 
 type type_storage::get_i32_type() {
@@ -60,5 +63,21 @@ type type_storage::get_tensor_type(type et, const std::vector<i64>& dims) {
     it->second = impl;
     return type(impl);
 }
+
+type type_storage::get_tuple_type(const std::vector<type>& types) {
+    tuple_type_impl::key_type key(types);
+    auto [it, inserted] = tuple_types.insert({std::move(key), nullptr});
+    if (!inserted) {
+        return type(it->second);
+    }
+
+    auto impl = new tuple_type_impl();
+    for (auto& t : types) {
+        impl->add_type(t);
+    }
+    it->second = impl;
+    return type(impl);
+}
+
 
 }

@@ -98,6 +98,86 @@ TEST(uniquing_tensors) {
     return true;
 }
 
+TEST(uniquing_tuples) {
+    auto i32 = s.get_i32_type();
+    auto f64 = s.get_f64_type();
+
+    // Same types inserted twice → pointer-equal.
+    auto t1 = s.get_tuple_type({i32, f64});
+    auto t2 = s.get_tuple_type({i32, f64});
+    assert(t1 == t2);
+    assert(t1.get_kind() == colgm_type_kind::TYPE_KIND_TUPLE);
+
+    // Different order → not equal.
+    auto t3 = s.get_tuple_type({f64, i32});
+    assert(t1 != t3);
+
+    // Different arity → not equal.
+    auto t4 = s.get_tuple_type({i32, f64, i32});
+    assert(t1 != t4);
+
+    // Single-element tuple.
+    auto t5 = s.get_tuple_type({i32});
+    assert(t5 == s.get_tuple_type({i32}));
+    assert(t5 != t1);
+
+    // Empty tuple.
+    auto t6 = s.get_tuple_type({});
+    assert(t6.get_kind() == colgm_type_kind::TYPE_KIND_TUPLE);
+    assert(t6 == s.get_tuple_type({}));
+    assert(t6 != t5);
+
+    return true;
+}
+
+TEST(nested_tuples) {
+    auto i32 = s.get_i32_type();
+    auto f32 = s.get_f32_type();
+
+    // tuple<tuple<i32>, f32>
+    auto inner = s.get_tuple_type({i32});
+    auto outer = s.get_tuple_type({inner, f32});
+    assert(outer.get_kind() == colgm_type_kind::TYPE_KIND_TUPLE);
+
+    // Same nested structure → uniqued.
+    auto outer2 = s.get_tuple_type({inner, f32});
+    assert(outer == outer2);
+
+    // Different nesting → not equal.
+    auto outer3 = s.get_tuple_type({i32, f32});
+    assert(outer != outer3);
+
+    // tuple<tuple<i32, f32>, tuple<f32>>
+    auto inner2 = s.get_tuple_type({i32, f32});
+    auto inner3 = s.get_tuple_type({f32});
+    auto multi_nested = s.get_tuple_type({inner2, inner3});
+    assert(multi_nested == s.get_tuple_type({inner2, inner3}));
+
+    return true;
+}
+
+TEST(tuple_in_functions) {
+    auto i32 = s.get_i32_type();
+    auto f64 = s.get_f64_type();
+
+    // fn(tuple<i32, f64>) -> i32
+    auto tup = s.get_tuple_type({i32, f64});
+    auto fn = s.get_function_type({tup}, i32);
+    assert(fn.get_kind() == colgm_type_kind::TYPE_KIND_FUNCTION);
+    assert(fn == s.get_function_type({tup}, i32));
+
+    // fn(i32, f64) -> tuple<i32, f64>
+    auto fn2 = s.get_function_type({i32, f64}, tup);
+    assert(fn2.get_kind() == colgm_type_kind::TYPE_KIND_FUNCTION);
+    assert(fn2 == s.get_function_type({i32, f64}, tup));
+
+    // fn(tuple<i32, f64>) vs fn(i32, f64) → not equal.
+    auto fn3 = s.get_function_type({i32, f64}, i32);
+    assert(fn != fn3);
+
+    return true;
+}
+
 TEST(empty_args) {
     // fn() -> i32
     auto i32_ret = s.get_function_type({}, s.get_i32_type());
@@ -204,6 +284,16 @@ TEST(hash_no_false_collision) {
     auto t_b = s.get_tensor_type(i32, {3, 2});
     assert(t_a != t_b);
 
+    // tuple<i32, f64> vs tuple<f64, i32> — different order, must not collide.
+    auto tu_a = s.get_tuple_type({i32, f64});
+    auto tu_b = s.get_tuple_type({f64, i32});
+    assert(tu_a != tu_b);
+
+    // tuple<i32> vs tuple<f64> — different element types.
+    auto tu_c = s.get_tuple_type({i32});
+    auto tu_d = s.get_tuple_type({f64});
+    assert(tu_c != tu_d);
+
     return true;
 }
 
@@ -238,6 +328,15 @@ TEST(volume) {
         assert(t.get_kind() == colgm_type_kind::TYPE_KIND_TENSOR);
     }
 
+    // Insert 10000 unique tuple types.
+    // 2-element tuples with varying element: tuple<i32, tensor<f32,[i]>>.
+    auto i32 = s.get_i32_type();
+    for (int i = 0; i < 10000; i++) {
+        auto et = s.get_tensor_type(f32, {static_cast<i64>(i)});
+        auto tup = s.get_tuple_type({i32, et});
+        assert(tup.get_kind() == colgm_type_kind::TYPE_KIND_TUPLE);
+    }
+
     return true;
 }
 
@@ -248,10 +347,11 @@ TEST(destructor) {
         auto i32 = local.get_i32_type();
         auto f32 = local.get_f32_type();
 
-        // Insert a mix of function and tensor types.
+        // Insert a mix of function, tensor, and tuple types.
         for (int i = 0; i < 100; i++) {
             local.get_function_type({i32, f32}, i32);
             local.get_tensor_type(f32, {static_cast<i64>(i)});
+            local.get_tuple_type({i32, f32});
         }
         // local goes out of scope here — run under valgrind/ASAN to
         // verify no leaks or double-frees.
@@ -272,6 +372,9 @@ int main() {
     RUN(uniquing_scalars);
     RUN(uniquing_functions);
     RUN(uniquing_tensors);
+    RUN(uniquing_tuples);
+    RUN(nested_tuples);
+    RUN(tuple_in_functions);
     RUN(empty_args);
     RUN(many_args);
     RUN(nested_function_types);

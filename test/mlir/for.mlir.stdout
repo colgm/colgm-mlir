@@ -12,11 +12,17 @@ module {
     }
     return
   }
-  func.func @for_with_result(%arg0: index, %arg1: index, %arg2: tensor<f32>) -> tensor<f32> {
-    %0 = colgm.for %arg3 = %arg0 to %arg1 -> tensor<f32> {
+  func.func @for_with_result(%arg0: index, %arg1: index, %arg2: tensor<f32>, %arg3: tensor<f32>) -> tensor<f32> {
+    %0 = colgm.for %arg4 = %arg0 to %arg1 iter_args(%arg5 = %arg3) -> tensor<f32> {
       colgm.yield %arg2 : tensor<f32>
     }
     return %0 : tensor<f32>
+  }
+  func.func @for_multi_result(%arg0: index, %arg1: index, %arg2: tensor<f32>, %arg3: tensor<f64>, %arg4: tensor<f32>, %arg5: tensor<f64>) -> tensor<f32> {
+    %0:2 = colgm.for %arg6 = %arg0 to %arg1 iter_args(%arg7 = %arg4, %arg8 = %arg5) -> (tensor<f32>, tensor<f64>) {
+      colgm.yield %arg2, %arg3 : tensor<f32>, tensor<f64>
+    }
+    return %0#0 : tensor<f32>
   }
 }
 

@@ -6,22 +6,27 @@ namespace colgm_mlir {
 
 void for_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                    mlir::Value lower_bound, mlir::Value upper_bound,
-                   mlir::Type result_type) {
-    state.addOperands({lower_bound, upper_bound});
-    if (result_type) {
-        state.addTypes(result_type);
-    }
+                   mlir::ValueRange iter_args,
+                   mlir::TypeRange result_types) {
+    state.addOperands(lower_bound);
+    state.addOperands(upper_bound);
+    state.addOperands(iter_args);
+    state.addTypes(result_types);
 
     auto* body = state.addRegion();
     auto& block = body->emplaceBlock();
     block.addArgument(builder.getIndexType(), builder.getUnknownLoc());
+    for (auto t : result_types) {
+        block.addArgument(t, builder.getUnknownLoc());
+    }
 }
 
 for_op for_op::create(mlir::OpBuilder& builder, mlir::Location loc,
                       mlir::Value lower_bound, mlir::Value upper_bound,
-                      mlir::Type result_type) {
+                      mlir::ValueRange iter_args,
+                      mlir::TypeRange result_types) {
     mlir::OperationState state(loc, getOperationName());
-    build(builder, state, lower_bound, upper_bound, result_type);
+    build(builder, state, lower_bound, upper_bound, iter_args, result_types);
     return llvm::cast<for_op>(builder.create(state));
 }
 
@@ -45,19 +50,82 @@ mlir::ParseResult for_op::parse(mlir::OpAsmParser& parser,
         return mlir::failure();
     }
 
-    // optional -> result_type
-    if (mlir::succeeded(parser.parseOptionalArrow())) {
-        mlir::Type result_type;
-        if (parser.parseType(result_type)) {
+    induction_var.type = idx_type;
+
+    // optional iter_args(%name = %init, ...)
+    llvm::SmallVector<mlir::OpAsmParser::UnresolvedOperand, 4> iter_operands;
+    llvm::SmallVector<mlir::OpAsmParser::Argument, 4> iter_args;
+    if (mlir::succeeded(parser.parseOptionalKeyword("iter_args"))) {
+        if (parser.parseLParen()) {
             return mlir::failure();
         }
-        result.addTypes(result_type);
+        while (!mlir::succeeded(parser.parseOptionalRParen())) {
+            mlir::OpAsmParser::Argument arg;
+            mlir::OpAsmParser::UnresolvedOperand init;
+            if (parser.parseArgument(arg, false, false) ||
+                parser.parseEqual() ||
+                parser.parseOperand(init)) {
+                return mlir::failure();
+            }
+            iter_args.push_back(arg);
+            iter_operands.push_back(init);
+            if (mlir::succeeded(parser.parseOptionalRParen())) {
+                break;
+            }
+            if (parser.parseComma()) {
+                return mlir::failure();
+            }
+        }
     }
 
-    // { body region }
+    // optional -> (result_type1, result_type2, ...)  or  -> single_type
+    bool has_arrow = mlir::succeeded(parser.parseOptionalArrow());
+    if (has_arrow) {
+        auto lparen_loc = parser.getCurrentLocation();
+        if (mlir::succeeded(parser.parseOptionalLParen())) {
+            // multiple types: -> (type1, type2, ...)
+            llvm::SmallVector<mlir::Type> types;
+            do {
+                mlir::Type t;
+                if (parser.parseType(t)) {
+                    return mlir::failure();
+                }
+                types.push_back(t);
+            } while (mlir::succeeded(parser.parseOptionalComma()));
+            if (parser.parseRParen()) {
+                return mlir::failure();
+            }
+            for (auto t : types) result.addTypes(t);
+        } else {
+            // single type (backward-compatible)
+            mlir::Type single_type;
+            if (parser.parseType(single_type)) {
+                return mlir::failure();
+            }
+            result.addTypes(single_type);
+        }
+
+        // set iter_args types from result types
+        for (usize i = 0; i < iter_args.size() && i < result.types.size(); ++i) {
+            iter_args[i].type = result.types[i];
+        }
+    }
+
+    // resolve iter_args init operands
+    for (usize i = 0; i < iter_operands.size(); ++i) {
+        if (parser.resolveOperand(iter_operands[i], iter_args[i].type,
+                                  result.operands)) {
+            return mlir::failure();
+        }
+    }
+
+    // body region
     auto body = result.addRegion();
-    induction_var.type = idx_type;
-    if (parser.parseRegion(*body, {induction_var})) {
+    llvm::SmallVector<mlir::OpAsmParser::Argument, 4> block_args = { induction_var };
+    for (auto& arg : iter_args) {
+        block_args.push_back(arg);
+    }
+    if (parser.parseRegion(*body, block_args)) {
         return mlir::failure();
     }
 
@@ -67,9 +135,29 @@ mlir::ParseResult for_op::parse(mlir::OpAsmParser& parser,
 void for_op::print(mlir::OpAsmPrinter& p) {
     p << " " << get_induction_var() << " = "
       << get_lower_bound() << " to " << get_upper_bound();
-    if (getNumResults() > 0) {
-        p << " -> " << getResult(0).getType();
+
+    auto iter_args = get_iter_args();
+    if (!iter_args.empty()) {
+        p << " iter_args(";
+        auto& block = get_body().getBlocks().front();
+        for (usize i = 0; i < iter_args.size(); ++i) {
+            if (i > 0) p << ", ";
+            p << block.getArgument(1 + i) << " = " << iter_args[i];
+        }
+        p << ")";
     }
+
+    if (getNumResults() > 0) {
+        p << " -> ";
+        if (getNumResults() == 1) {
+            p << getResult(0).getType();
+        } else {
+            p << "(";
+            llvm::interleaveComma(getResultTypes(), p);
+            p << ")";
+        }
+    }
+
     p << " ";
     p.printRegion(get_body(), false, true);
 }
@@ -87,30 +175,52 @@ mlir::LogicalResult for_op::verify() {
     if (ub_type != idx_type) {
         return emitOpError("upper bound must be index, got ") << ub_type;
     }
-    if (get_body().getBlocks().front().getNumArguments() != 1) {
-        return emitOpError("body must have exactly one argument");
+
+    auto num_iter_args = getNumIterArgs();
+    auto num_results = getNumResults();
+    auto& block = get_body().getBlocks().front();
+
+    // block args: induction var + iter_args
+    if (block.getNumArguments() != 1 + num_iter_args) {
+        return emitOpError("body must have ")
+               << (1 + num_iter_args) << " arguments (induction var"
+               << (num_iter_args > 0 ? " + iter_args" : "") << ")";
     }
+
     if (get_induction_var().getType() != idx_type) {
         return emitOpError("induction variable must be index, got ")
                << get_induction_var().getType();
     }
 
-    auto yield_op = llvm::cast<colgm_mlir::yield_op>(
-        get_body().getBlocks().front().getTerminator());
-    auto yield_operands = yield_op.getNumOperands();
+    // iter_args types must match result types
+    for (unsigned i = 0; i < num_iter_args; ++i) {
+        auto iter_arg_type = block.getArgument(1 + i).getType();
+        if (iter_arg_type != getResult(i).getType()) {
+            return emitOpError("iter_arg #") << i << " type "
+                   << iter_arg_type << " does not match result type "
+                   << getResult(i).getType();
+        }
+    }
 
-    if (yield_operands == 1) {
-        if (getNumResults() != 1) {
-            return emitOpError("yield has value but op has ") << getNumResults() << " results";
-        }
-        if (yield_op.getOperand(0).getType() != getResult(0).getType()) {
-            return emitOpError("yield type ")
-                   << yield_op.getOperand(0).getType()
-                   << " does not match result type " << getResult(0).getType();
-        }
-    } else {
-        if (getNumResults() != 0) {
-            return emitOpError("yield has no value but op has ") << getNumResults() << " results";
+    // results count must equal iter_args count
+    if (num_results != num_iter_args) {
+        return emitOpError("result count (") << num_results
+               << ") must equal iter_args count (" << num_iter_args << ")";
+    }
+
+    // yield operands must match result count and types
+    auto yield_op = llvm::cast<colgm_mlir::yield_op>(block.getTerminator());
+    if (yield_op.getNumOperands() != num_results) {
+        return emitOpError("yield has ") << yield_op.getNumOperands()
+               << " operands but op has " << num_results << " results";
+    }
+
+    for (unsigned i = 0; i < num_results; ++i) {
+        if (yield_op.getOperand(i).getType() != getResult(i).getType()) {
+            return emitOpError("yield operand #") << i << " type "
+                   << yield_op.getOperand(i).getType()
+                   << " does not match result type "
+                   << getResult(i).getType();
         }
     }
 

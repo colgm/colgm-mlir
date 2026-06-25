@@ -20,6 +20,7 @@ enum class colgm_type_kind: u8 {
   TYPE_KIND_VOID,
   TYPE_KIND_FUNCTION,
   TYPE_KIND_TENSOR,
+  TYPE_KIND_TUPLE
 };
 
 class type_impl {
@@ -230,12 +231,41 @@ public:
     }
 };
 
+class tuple_type_impl: public type_impl {
+public:
+    using key_type = std::vector<type>;
+
+private:
+    std::vector<type> types;
+
+public:
+    tuple_type_impl(): type_impl(colgm_type_kind::TYPE_KIND_TUPLE) {}
+    void add_type(type t) { types.push_back(t); }
+    const auto& get_types() const { return types; }
+    std::string to_string() const override;
+};
+
+class tuple_type: public type {
+public:
+    tuple_type(tuple_type_impl* t): type(t) {}
+    static bool is(const type& t) {
+        return t.get_kind() == colgm_type_kind::TYPE_KIND_TUPLE;
+    }
+    const auto& get_types() const {
+        return get_impl_as<tuple_type_impl>()->get_types();
+    }
+};
+
 struct function_key_type_hash {
     usize operator()(const function_type_impl::key_type& key) const;
 };
 
 struct tensor_key_type_hash {
     usize operator()(const tensor_type_impl::key_type& key) const;
+};
+
+struct tuple_key_type_hash {
+    usize operator()(const tuple_type_impl::key_type& key) const;
 };
 
 }

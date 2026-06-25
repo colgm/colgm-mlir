@@ -31,6 +31,9 @@ private:
     std::unordered_map<tensor_type_impl::key_type,
                        tensor_type_impl*,
                        tensor_key_type_hash> tensor_types;
+    std::unordered_map<tuple_type_impl::key_type,
+                       tuple_type_impl*,
+                       tuple_key_type_hash> tuple_types;
 
 public:
     ~type_storage();
@@ -43,9 +46,11 @@ public:
     type get_bool_type();
     type get_function_type(const std::vector<type>&, type);
     type get_tensor_type(type, const std::vector<i64>&);
+    type get_tuple_type(const std::vector<type>&);
 
     const auto& get_function_type_cache() const { return function_types; }
     const auto& get_tensor_type_cache() const { return tensor_types; }
+    const auto& get_tuple_type_cache() const { return tuple_types; }
 };
 
 }

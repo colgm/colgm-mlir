@@ -5,6 +5,8 @@
 #include <mlir/IR/Builders.h>
 #include <mlir/Interfaces/SideEffectInterfaces.h>
 
+#include "utils/type.hpp"
+
 namespace colgm_mlir {
 
 class yield_op: public mlir::Op<yield_op,
@@ -17,9 +19,9 @@ public:
     static llvm::ArrayRef<llvm::StringRef> getAttributeNames() { return {}; }
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
-                      mlir::Value value = {});
+                      mlir::ValueRange values = {});
     static yield_op create(mlir::OpBuilder& builder, mlir::Location loc,
-                           mlir::Value value = {});
+                           mlir::ValueRange values = {});
 
     static mlir::ParseResult parse(mlir::OpAsmParser&, mlir::OperationState&);
     void print(mlir::OpAsmPrinter&);
