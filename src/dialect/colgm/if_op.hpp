@@ -24,10 +24,10 @@ public:
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value condition,
-                      mlir::Type result_type = {});
+                      mlir::TypeRange result_types = {});
     static if_op create(mlir::OpBuilder& builder, mlir::Location loc,
                         mlir::Value condition,
-                        mlir::Type result_type = {});
+                        mlir::TypeRange result_types = {});
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);

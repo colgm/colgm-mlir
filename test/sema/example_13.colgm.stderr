@@ -1,0 +1,23 @@
+Error: must yield same-size values because init pairs exist
+  --> test/sema/example_13.colgm:4:5
+  | 
+4 |     for i in 0..4 init(a = 1) {}
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning: yield value ignored
+  --> test/sema/example_13.colgm:4:5
+4 |     for i in 0..4 init(a = 1) {}
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Error: yield values size does not match init pairs size
+  --> test/sema/example_13.colgm:7:9
+  | 
+7 |         yield 0
+  |         ^^^^^^^
+
+Error: yield value type does not match init pair type, expect 'tensor<i64>', but got 'tensor<f64>'
+  --> test/sema/example_13.colgm:11:22
+   | 
+11 |         yield a + 1, 0.114
+   |                      ^^^^^
+

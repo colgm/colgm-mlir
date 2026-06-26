@@ -89,14 +89,19 @@ void mlir_generator::generate_block(mlir::Block* entry, block_stmt* b) {
 }
 
 void mlir_generator::generate_var_decl(mlir::Block* entry, var_decl* v) {
-    auto value = generate_expr(v->get_init());
-    vars.add_var(v->get_name(), value);
+    std::vector<mlir::Value> values;
+    generate_expr_tuple(v->get_init(), values);
+    assert(values.size() == v->get_vars().size());
+    for (usize i = 0; i < v->get_vars().size(); i++) {
+        vars.add_var(v->get_vars()[i], values[i]);
+    }
 }
 
 void mlir_generator::generate_expr_stmt(mlir::Block* entry, expr_stmt* s) {
     auto inner = s->get_inner();
     if (!inner) return;
-    generate_expr(inner);
+    std::vector<mlir::Value> values;
+    generate_expr_tuple(inner, values);
 }
 
 void mlir_generator::generate_return_stmt(mlir::Block* entry, return_stmt* r) {
@@ -274,52 +279,109 @@ mlir::Value mlir_generator::generate_index_access(index_access* n) {
     return op->getResult(0);
 }
 
-mlir::Value mlir_generator::generate_if_expr(if_expr* i) {
+void mlir_generator::generate_if_expr(if_expr* i, std::vector<mlir::Value>& values) {
     auto cond = generate_expr(i->get_condition());
 
     auto i1_ty = mlir::IntegerType::get(&ctx, 1);
     auto cast = cast_op::create(builder, to_loc(i), cond, i1_ty);
     auto cond_i1 = cast->getResult(0);
 
-    auto result_type = convert_type(i->get_resolved());
-    auto op = if_op::create(builder, to_loc(i), cond_i1, result_type);
+    auto resolved = i->get_resolved();
+    if_op op;
+
+    // create if op
+    if (type::isa<tuple_type>(resolved)) {
+        auto& tup = type::as<tuple_type>(resolved);
+        llvm::SmallVector<mlir::Type> result_types;
+        for (auto& t : tup.get_types()) {
+            result_types.push_back(convert_type(t));
+        }
+        op = if_op::create(builder, to_loc(i), cond_i1, result_types);
+    } else {
+        auto result_type = convert_type(resolved);
+        mlir::TypeRange types = result_type ? mlir::TypeRange(result_type) : mlir::TypeRange();
+        op = if_op::create(builder, to_loc(i), cond_i1, types);
+    }
 
     // then
     {
         auto& block = op.get_then_region().front();
         builder.setInsertionPointToEnd(&block);
-        vars.add_scope();
         generate_block(&block, i->get_body());
         if (block.empty() || !block.back().hasTrait<mlir::OpTrait::IsTerminator>()) {
             yield_op::create(builder, to_loc(i));
         }
-        vars.remove_scope();
     }
 
     if (auto* else_body = i->get_else_body()) {
         auto& block = op.get_else_region().front();
         builder.setInsertionPointToEnd(&block);
-        vars.add_scope();
         generate_block(&block, else_body);
         if (block.empty() || !block.back().hasTrait<mlir::OpTrait::IsTerminator>()) {
             yield_op::create(builder, to_loc(i));
         }
-        vars.remove_scope();
     }
 
     builder.setInsertionPointAfter(op);
 
-    // if if_expr returns void, there's no result
-    if (op.getNumResults() == 0) {
-        return mlir::Value();
+    for (auto r : op.getResults()) {
+        values.push_back(r);
     }
-
-    return op.getResult(0);
 }
 
-mlir::Value mlir_generator::generate_for_expr(for_expr* f) {
-    // TODO
-    return mlir::Value();
+void mlir_generator::generate_for_expr(for_expr* f, std::vector<mlir::Value>& values) {
+    llvm::SmallVector<mlir::Value, 4> init_values;
+
+    vars.add_scope();
+    for (auto i : f->get_init_pairs()) {
+        auto v = generate_expr(std::get<1>(i));
+        init_values.push_back(v);
+    }
+
+    auto start = generate_expr(f->get_range()->get_start());
+    auto end = generate_expr(f->get_range()->get_end());
+
+    auto idx_ty = mlir::IndexType::get(&ctx);
+    auto start_idx = cast_op::create(builder, to_loc(f), start, idx_ty)->getResult(0);
+    auto end_idx = cast_op::create(builder, to_loc(f), end, idx_ty)->getResult(0);
+
+    for_op op;
+    if (type::isa<tuple_type>(f->get_resolved())) {
+        auto tup = type::as<tuple_type>(f->get_resolved());
+        llvm::SmallVector<mlir::Type, 4> result_types;
+        for (auto t : tup.get_types()) {
+            result_types.push_back(convert_type(t));
+        }
+        op = for_op::create(builder, to_loc(f), start_idx, end_idx, init_values, result_types);
+    } else {
+        auto rt = convert_type(f->get_resolved());
+        op = for_op::create(builder, to_loc(f), start_idx, end_idx, init_values,
+                            rt ? mlir::TypeRange(rt) : mlir::TypeRange());
+    }
+
+    {
+        auto& block = op.get_body().front();
+
+        vars.add_var(f->get_iter(), block.getArgument(0));
+        const auto& pairs = f->get_init_pairs();
+        for (usize i = 0; i < pairs.size(); i++) {
+            vars.add_var(std::get<0>(pairs[i]), block.getArgument(i + 1));
+        }
+
+        builder.setInsertionPointToEnd(&block);
+        generate_block(&block, f->get_body());
+        if (block.empty() || !block.back().hasTrait<mlir::OpTrait::IsTerminator>()) {
+            yield_op::create(builder, to_loc(f));
+        }
+    }
+
+    vars.remove_scope();
+
+    builder.setInsertionPointAfter(op);
+    for (auto r : op.getResults()) {
+        values.push_back(r);
+    }
+    return;
 }
 mlir::Value mlir_generator::generate_expr(expr* e) {
     if (e->is(ast_type::int_literal)) {
@@ -340,16 +402,20 @@ mlir::Value mlir_generator::generate_expr(expr* e) {
         return generate_call_expr(static_cast<call_expr*>(e));
     } else if (e->is(ast_type::index_access)) {
         return generate_index_access(static_cast<index_access*>(e));
-    } else if (e->is(ast_type::range_expr)) {
-
-    } else if (e->is(ast_type::if_expr)) {
-        return generate_if_expr(static_cast<if_expr*>(e));
-    } else if (e->is(ast_type::for_expr)) {
-        return generate_for_expr(static_cast<for_expr*>(e));
-    } else {
-        assert(false && "not implemented");
     }
+
+    assert(false && "not implemented");
     return mlir::Value();
+}
+
+void mlir_generator::generate_expr_tuple(expr* e, std::vector<mlir::Value>& values) {
+    if (e->is(ast_type::if_expr)) {
+        generate_if_expr(static_cast<if_expr*>(e), values);
+    } else if (e->is(ast_type::for_expr)) {
+        generate_for_expr(static_cast<for_expr*>(e), values);
+    } else {
+        values.push_back(generate_expr(e));
+    }
 }
 
 void mlir_generator::generate(root* r) {

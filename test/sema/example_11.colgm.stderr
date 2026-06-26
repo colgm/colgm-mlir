@@ -1,0 +1,6 @@
+Error: cannot use yield in function 'main'
+  --> test/sema/example_11.colgm:2:5
+  | 
+2 |     yield 0
+  |     ^^^^^^^
+

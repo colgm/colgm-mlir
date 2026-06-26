@@ -52,10 +52,10 @@ A scalar is just a zero-dimensional tensor: `f32[]` or simply `f32`.
 ### Scalar Literals
 
 ```rs
-42               // i64 (default integer)
-3.14             // f64 (default float)
-true             // bool
-false            // bool
+42               // i64[] (default integer)
+3.14             // f64[] (default float)
+true             // bool[]
+false            // bool[]
 ```
 
 Integer literals support hex and octal prefixes:
@@ -71,8 +71,8 @@ Nested-bracket syntax. The shape and element type are inferred:
 
 ```rs
 [[1.0, 2.0], [3.0, 4.0]]       // f64[2, 2]
-[[1, 2, 3], [4, 5, 6]]          // i64[2, 3]
-[1.0, 2.0, 3.0]                 // f64[3]
+[[1, 2, 3], [4, 5, 6]]         // i64[2, 3]
+[1.0, 2.0, 3.0]                // f64[3]
 ```
 
 Type can be made explicit via a variable annotation:
@@ -89,9 +89,9 @@ Declared with `var`. Type annotation is optional when the initializer
 can infer the type:
 
 ```rs
-var x = [[1.0, 2.0], [3.0, 4.0]]       // type inferred: f64[2, 2]
+var x = [[1.0, 2.0], [3.0, 4.0]]   // type inferred: f64[2, 2]
 var y: f32[2, 2] = [[1.0, 2.0], [3.0, 4.0]]
-var z = a + b                            // type inferred from a, b
+var z = a + b                      // type inferred from a, b
 ```
 
 Assignment to an existing variable (no `var`):
@@ -218,11 +218,11 @@ var x = if a {
 ### for (range-based)
 
 ```rs
-for i in 0..10 {
+var x = for i in 0..10 {
     // i is i64, values 0 through 9
 }
 
-for i in 0..N {
+var y = for i in 0..N {
     // N can be a variable
 }
 ```
@@ -231,7 +231,7 @@ for i in 0..N {
 
 ```rs
 return expr
-return                       // for void functions
+return // for void functions
 
 var a = if x == y { yield x } else { yield y }
 ```

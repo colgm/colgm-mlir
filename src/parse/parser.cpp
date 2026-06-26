@@ -142,8 +142,13 @@ stmt* parser::parse_stmt() {
 var_decl* parser::parse_var_decl() {
     auto node = new var_decl(tokens[ptr].loc);
     match(tok::tk_var);
-    node->set_name(tokens[ptr].str);
+    node->add_var(tokens[ptr].str);
     match(tok::tk_id);
+    while (lookahead(tok::tk_comma)) {
+        match(tok::tk_comma);
+        node->add_var(tokens[ptr].str);
+        match(tok::tk_id);
+    }
     match(tok::tk_eq);
     node->set_init(parse_expr());
     update_location(node);

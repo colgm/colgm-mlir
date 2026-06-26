@@ -5,10 +5,10 @@
 namespace colgm_mlir {
 
 void if_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
-                  mlir::Value condition, mlir::Type result_type) {
+                  mlir::Value condition, mlir::TypeRange result_types) {
     state.addOperands(condition);
-    if (result_type) {
-        state.addTypes(result_type);
+    if (!result_types.empty()) {
+        state.addTypes(result_types);
     }
 
     auto then_body = state.addRegion();
@@ -19,9 +19,9 @@ void if_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
 }
 
 if_op if_op::create(mlir::OpBuilder& builder, mlir::Location loc,
-                    mlir::Value condition, mlir::Type result_type) {
+                    mlir::Value condition, mlir::TypeRange result_types) {
     mlir::OperationState state(loc, getOperationName());
-    build(builder, state, condition, result_type);
+    build(builder, state, condition, result_types);
     return llvm::cast<if_op>(builder.create(state));
 }
 
@@ -35,14 +35,12 @@ mlir::ParseResult if_op::parse(mlir::OpAsmParser& parser,
         return mlir::failure();
     }
 
-    // optional -> result_type
-    if (mlir::succeeded(parser.parseOptionalArrow())) {
-        mlir::Type result_type;
-        if (parser.parseType(result_type)) {
-            return mlir::failure();
-        }
-        result.addTypes(result_type);
+    // optional -> result_type  or  -> (type1, type2, ...)
+    llvm::SmallVector<mlir::Type> res_types;
+    if (parser.parseOptionalArrowTypeList(res_types)) {
+        return mlir::failure();
     }
+    result.addTypes(res_types);
 
     // { then region }
     auto then_region = result.addRegion();
@@ -67,8 +65,15 @@ mlir::ParseResult if_op::parse(mlir::OpAsmParser& parser,
 
 void if_op::print(mlir::OpAsmPrinter& p) {
     p << " " << get_condition();
-    if (getNumResults() > 0) {
+    auto num_results = getNumResults();
+    if (num_results == 1) {
         p << " -> " << getResult(0).getType();
+    } else if (num_results > 1) {
+        p << " -> (" << getResult(0).getType();
+        for (unsigned i = 1; i < num_results; ++i) {
+            p << ", " << getResult(i).getType();
+        }
+        p << ")";
     }
     p << " ";
     p.printRegion(get_then_region(), false);
@@ -98,24 +103,23 @@ mlir::LogicalResult if_op::verify() {
                << then_operands << " vs " << else_operands;
     }
 
-    if (then_operands == 1) {
-        if (getNumResults() != 1) {
-            return emitOpError("yield has value but op has ") << getNumResults() << " results";
+    auto num_results = getNumResults();
+    if (then_operands != num_results) {
+        return emitOpError("yield operand count ") << then_operands
+               << " does not match result count " << num_results;
+    }
+
+    for (unsigned i = 0; i < num_results; ++i) {
+        auto then_type = then_yield.getOperand(i).getType();
+        auto else_type = else_yield.getOperand(i).getType();
+        auto res_type = getResult(i).getType();
+        if (then_type != res_type) {
+            return emitOpError("then branch yield operand #") << i << " type "
+                   << then_type << " does not match result type " << res_type;
         }
-        auto yield_type = then_yield.getOperand(0).getType();
-        auto result_type = getResult(0).getType();
-        if (yield_type != result_type) {
-            return emitOpError("yield type ") << yield_type
-                   << " does not match result type " << result_type;
-        }
-        if (else_yield.getOperand(0).getType() != result_type) {
-            return emitOpError("else branch yield type ")
-                   << else_yield.getOperand(0).getType()
-                   << " does not match result type " << result_type;
-        }
-    } else {
-        if (getNumResults() != 0) {
-            return emitOpError("yield has no value but op has ") << getNumResults() << " results";
+        if (else_type != res_type) {
+            return emitOpError("else branch yield operand #") << i << " type "
+                   << else_type << " does not match result type " << res_type;
         }
     }
 

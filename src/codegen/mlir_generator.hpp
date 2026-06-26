@@ -100,9 +100,10 @@ private:
     mlir::Value generate_unary_expr(unary_expr*);
     mlir::Value generate_call_expr(call_expr*);
     mlir::Value generate_index_access(index_access*);
-    mlir::Value generate_if_expr(if_expr*);
-    mlir::Value generate_for_expr(for_expr*);
+    void generate_if_expr(if_expr*, std::vector<mlir::Value>&);
+    void generate_for_expr(for_expr*, std::vector<mlir::Value>&);
     mlir::Value generate_expr(expr*);
+    void generate_expr_tuple(expr*, std::vector<mlir::Value>&);
 
 public:
     mlir_generator(mlir::MLIRContext& c): ctx(c), builder(&c) {
@@ -111,6 +112,11 @@ public:
     }
     void generate(root*);
     void dump() {
+        // verify before dump
+        if (failed(module.verify())) {
+            module->emitError("module verification failed");
+        }
+
         mlir::OpPrintingFlags flags;
         flags.enableDebugInfo();
         module.print(llvm::outs(), flags);

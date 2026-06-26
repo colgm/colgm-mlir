@@ -1,0 +1,14 @@
+func main() -> i64 {
+    var x = [0, 1, 2, 3];
+    var a, b = for i in 0..4 init(max_num = -1, acc = 0) {
+        var acc_next = acc + x[i];
+        var max_num_next = if x[i] > max_num {
+            yield x[i]
+        } else {
+            yield max_num
+        };
+        yield max_num_next, acc_next
+    }
+
+    return a + b;
+}

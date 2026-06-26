@@ -1,0 +1,30 @@
+Error: all branches must yield same type but else branch does not exist
+  --> test/sema/example_12.colgm:4:15
+  | 
+4 |     var foo = if a == 1 {
+  |               ^^^^^^^^^^^^
+  | ...
+  | 
+6 |     }
+  | ^^^^^
+
+Error: all branches must yield same type but else branch yields void
+  --> test/sema/example_12.colgm:8:15
+   | 
+ 8 |     var bar = if a == 2 {
+   |               ^^^^^^^^^^^^
+   | ...
+   | 
+11 |     }
+   | ^^^^^
+
+Error: all branches must yield same type but if branch yields void
+  --> test/sema/example_12.colgm:13:15
+   | 
+13 |     var baz = if a == 3 {
+   |               ^^^^^^^^^^^^
+   | ...
+   | 
+16 |     }
+   | ^^^^^
+

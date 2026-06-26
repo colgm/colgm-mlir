@@ -71,9 +71,9 @@
 - [x] Write `MLIRGen` visitor class (analogous to Toy tutorial's `MLIRGen`)
 - [x] Expression lowering: each AST expression node → MLIR `Value` (via op builder)
 - [x] Statement lowering: var declarations → `colgm.constant` + SSA values
-- [ ] Control flow lowering: `if` / `for` → `colgm.if` / `colgm.for`
-- [ ] Function lowering: `func_decl` → `func.func` with body region
-- [ ] Shape propagation: infer result tensor shapes from input shapes
+- [x] Control flow lowering: `if` / `for` → `colgm.if` / `colgm.for`
+- [x] Function lowering: `func_decl` → `func.func` with body region
+- [x] Shape propagation: infer result tensor shapes from input shapes
 
 ---
 

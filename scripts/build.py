@@ -21,11 +21,11 @@ def main():
     # configure
     if not cmakefiles_dir.exists():
         subprocess.run(
-            ["cmake", "..", "-DENABLE_MLIR=ON"]
+            ["cmake", "..", "-DCMAKE_BUILD_TYPE=RelWithDebInfo", "-DENABLE_MLIR=ON"]
         ).check_returncode()
     # build
     subprocess.run(
-        ["cmake", "--build", ".", "--config", "RelWithDebInfo", "-j", f"{cpu_count()}"]
+        ["cmake", "--build", ".", "-j", f"{cpu_count()}"]
     ).check_returncode()
     os.chdir("..")
 

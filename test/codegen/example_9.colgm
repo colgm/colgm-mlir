@@ -1,0 +1,10 @@
+func main() -> i64 {
+    var x = [0, 1];
+    var a, b = if x[0] < x[1] {
+        yield x[0], x[1]
+    } else {
+        yield x[1], x[0]
+    }
+
+    return a + b - 1;
+}

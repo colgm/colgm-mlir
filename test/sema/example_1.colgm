@@ -4,7 +4,7 @@ func main() {
     var c = [b, b, b]
     var d = c[0]
 
-    for i in 0..2 {
+    var r = for i in 0..2 init(x = b) {
         var e = relu(c[i])
         yield e
     }

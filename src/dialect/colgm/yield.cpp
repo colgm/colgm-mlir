@@ -80,11 +80,6 @@ mlir::LogicalResult yield_op::verify() {
         return emitOpError("yield must be inside if or for");
     }
 
-    // if_op allows at most 1 operand
-    if (llvm::isa<if_op>(parent) && getNumOperands() > 1) {
-        return emitOpError("yield inside if can have at most one operand");
-    }
-
     return mlir::success();
 }
 

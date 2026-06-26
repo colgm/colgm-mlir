@@ -186,7 +186,14 @@ bool dumper::visit_for_expr(for_expr* node) {
 bool dumper::visit_var_decl(var_decl* node) {
     dump_indent();
     std::cout << purple << "VarDecl " << reset;
-    std::cout << green << node->get_name() << reset << format_info(node);
+    std::cout << green;
+    for (usize i = 0; i < node->get_vars().size(); i++) {
+        std::cout << node->get_vars()[i];
+        if (i != node->get_vars().size() - 1) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << reset << format_info(node);
     push_indent();
     set_last();
     node->get_init()->accept(this);

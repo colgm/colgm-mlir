@@ -1,5 +1,5 @@
 Warning: yield value ignored
-  --> test/sema/example_5.colgm:3:5
+  --> test/sema/example_10.colgm:3:5
 3 |     if a[0] == 1 {
   |     ^^^^^^^^^^^^^^^
   | ...

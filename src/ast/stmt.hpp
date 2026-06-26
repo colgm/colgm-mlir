@@ -17,15 +17,15 @@ public:
 
 class var_decl: public stmt {
 private:
-    std::string name;
+    std::vector<std::string> vars;
     expr* init = nullptr;
 
 public:
     var_decl(const span& loc): stmt(ast_type::var_decl, loc) {}
     ~var_decl() override;
     void accept(visitor*) override;
-    void set_name(const std::string& n) { name = n; }
-    const auto& get_name() const { return name; }
+    void add_var(const std::string& n) { vars.push_back(n); }
+    const auto& get_vars() const { return vars; }
     void set_init(expr* i) { init = i; }
     auto get_init() const { return init; }
 };
