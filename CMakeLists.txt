@@ -73,6 +73,7 @@ set(COLGM_LIB_SOURCES
     src/dialect/colgm/transpose.cpp
     src/dialect/colgm/unary_op.cpp
     src/dialect/colgm/yield.cpp
+    src/dialect/pass/constfold.cpp
     src/dialect/dialect.cpp
     src/lexer/lexer.cpp
     src/lexer/token.cpp
@@ -137,6 +138,7 @@ if(ENABLE_MLIR)
         MLIRSupport
         MLIRDialect
         MLIRFuncDialect
+        MLIRPass
     )
 
     # Standalone colgm-opt tool (like mlir-opt, but statically includes our dialect)

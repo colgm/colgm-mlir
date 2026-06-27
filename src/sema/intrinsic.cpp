@@ -2,6 +2,23 @@
 
 namespace colgm_mlir {
 
+intrinsic_registry::intrinsic_registry() {
+    regist("relu", relu_infer);
+    regist("abs", abs_infer);
+    regist("exp", exp_infer);
+    regist("log", log_infer);
+    regist("sqrt", sqrt_infer);
+    regist("tanh", tanh_infer);
+    regist("sigmoid", sigmoid_infer);
+}
+
+intrinsic_find_res intrinsic_registry::find(const std::string& name) const {
+    if (intrinsics.find(name) != intrinsics.end()) {
+        return intrinsic_find_res { intrinsics.at(name).infer, true };
+    }
+    return intrinsic_find_res { nullptr, false };
+}
+
 static bool is_calculation_type(const type& t) {
     if (!type::isa<tensor_type>(t)) {
         return false;

@@ -30,28 +30,16 @@ public:
         type ty;
         bool found = false;
     };
-    struct intrinsic_find_res {
-        infer_func check;
-        bool found = false;
-    };
 
 private:
     type_storage& ts;
+    intrinsic_registry intrinsics;
     std::unordered_map<std::string, func_info> functions;
-
     std::vector<std::unordered_map<std::string, type>> variables;
-
-    std::unordered_map<std::string, intrinsic> intrinsics;
 
 public:
     context(type_storage& ts) : ts(ts) {
-        intrinsics.emplace("relu", intrinsic { "relu", relu_infer });
-        intrinsics.emplace("abs", intrinsic { "abs", abs_infer });
-        intrinsics.emplace("exp", intrinsic { "exp", exp_infer });
-        intrinsics.emplace("log", intrinsic { "log", log_infer });
-        intrinsics.emplace("sqrt", intrinsic { "sqrt", sqrt_infer });
-        intrinsics.emplace("tanh", intrinsic { "tanh", tanh_infer });
-        intrinsics.emplace("sigmoid", intrinsic { "sigmoid", sigmoid_infer });
+        
     }
     void regist_function(const std::string& name, func_info&& fi) {
         functions.emplace(name, fi);
@@ -78,10 +66,7 @@ public:
         return var_find_res { ts.get_unknown_type(), false };
     }
     intrinsic_find_res find_intrinsic(const std::string& name) const {
-        if (intrinsics.find(name) != intrinsics.end()) {
-            return intrinsic_find_res { intrinsics.at(name).infer, true };
-        }
-        return intrinsic_find_res { nullptr, false };
+        return intrinsics.find(name);
     }
     void dump() const;
 };

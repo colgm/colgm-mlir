@@ -72,10 +72,15 @@ def test(executable: Path, directory: Path, suffix: str, options: list[str]) -> 
         test_file = stage_test[i]
         test_file_stdout = Path(str(test_file) + ".stdout")
         test_file_stderr = Path(str(test_file) + ".stderr")
+        option_file = Path(str(test_file) + ".option")
         if not test_file_stdout.exists() or not test_file_stderr.exists():
             print(f"[FAILED] cannot find stdout/stderr file of {test_file}")
             continue
-        cmd = [str(executable), str(test_file)] + options
+        cmd = [str(executable)]
+        if option_file.exists():
+            with open(option_file, "r") as f:
+                cmd += f.read().split(" ")
+        cmd +=[str(test_file)] + options
         with open(test_file_stdout, "r") as f:
             stdout = f.read()
         with open(test_file_stderr, "r") as f:

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <unordered_map>
 
 #include "ast/ast.hpp"
 #include "ast/expr.hpp"
@@ -18,6 +19,25 @@ typedef std::function<type(error&, call_expr*, type_storage&)> infer_func;
 struct intrinsic {
     std::string name;
     infer_func infer;
+};
+
+struct intrinsic_find_res {
+    infer_func check;
+    bool found = false;
+};
+
+class intrinsic_registry {
+private:
+    std::unordered_map<std::string, intrinsic> intrinsics;
+
+private:
+    void regist(const char* name, infer_func fp) {
+        intrinsics.emplace(name, intrinsic { name, fp });
+    }
+
+public:
+    intrinsic_registry();
+    intrinsic_find_res find(const std::string&) const;
 };
 
 type relu_infer(error&, call_expr*, type_storage&);

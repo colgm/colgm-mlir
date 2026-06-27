@@ -2,12 +2,17 @@
 #include <mlir/IR/DialectRegistry.h>
 #include <mlir/Tools/mlir-opt/MlirOptMain.h>
 
+#include "dialect/pass/constfold.hpp"
 #include "dialect/dialect.hpp"
 
 int main(int argc, char **argv) {
     mlir::DialectRegistry registry;
     registry.insert<colgm_mlir::colgm_dialect>();
     registry.insert<mlir::func::FuncDialect>();
+
+    // Force-link constfold pass (static registration via PassRegistration
+    // would be dropped by linker since constfold.cpp is in a .a archive).
+    (void)colgm_mlir::createColgmConstFoldPass();
 
     return mlir::asMainReturnCode(
         mlir::MlirOptMain(argc, argv, "colgm-opt", registry));

@@ -1,0 +1,17 @@
+module {
+  func.func @fold_elements_1d() -> tensor<3xi64> {
+    %0 = colgm.constant dense<[1, 2, 3]> : tensor<3xi64>
+    return %0 : tensor<3xi64>
+  }
+  func.func @fold_elements_2d() -> tensor<2x2xf32> {
+    %0 = colgm.constant dense<[[1.000000e+00, 2.000000e+00], [3.000000e+00, 4.000000e+00]]> : tensor<2x2xf32>
+    return %0 : tensor<2x2xf32>
+  }
+  func.func @no_fold_mixed(%arg0: tensor<f64>) -> tensor<3xf64> {
+    %0 = colgm.constant dense<1.000000e+00> : tensor<f64>
+    %1 = colgm.constant dense<2.000000e+00> : tensor<f64>
+    %2 = colgm.elements(%0, %1, %arg0) {target_shape = [3]} : tensor<f64> -> tensor<3xf64>
+    return %2 : tensor<3xf64>
+  }
+}
+

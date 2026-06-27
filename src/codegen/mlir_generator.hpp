@@ -110,6 +110,7 @@ public:
         ctx.getOrLoadDialect<colgm_dialect>();
         ctx.getOrLoadDialect<mlir::func::FuncDialect>();
     }
+    mlir::ModuleOp& get_module() { return module; }
     void generate(root*);
     void dump() {
         // verify before dump

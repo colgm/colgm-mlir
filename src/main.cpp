@@ -1,9 +1,11 @@
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <thread>
 #include <cstdlib>
 
 #include <mlir/Support/LLVM.h>
+#include <mlir/Pass/PassManager.h>
 
 #include "utils/colgm.hpp"
 #include "utils/source_manager.hpp"
@@ -12,6 +14,7 @@
 #include "parse/parser.hpp"
 #include "sema/storage.hpp"
 #include "sema/sema.hpp"
+#include "dialect/pass/constfold.hpp"
 #include "dialect/dialect.hpp"
 #include "codegen/mlir_generator.hpp"
 
@@ -23,6 +26,25 @@ const u32 COMPILE_VIEW_AST = 1 << 1;
 const u32 COMPILE_VIEW_SEMA = 1 << 2;
 const u32 COMPILE_VIEW_SEMA_AST = 1 << 3;
 const u32 COMPILE_VIEW_MLIR = 1 << 4;
+
+struct pass_options {
+    const std::unordered_set<std::string> available = {
+        "--const-fold"
+    };
+    std::unordered_set<std::string> options;
+
+    bool is_available_pass(const std::string& name) const {
+        return available.count(name) != 0;
+    }
+    void add_pass(const std::string& name) {
+        if (is_available_pass(name)) {
+            options.insert(name);
+        }
+    }
+    bool enable_const_fold() const {
+        return options.count("--const-fold") != 0;
+    }
+};
 
 std::ostream& help(std::ostream& out) {
     out
@@ -37,6 +59,7 @@ std::ostream& help(std::ostream& out) {
     << "   -s,   --sema           | view analysed semantic context.\n"
     << "   -sa,  --sema-ast       | view analysed ast with semantic result.\n"
     << "   -m,   --mlir           | view generated mlir.\n"
+    << "         --const-fold     | enable const fold.\n"
     << "file:\n"
     << "   <filename>             | input file.\n"
     << "\n";
@@ -79,6 +102,7 @@ void err() {
 
 void execute(const std::string& input_file,
              const std::string& output_file,
+             const pass_options& po,
              const u32 cmd = 0) {
     // main components of compiler
     colgm_mlir::error err;
@@ -114,7 +138,16 @@ void execute(const std::string& input_file,
 
     mlir::MLIRContext context;
     colgm_mlir::mlir_generator gen(context);
+
+    mlir::PassManager pm(&context);
+    if (po.enable_const_fold()) {
+        pm.addNestedPass<mlir::func::FuncOp>(colgm_mlir::createColgmConstFoldPass());
+    }
+
     gen.generate(parser.get_tree());
+    if (mlir::failed(pm.run(gen.get_module()))) {
+        std::exit(-1);
+    }
     if (cmd & COMPILE_VIEW_MLIR) {
         gen.dump();
         return;
@@ -128,6 +161,8 @@ i32 main(i32 argc, const char* argv[]) {
         return 0;
     }
 
+    pass_options po;
+
     // run directly or show help
     if (argc == 2) {
         std::string s(argv[1]);
@@ -136,7 +171,7 @@ i32 main(i32 argc, const char* argv[]) {
         } else if (s == "-v" || s == "--version") {
             std::clog << version;
         } else if (s[0] != '-') {
-            execute(s, "a.out.ll");
+            execute(s, "a.out.ll", po);
         } else {
             err();
         }
@@ -192,6 +227,8 @@ i32 main(i32 argc, const char* argv[]) {
             } else {
                 err();
             }
+        } else if (po.is_available_pass(args[i])) {
+            po.add_pass(args[i]);
         } else if (!input_file.length()) {
             input_file = args[i];
         } else {
@@ -204,6 +241,6 @@ i32 main(i32 argc, const char* argv[]) {
         err();
     }
 
-    execute(input_file, output_file, cmd);
+    execute(input_file, output_file, po, cmd);
     return 0;
 }
