@@ -1,0 +1,6 @@
+test/mlir/stack_bad_case_0.mlir:5:24: error: use of value '%b' expects different type than prior uses: 'tensor<2x4xi64>' vs 'tensor<3x4xi64>'
+  %0 = colgm.stack(%a, %b) {target_shape = [2]} : tensor<2x4xi64> -> tensor<2x2x4xi64>
+                       ^
+test/mlir/stack_bad_case_0.mlir:4:49: note: prior use here
+func.func @bad_mixed_types(%a: tensor<2x4xi64>, %b: tensor<3x4xi64>) -> tensor<2x2x4xi64> {
+                                                ^

@@ -1,0 +1,4 @@
+test/mlir/stack_bad_case_3.mlir:5:8: error: 'colgm.stack' op operand dim[0] = 4 != result dim[1] = 2
+  %0 = colgm.stack(%a, %b) {target_shape = [2]} : tensor<4xf32> -> tensor<2x2xf32>
+       ^
+test/mlir/stack_bad_case_3.mlir:5:8: note: see current operation: %0 = "colgm.stack"(%arg0, %arg1) {target_shape = [2]} : (tensor<4xf32>, tensor<4xf32>) -> tensor<2x2xf32>

@@ -10,6 +10,7 @@
 #include "dialect/colgm/cast_op.hpp"
 #include "dialect/colgm/constant_op.hpp"
 #include "dialect/colgm/elements.hpp"
+#include "dialect/colgm/stack.hpp"
 #include "dialect/colgm/slice.hpp"
 #include "dialect/colgm/yield.hpp"
 #include "dialect/colgm/if_op.hpp"
@@ -50,6 +51,7 @@ colgm_dialect::colgm_dialect(mlir::MLIRContext* ctx):
         cast_op,
         constant_op,
         elements_op,
+        stack_op,
         slice_op,
         yield_op,
         if_op,

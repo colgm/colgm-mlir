@@ -65,6 +65,7 @@ set(COLGM_LIB_SOURCES
     src/dialect/colgm/cast_op.cpp
     src/dialect/colgm/constant_op.cpp
     src/dialect/colgm/elements.cpp
+    src/dialect/colgm/stack.cpp
     src/dialect/colgm/for_op.cpp
     src/dialect/colgm/if_op.cpp
     src/dialect/colgm/reduce_sum.cpp

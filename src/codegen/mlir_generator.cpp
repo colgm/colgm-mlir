@@ -173,11 +173,22 @@ mlir::Value mlir_generator::generate_tensor(tensor* t) {
         elems.push_back(generate_expr(i));
     }
 
-    auto ty = convert_type(t->get_resolved());
-    auto shape = llvm::cast<mlir::RankedTensorType>(ty).getShape();
-    auto op = elements_op::create(builder, to_loc(t), elems, shape);
+    auto full_ty = convert_type(t->get_resolved());
+    auto full_shape = llvm::cast<mlir::RankedTensorType>(full_ty).getShape();
+    auto operand_shape = llvm::cast<mlir::RankedTensorType>(elems[0].getType()).getShape();
 
-    return op->getResult(0);
+    if (operand_shape.empty()) {
+        // rank-0 operands: target_shape = full_shape
+        auto op = elements_op::create(builder, to_loc(t), elems, full_shape);
+        return op->getResult(0);
+    } else {
+        // rank>0 operands: target_shape = outer nesting dims
+        auto target_rank = full_shape.size() - operand_shape.size();
+        llvm::SmallVector<i64> target_shape(
+            full_shape.begin(), full_shape.begin() + target_rank);
+        auto op = stack_op::create(builder, to_loc(t), elems, target_shape);
+        return op->getResult(0);
+    }
 }
 
 mlir::Value mlir_generator::generate_identifier(identifier* i) {

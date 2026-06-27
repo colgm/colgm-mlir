@@ -1,0 +1,4 @@
+test/mlir/stack_bad_case_1.mlir:5:8: error: 'colgm.stack' op operand count 2 != product of target_shape dims 3
+  %0 = colgm.stack(%a, %b) {target_shape = [3]} : tensor<4xf32> -> tensor<3x4xf32>
+       ^
+test/mlir/stack_bad_case_1.mlir:5:8: note: see current operation: %0 = "colgm.stack"(%arg0, %arg1) {target_shape = [3]} : (tensor<4xf32>, tensor<4xf32>) -> tensor<3x4xf32>

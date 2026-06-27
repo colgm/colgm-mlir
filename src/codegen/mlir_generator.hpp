@@ -23,6 +23,7 @@
 #include "dialect/colgm/cmp_op.hpp"
 #include "dialect/colgm/constant_op.hpp"
 #include "dialect/colgm/elements.hpp"
+#include "dialect/colgm/stack.hpp"
 #include "dialect/colgm/if_op.hpp"
 #include "dialect/colgm/for_op.hpp"
 #include "dialect/colgm/slice.hpp"
