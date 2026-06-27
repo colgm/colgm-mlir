@@ -5,13 +5,13 @@
 
 namespace colgm_mlir {
 
-std::unique_ptr<mlir::Pass> createColgmConstFoldPass() {
+std::unique_ptr<mlir::Pass> create_colgm_const_fold_pass() {
     return std::make_unique<colgm_const_fold_pass>();
 }
 
 // shared folding logic for ops that pack N constants into one constant
 template <typename OpTy>
-static void tryFoldPackOp(OpTy elem) {
+static void try_fold_pack_op(OpTy elem) {
     llvm::SmallVector<mlir::DenseElementsAttr> const_values;
     llvm::SmallVector<constant_op> source_ops;
     bool all_const = true;
@@ -61,10 +61,10 @@ static void tryFoldPackOp(OpTy elem) {
 
 void colgm_const_fold_pass::runOnOperation() {
     getOperation().walk([&](elements_op elem) {
-        tryFoldPackOp(elem);
+        try_fold_pack_op(elem);
     });
     getOperation().walk([&](stack_op elem) {
-        tryFoldPackOp(elem);
+        try_fold_pack_op(elem);
     });
 }
 

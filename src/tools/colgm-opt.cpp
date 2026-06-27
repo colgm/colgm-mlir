@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
 
     // Force-link constfold pass (static registration via PassRegistration
     // would be dropped by linker since constfold.cpp is in a .a archive).
-    (void)colgm_mlir::createColgmConstFoldPass();
+    (void)colgm_mlir::create_colgm_const_fold_pass();
 
     return mlir::asMainReturnCode(
         mlir::MlirOptMain(argc, argv, "colgm-opt", registry));

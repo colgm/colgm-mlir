@@ -141,7 +141,7 @@ void execute(const std::string& input_file,
 
     mlir::PassManager pm(&context);
     if (po.enable_const_fold()) {
-        pm.addNestedPass<mlir::func::FuncOp>(colgm_mlir::createColgmConstFoldPass());
+        pm.addNestedPass<mlir::func::FuncOp>(colgm_mlir::create_colgm_const_fold_pass());
     }
 
     gen.generate(parser.get_tree());

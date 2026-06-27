@@ -7,7 +7,7 @@
 
 namespace colgm_mlir {
 
-std::unique_ptr<mlir::Pass> createColgmConstFoldPass();
+std::unique_ptr<mlir::Pass> create_colgm_const_fold_pass();
 
 class colgm_const_fold_pass: public mlir::PassWrapper<colgm_const_fold_pass,
                                                       mlir::OperationPass<mlir::func::FuncOp>> {
