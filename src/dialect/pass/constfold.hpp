@@ -2,8 +2,14 @@
 
 #include <mlir/Pass/Pass.h>
 #include <mlir/Dialect/Func/IR/FuncOps.h>
+#include <mlir/Transforms/GreedyPatternRewriteDriver.h>
 
 #include <memory>
+
+#include "dialect/colgm/elements.hpp"
+#include "dialect/colgm/stack.hpp"
+#include "dialect/colgm/constant_op.hpp"
+#include "dialect/colgm/unary_op.hpp"
 
 namespace colgm_mlir {
 
@@ -19,6 +25,27 @@ public:
         return "Fold colgm.elements with all-constant operands into colgm.constant";
     }
     void runOnOperation() override;
+};
+
+struct fold_neg : public mlir::OpRewritePattern<neg_op> {
+    using mlir::OpRewritePattern<neg_op>::OpRewritePattern;
+
+    mlir::LogicalResult matchAndRewrite(neg_op elem,
+                                        mlir::PatternRewriter& rewriter) const override;
+};
+
+struct fold_elements : public mlir::OpRewritePattern<elements_op> {
+    using mlir::OpRewritePattern<elements_op>::OpRewritePattern;
+
+    mlir::LogicalResult matchAndRewrite(elements_op elem,
+                                        mlir::PatternRewriter& rewriter) const override;
+};
+
+struct fold_stack : public mlir::OpRewritePattern<stack_op> {
+    using mlir::OpRewritePattern<stack_op>::OpRewritePattern;
+
+    mlir::LogicalResult matchAndRewrite(stack_op elem,
+                                        mlir::PatternRewriter& rewriter) const override;
 };
 
 }

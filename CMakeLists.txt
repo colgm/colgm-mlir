@@ -140,6 +140,8 @@ if(ENABLE_MLIR)
         MLIRDialect
         MLIRFuncDialect
         MLIRPass
+        MLIRTransformUtils
+        MLIRRewrite
     )
 
     # Standalone colgm-opt tool (like mlir-opt, but statically includes our dialect)
