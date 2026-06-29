@@ -92,6 +92,45 @@ static bool try_fold_neg(neg_op elem, mlir::PatternRewriter& rewriter) {
     return true;
 }
 
+template <typename OpTy>
+static bool try_canonicalize_binary_op(OpTy elem, mlir::PatternRewriter& rewriter) {
+    mlir::Value rhs = elem.get_rhs();
+    auto constant = rhs.getDefiningOp<constant_op>();
+    if (!constant) {
+        return false;
+    }
+
+    auto dea = llvm::dyn_cast<mlir::DenseElementsAttr>(constant.get_value());
+    if (!dea) {
+        return false;
+    }
+
+    if (!dea.isSplat()) {
+        return false;
+    }
+
+    auto type = dea.getElementType();
+    if (auto int_ty = llvm::dyn_cast<mlir::IntegerType>(type)) {
+        if (mlir::IntegerAttr::get(type, 0) == dea.getSplatValue<mlir::Attribute>()) {
+            rewriter.replaceOp(elem, elem.get_lhs());
+            rewriter.eraseOp(constant);
+            return true;
+        }
+        return false;
+    }
+
+    if (auto float_ty = llvm::dyn_cast<mlir::FloatType>(type)) {
+        if (mlir::FloatAttr::get(type, 0.0) == dea.getSplatValue<mlir::Attribute>()) {
+            rewriter.replaceOp(elem, elem.get_lhs());
+            rewriter.eraseOp(constant);
+            return true;
+        }
+        return false;
+    }
+
+    return false;
+}
+
 mlir::LogicalResult fold_neg::matchAndRewrite(neg_op elem,
                                               mlir::PatternRewriter& rewriter) const {
     return mlir::success(try_fold_neg(elem, rewriter));
@@ -107,9 +146,20 @@ mlir::LogicalResult fold_stack::matchAndRewrite(stack_op elem,
     return mlir::success(try_fold_pack_op(elem, rewriter));
 }
 
+mlir::LogicalResult canonicalize_add::matchAndRewrite(add_op elem,
+                                                      mlir::PatternRewriter& rewriter) const {
+    return mlir::success(try_canonicalize_binary_op(elem, rewriter));
+}
+
+mlir::LogicalResult canonicalize_sub::matchAndRewrite(sub_op elem,
+                                                      mlir::PatternRewriter& rewriter) const {
+    return mlir::success(try_canonicalize_binary_op(elem, rewriter));
+}
+
 void colgm_const_fold_pass::runOnOperation() {
     mlir::RewritePatternSet patterns(&getContext());
-    patterns.add<fold_neg, fold_elements, fold_stack>(&getContext());
+    patterns.add<fold_neg, fold_elements, fold_stack,
+                 canonicalize_add, canonicalize_sub>(&getContext());
 
     mlir::GreedyRewriteConfig config;
     config.setMaxIterations(32);

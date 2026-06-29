@@ -9,6 +9,7 @@
 #include "dialect/colgm/elements.hpp"
 #include "dialect/colgm/stack.hpp"
 #include "dialect/colgm/constant_op.hpp"
+#include "dialect/colgm/binary_op.hpp"
 #include "dialect/colgm/unary_op.hpp"
 
 namespace colgm_mlir {
@@ -22,7 +23,7 @@ public:
 
     llvm::StringRef getArgument() const override { return "colgm-const-fold"; }
     llvm::StringRef getDescription() const override {
-        return "Fold colgm.elements with all-constant operands into colgm.constant";
+        return "Fold IR with all-constant operands into colgm.constant / Do canonicalization";
     }
     void runOnOperation() override;
 };
@@ -45,6 +46,20 @@ struct fold_stack : public mlir::OpRewritePattern<stack_op> {
     using mlir::OpRewritePattern<stack_op>::OpRewritePattern;
 
     mlir::LogicalResult matchAndRewrite(stack_op elem,
+                                        mlir::PatternRewriter& rewriter) const override;
+};
+
+struct canonicalize_add : public mlir::OpRewritePattern<add_op> {
+    using mlir::OpRewritePattern<add_op>::OpRewritePattern;
+
+    mlir::LogicalResult matchAndRewrite(add_op elem,
+                                        mlir::PatternRewriter& rewriter) const override;
+};
+
+struct canonicalize_sub : public mlir::OpRewritePattern<sub_op> {
+    using mlir::OpRewritePattern<sub_op>::OpRewritePattern;
+
+    mlir::LogicalResult matchAndRewrite(sub_op elem,
                                         mlir::PatternRewriter& rewriter) const override;
 };
 

@@ -1,0 +1,13 @@
+func main() {
+    var a = 1;
+    var b = a - 0;
+    var c = a + 0;
+
+    var x = [1, 2, 3];
+    var y = x - [0, 0, 0];
+    var z = x + [0, 0, 0];
+
+    var foo = [[1, 1], [2, 2]];
+    var bar = foo - [[0, 0], [0, 0]];
+    var baz = foo + [[0, 0], [0, 0]];
+}

@@ -14,9 +14,11 @@
 #include "parse/parser.hpp"
 #include "sema/storage.hpp"
 #include "sema/sema.hpp"
-#include "dialect/pass/constfold.hpp"
+
 #include "dialect/dialect.hpp"
 #include "codegen/mlir_generator.hpp"
+#include "dialect/pass/constfold.hpp"
+#include "dialect/pass/colgm_lowering.hpp"
 
 using colgm_mlir::u32;
 using colgm_mlir::i32;
@@ -29,7 +31,8 @@ const u32 COMPILE_VIEW_MLIR = 1 << 4;
 
 struct pass_options {
     const std::unordered_set<std::string> available = {
-        "--const-fold"
+        "--const-fold",
+        "--lowering"
     };
     std::unordered_set<std::string> options;
 
@@ -43,6 +46,9 @@ struct pass_options {
     }
     bool enable_const_fold() const {
         return options.count("--const-fold") != 0;
+    }
+    bool enable_lowering() const {
+        return options.count("--lowering") != 0;
     }
 };
 
@@ -59,7 +65,7 @@ std::ostream& help(std::ostream& out) {
     << "   -s,   --sema           | view analysed semantic context.\n"
     << "   -sa,  --sema-ast       | view analysed ast with semantic result.\n"
     << "   -m,   --mlir           | view generated mlir.\n"
-    << "         --const-fold     | enable const fold.\n"
+    << "         --const-fold     | enable const fold/canonicalization.\n"
     << "file:\n"
     << "   <filename>             | input file.\n"
     << "\n";
@@ -142,6 +148,9 @@ void execute(const std::string& input_file,
     mlir::PassManager pm(&context);
     if (po.enable_const_fold()) {
         pm.addNestedPass<mlir::func::FuncOp>(colgm_mlir::create_colgm_const_fold_pass());
+    }
+    if (po.enable_lowering()) {
+        pm.addPass(colgm_mlir::create_colgm_lowering_pass());
     }
 
     gen.generate(parser.get_tree());

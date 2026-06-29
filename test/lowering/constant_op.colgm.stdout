@@ -1,0 +1,12 @@
+module {
+  func.func @main() {
+    %cst = arith.constant dense<1> : tensor<i64> loc(#loc1)
+    %cst_0 = arith.constant dense<[1, 2, 3]> : tensor<3xi64> loc(#loc2)
+    %cst_1 = arith.constant dense<[[1, 1], [2, 2]]> : tensor<2x2xi64> loc(#loc3)
+    return loc(#loc)
+  } loc(#loc)
+} loc(#loc)
+#loc = loc("test/lowering/constant_op.colgm":1:1)
+#loc1 = loc("test/lowering/constant_op.colgm":2:13)
+#loc2 = loc("test/lowering/constant_op.colgm":6:13)
+#loc3 = loc("test/lowering/constant_op.colgm":10:15)

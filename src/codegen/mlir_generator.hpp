@@ -8,6 +8,10 @@
 #include <mlir/IR/Location.h>
 #include <mlir/Support/LogicalResult.h>
 #include <mlir/Dialect/Func/IR/FuncOps.h>
+#include <mlir/Dialect/Arith/IR/Arith.h>
+#include <mlir/Dialect/Math/IR/Math.h>
+#include <mlir/Dialect/Tensor/IR/Tensor.h>
+#include <mlir/Dialect/SCF/IR/SCF.h>
 
 #include <string>
 #include <vector>
@@ -110,6 +114,10 @@ public:
     mlir_generator(mlir::MLIRContext& c): ctx(c), builder(&c) {
         ctx.getOrLoadDialect<colgm_dialect>();
         ctx.getOrLoadDialect<mlir::func::FuncDialect>();
+        ctx.getOrLoadDialect<mlir::arith::ArithDialect>();
+        ctx.getOrLoadDialect<mlir::math::MathDialect>();
+        ctx.getOrLoadDialect<mlir::tensor::TensorDialect>();
+        ctx.getOrLoadDialect<mlir::scf::SCFDialect>();
     }
     mlir::ModuleOp& get_module() { return module; }
     void generate(root*);

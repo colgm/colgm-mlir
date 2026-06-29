@@ -1,0 +1,12 @@
+module {
+  func.func @main() {
+    %0 = colgm.constant dense<1> : tensor<i64> loc(#loc1)
+    %1 = colgm.constant dense<[1, 2, 3]> : tensor<3xi64> loc(#loc2)
+    %2 = colgm.constant dense<[[1, 1], [2, 2]]> : tensor<2x2xi64> loc(#loc3)
+    return loc(#loc)
+  } loc(#loc)
+} loc(#loc)
+#loc = loc("test/codegen/example_15.colgm":1:1)
+#loc1 = loc("test/codegen/example_15.colgm":2:13)
+#loc2 = loc("test/codegen/example_15.colgm":6:13)
+#loc3 = loc("test/codegen/example_15.colgm":10:15)
