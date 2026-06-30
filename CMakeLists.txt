@@ -9,6 +9,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+find_program(MOLD_PATH mold)
+if (MOLD_PATH)
+    add_link_options(-fuse-ld=mold)
+    message(STATUS "Using mold linker: ${MOLD_PATH}")
+endif()
+
 # ---- platform detection ----
 if(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)

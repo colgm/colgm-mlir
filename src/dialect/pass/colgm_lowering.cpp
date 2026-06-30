@@ -18,7 +18,33 @@ lowering_constant::matchAndRewrite(mlir::Operation* op,
     return mlir::success();
 }
 
+mlir::LogicalResult
+lowering_add::matchAndRewrite(mlir::Operation* op,
+                              llvm::ArrayRef<mlir::Value> operands,
+                              mlir::ConversionPatternRewriter& rewriter) const {
+    auto add = llvm::cast<add_op>(op);
+    auto lhs = add.get_lhs();
+    auto rhs = add.get_rhs();
+    mlir::ValueRange vr = { lhs, rhs };
+
+    auto ty = llvm::cast<mlir::RankedTensorType>(lhs.getType());
+    auto base_type = ty.getElementType();
+
+    if (llvm::isa<mlir::IntegerType>(base_type)) {
+        auto new_op = mlir::arith::AddIOp::create(rewriter, op->getLoc(), vr);
+        rewriter.replaceOp(op, new_op->getResults());
+    } else if (llvm::isa<mlir::FloatType>(base_type)) {
+        auto new_op = mlir::arith::AddFOp::create(rewriter, op->getLoc(), vr);
+        rewriter.replaceOp(op, new_op->getResults());
+    } else {
+        return mlir::failure();
+    }
+    return mlir::success();
+}
+
 void colgm_lowering::runOnOperation() {
+    cvt.addConversion([](mlir::Type type) { return type; });
+
     mlir::ConversionTarget target(getContext());
     target.addIllegalDialect<colgm_dialect>();
     target.addLegalDialect<mlir::func::FuncDialect>();
@@ -29,7 +55,7 @@ void colgm_lowering::runOnOperation() {
 
     
     mlir::RewritePatternSet patterns(&getContext());
-    patterns.add<lowering_constant>(cvt, &getContext());
+    patterns.add<lowering_constant, lowering_add>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
     if (mlir::failed(mlir::applyPartialConversion(getOperation(), target, frozen))) {

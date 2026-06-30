@@ -43,4 +43,14 @@ struct lowering_constant : public mlir::ConversionPattern {
                     mlir::ConversionPatternRewriter& rewriter) const override;
 };
 
+struct lowering_add : public mlir::ConversionPattern {
+    explicit lowering_add(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
+        : mlir::ConversionPattern(cvt, add_op::getOperationName(), 1, ctx) {}
+
+    mlir::LogicalResult
+    matchAndRewrite(mlir::Operation* op,
+                    llvm::ArrayRef<mlir::Value> operands,
+                    mlir::ConversionPatternRewriter& rewriter) const override;
+};
+
 }

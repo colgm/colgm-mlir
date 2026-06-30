@@ -63,5 +63,19 @@ struct canonicalize_sub : public mlir::OpRewritePattern<sub_op> {
                                         mlir::PatternRewriter& rewriter) const override;
 };
 
+struct canonicalize_mul : public mlir::OpRewritePattern<mul_op> {
+    using mlir::OpRewritePattern<mul_op>::OpRewritePattern;
+
+    mlir::LogicalResult matchAndRewrite(mul_op elem,
+                                        mlir::PatternRewriter& rewriter) const override;
+};
+
+struct canonicalize_div : public mlir::OpRewritePattern<div_op> {
+    using mlir::OpRewritePattern<div_op>::OpRewritePattern;
+
+    mlir::LogicalResult matchAndRewrite(div_op elem,
+                                        mlir::PatternRewriter& rewriter) const override;
+};
+
 }
 

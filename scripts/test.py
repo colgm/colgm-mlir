@@ -66,7 +66,7 @@ def show_diff(expect: str, actual: str):
         actual.splitlines()
     )
 
-    print(yellow("============= actual vs expected ============="))
+    print(yellow("==================== actual vs expected ===================="))
     for line in diff:
         if line.startswith("+"):
             print(green(line))
@@ -76,7 +76,7 @@ def show_diff(expect: str, actual: str):
             print(yellow(line))
         else:
             print(line)
-    print(yellow("================== end diff =================="))
+    print(yellow("========================= end diff ========================="))
 
 def check(cmd: list[str], expect_stdout: str, expect_stderr: str) -> bool:
     res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
