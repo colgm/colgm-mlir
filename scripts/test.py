@@ -1,6 +1,23 @@
 from pathlib import Path
 import subprocess
 import sys
+import os
+import difflib
+
+def red(s: str) -> str:
+    if not os.isatty(1):
+        return s
+    return "\033[91m" + s + "\033[0m"
+
+def green(s: str) -> str:
+    if not os.isatty(1):
+        return s
+    return "\033[92m" + s + "\033[0m"
+
+def yellow(s: str) -> str:
+    if not os.isatty(1):
+        return s
+    return "\033[93m" + s + "\033[0m"
 
 def find_binary_tests():
     binary_tests = [
@@ -19,9 +36,9 @@ def test_binary() -> tuple[int, int]:
     for t in tests:
         res = subprocess.run([str(t)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if res.returncode != 0:
-            print("[FAILED]", t)
+            print(red("[FAILED]"), t)
         else:
-            print("[PASSED]", t)
+            print(green("[PASSED]"), t)
             passed += 1
     return passed, len(tests)
 
@@ -43,25 +60,38 @@ def de_color(text: str) -> str:
     text = text.replace("\r", "")
     return text
 
+def show_diff(expect: str, actual: str):
+    diff = difflib.ndiff(
+        expect.splitlines(),
+        actual.splitlines()
+    )
+
+    print(yellow("============= actual vs expected ============="))
+    for line in diff:
+        if line.startswith("+"):
+            print(green(line))
+        elif line.startswith("-"):
+            print(red(line))
+        elif line.startswith("?"):
+            print(yellow(line))
+        else:
+            print(line)
+    print(yellow("================== end diff =================="))
+
 def check(cmd: list[str], expect_stdout: str, expect_stderr: str) -> bool:
     res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     expect_stdout = de_color(expect_stdout)
     expect_stderr = de_color(expect_stderr)
     stdout = de_color(res.stdout.decode("utf-8"))
     stderr = de_color(res.stderr.decode("utf-8"))
+    command = " ".join(cmd)
     if stdout != expect_stdout:
-        print(f"Error: {cmd}")
-        eo = expect_stdout.replace(" ", ".").replace("\n", "\n|")
-        ao = stdout.replace(" ", ".").replace("\n", "\n|")
-        print(f"Expected stdout:\n{eo}")
-        print(f"Actual stdout:\n{ao}")
+        print(f"{red('[ERROR-stdout]')}: {command}")
+        show_diff(expect_stdout, stdout)
         return False
     if stderr != expect_stderr:
-        print(f"Error: {cmd}")
-        ee = expect_stderr.replace(" ", ".").replace("\n", "\n|")
-        ae = stderr.replace(" ", ".").replace("\n", "\n|")
-        print(f"Expected stderr:\n{ee}")
-        print(f"Actual stderr:\n{ae}")
+        print(f"{red('[ERROR-stderr]')}: {command}")
+        show_diff(expect_stderr, stderr)
         return False
     return True
 
@@ -80,7 +110,7 @@ def test(executable: Path, directory: Path, suffix: str, options: list[str]) -> 
         if option_file.exists():
             with open(option_file, "r") as f:
                 cmd += f.read().split(" ")
-        cmd +=[str(test_file)] + options
+        cmd += [str(test_file)] + options
         with open(test_file_stdout, "r") as f:
             stdout = f.read()
         with open(test_file_stderr, "r") as f:
@@ -88,9 +118,9 @@ def test(executable: Path, directory: Path, suffix: str, options: list[str]) -> 
         res = check(cmd, stdout, stderr)
         passed += 1 if res else 0
         if res:
-            print("[PASSED]", stage_test[i])
+            print(green("[PASSED]"), stage_test[i])
         else:
-            print("[FAILED]", stage_test[i])
+            print(red("[FAILED]"), stage_test[i])
     return passed, len(stage_test)
 
 def test_lexer(executable: Path) -> tuple[int, int]:
@@ -173,7 +203,10 @@ if __name__ == "__main__":
     len_test += len_bin_test
 
     print("=" * 60)
-    print(f"{passed}/{len_test} passed")
+    f = green if passed == len_test else yellow
+    f = red if passed == 0 else f
+    res = f(f"{passed}/{len_test}")
+    print(f"{res} passed")
     print("=" * 60)
 
     if passed != len_test:

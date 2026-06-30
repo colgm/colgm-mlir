@@ -1,0 +1,22 @@
+module {
+  func.func @main() {
+    %0 = colgm.constant dense<0> : tensor<i64> loc(#loc1)
+    %1 = colgm.constant dense<0> : tensor<i64> loc(#loc2)
+    %2 = colgm.constant dense<100> : tensor<i64> loc(#loc3)
+    %3 = colgm.cast %1 : tensor<i64> -> index loc(#loc4)
+    %4 = colgm.cast %2 : tensor<i64> -> index loc(#loc4)
+    %5 = colgm.for %arg0 = %3 to %4 iter_args(%arg1 = %0) -> tensor<i64> {
+      %6 = colgm.cast %arg0 : index -> tensor<i64> loc(#loc5)
+      %7 = colgm.add %arg1, %6 : tensor<i64> loc(#loc5)
+      colgm.yield %7 : tensor<i64> loc(#loc6)
+    } loc(#loc4)
+    return loc(#loc)
+  } loc(#loc)
+} loc(#loc)
+#loc = loc("test/codegen/example_16.colgm":1:1)
+#loc1 = loc("test/codegen/example_16.colgm":2:38)
+#loc2 = loc("test/codegen/example_16.colgm":2:22)
+#loc3 = loc("test/codegen/example_16.colgm":2:25)
+#loc4 = loc("test/codegen/example_16.colgm":2:13)
+#loc5 = loc("test/codegen/example_16.colgm":3:17)
+#loc6 = loc("test/codegen/example_16.colgm":3:9)

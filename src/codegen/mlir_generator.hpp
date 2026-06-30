@@ -6,6 +6,7 @@
 #include <mlir/IR/Value.h>
 #include <mlir/IR/BuiltinTypes.h>
 #include <mlir/IR/Location.h>
+#include <mlir/IR/OwningOpRef.h>
 #include <mlir/Support/LogicalResult.h>
 #include <mlir/Dialect/Func/IR/FuncOps.h>
 #include <mlir/Dialect/Arith/IR/Arith.h>
@@ -72,7 +73,7 @@ class mlir_generator {
 private:
     mlir::MLIRContext& ctx;
     mlir::OpBuilder builder;
-    mlir::ModuleOp module;
+    mlir::OwningOpRef<mlir::ModuleOp> module;
 
     var_stack vars;
 
@@ -119,17 +120,17 @@ public:
         ctx.getOrLoadDialect<mlir::tensor::TensorDialect>();
         ctx.getOrLoadDialect<mlir::scf::SCFDialect>();
     }
-    mlir::ModuleOp& get_module() { return module; }
+    mlir::ModuleOp get_module() { return module.get(); }
     void generate(root*);
     void dump() {
         // verify before dump
-        if (failed(module.verify())) {
+        if (failed(module->verify())) {
             module->emitError("module verification failed");
         }
 
         mlir::OpPrintingFlags flags;
         flags.enableDebugInfo();
-        module.print(llvm::outs(), flags);
+        module->print(llvm::outs(), flags);
     }
 };
 

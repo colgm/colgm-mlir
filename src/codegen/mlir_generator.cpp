@@ -55,7 +55,7 @@ void mlir_generator::generate_func(func_decl* f) {
         result_types.push_back(ret_ty);
     }
 
-    builder.setInsertionPointToStart(module.getBody());
+    builder.setInsertionPointToStart(module->getBody());
     auto func = mlir::func::FuncOp::create(
         builder, to_loc(f), f->get_name(),
         builder.getFunctionType(args, result_types));
@@ -198,6 +198,14 @@ mlir::Value mlir_generator::generate_identifier(identifier* i) {
 mlir::Value mlir_generator::generate_binary_expr(binary_expr* n) {
     auto lhs = generate_expr(n->get_lhs());
     auto rhs = generate_expr(n->get_rhs());
+
+    // cast index type to normal type if iter arg is used in the binary expression
+    if (llvm::isa<mlir::IndexType>(lhs.getType()) && !llvm::isa<mlir::IndexType>(rhs.getType())) {
+        lhs = cast_op::create(builder, to_loc(n), lhs, rhs.getType())->getResult(0);
+    }
+    if (llvm::isa<mlir::IndexType>(rhs.getType()) && !llvm::isa<mlir::IndexType>(lhs.getType())) {
+        rhs = cast_op::create(builder, to_loc(n), rhs, lhs.getType())->getResult(0);
+    }
 
     switch (n->get_op_type()) {
         case binary_expr::op::add: {
