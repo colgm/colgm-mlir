@@ -1,0 +1,14 @@
+func test(i: i64) -> i64 {
+    var res = if i < 0 {
+        yield 0
+    } else {
+        yield i
+    }
+    return res
+}
+
+func main() {
+    var a = for i in 0..10 init(b = 0) {
+        yield test(i)
+    }
+}

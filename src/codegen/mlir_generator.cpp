@@ -261,6 +261,10 @@ mlir::Value mlir_generator::generate_binary_expr(binary_expr* n) {
 mlir::Value mlir_generator::generate_unary_expr(unary_expr* n) {
     auto v = generate_expr(n->get_operand());
 
+    if (llvm::isa<mlir::IndexType>(v.getType())) {
+        v = cast_op::create(builder, to_loc(n), v, convert_type(n->get_resolved()))->getResult(0);
+    }
+
     switch (n->get_op_type()) {
         case unary_expr::op::sub: {
             auto op = neg_op::create(builder, to_loc(n), v);
@@ -282,7 +286,12 @@ mlir::Value mlir_generator::generate_call_expr(call_expr* n) {
 
     llvm::SmallVector<mlir::Value> args;
     for (auto i : n->get_args()) {
-        args.push_back(generate_expr(i));
+        auto arg = generate_expr(i);
+        if (llvm::isa<mlir::IndexType>(arg.getType())) {
+            arg = cast_op::create(builder, to_loc(n), arg, convert_type(i->get_resolved()))
+                      ->getResult(0);
+        }
+        args.push_back(arg);
     }
 
     auto f = static_cast<identifier*>(n->get_callee())->get_name();

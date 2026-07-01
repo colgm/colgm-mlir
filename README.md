@@ -46,6 +46,7 @@ All tests should have `stdout` and `stderr` files, for example:
 test/test_add.colgm
 test/test_add.colgm.stdout
 test/test_add.colgm.stderr
+test/test_add.colgm.option # if need specific compile options for this test
 ```
 
 ## TODO

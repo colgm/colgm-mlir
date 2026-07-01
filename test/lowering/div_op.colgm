@@ -1,0 +1,16 @@
+func main() {
+    var a = 6
+    var b = a / 2
+    var c = 6.0
+    var d = c / 2.0
+
+    var x = [6, 4, 2]
+    var y = x / [2, 2, 2]
+    var z = [6.0, 4.0, 2.0]
+    var w = z / [2.0, 2.0, 2.0]
+
+    var foo = [[6, 4], [2, 0]]
+    var bar = foo / [[2, 2], [2, 2]]
+    var baz = [[6.0, 4.0], [2.0, 0.0]]
+    var qux = baz / [[2.0, 2.0], [2.0, 2.0]]
+}

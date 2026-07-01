@@ -1,0 +1,16 @@
+func main() {
+    var a = 3
+    var b = a - 1
+    var c = 3.5
+    var d = c - 1.2
+
+    var x = [3, 2, 1]
+    var y = x - [1, 1, 1]
+    var z = [3.5, 2.5, 1.5]
+    var w = z - [0.5, 0.5, 0.5]
+
+    var foo = [[3, 2], [1, 0]]
+    var bar = foo - [[1, 1], [1, 1]]
+    var baz = [[3.5, 2.5], [1.5, 0.5]]
+    var qux = baz - [[0.5, 0.5], [0.5, 0.5]]
+}
