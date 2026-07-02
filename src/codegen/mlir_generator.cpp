@@ -30,6 +30,13 @@ mlir::Type mlir_generator::convert_type(const type& t) {
     return mlir::RankedTensorType::get(shape, et);
 }
 
+mlir::Value mlir_generator::convert_index_value(mlir::Value val,
+                                                const span& loc,
+                                                const type t) {
+    auto op = cast_op::create(builder, to_loc(loc), val, convert_type(t));
+    return op->getResult(0);
+}
+
 void mlir_generator::flatten_tensor(std::vector<expr*>& v, tensor* n) {
     for (auto i : n->get_values()) {
         if (i->is(ast_type::tensor)) {
@@ -201,10 +208,18 @@ mlir::Value mlir_generator::generate_binary_expr(binary_expr* n) {
 
     // cast index type to normal type if iter arg is used in the binary expression
     if (llvm::isa<mlir::IndexType>(lhs.getType()) && !llvm::isa<mlir::IndexType>(rhs.getType())) {
-        lhs = cast_op::create(builder, to_loc(n), lhs, rhs.getType())->getResult(0);
+        lhs = convert_index_value(
+            lhs,
+            n->get_lhs()->get_location(),
+            n->get_lhs()->get_resolved()
+        );
     }
     if (llvm::isa<mlir::IndexType>(rhs.getType()) && !llvm::isa<mlir::IndexType>(lhs.getType())) {
-        rhs = cast_op::create(builder, to_loc(n), rhs, lhs.getType())->getResult(0);
+        rhs = convert_index_value(
+            rhs,
+            n->get_rhs()->get_location(),
+            n->get_rhs()->get_resolved()
+        );
     }
 
     switch (n->get_op_type()) {
@@ -262,7 +277,11 @@ mlir::Value mlir_generator::generate_unary_expr(unary_expr* n) {
     auto v = generate_expr(n->get_operand());
 
     if (llvm::isa<mlir::IndexType>(v.getType())) {
-        v = cast_op::create(builder, to_loc(n), v, convert_type(n->get_resolved()))->getResult(0);
+        v = convert_index_value(
+            v,
+            n->get_operand()->get_location(),
+            n->get_resolved()
+        );
     }
 
     switch (n->get_op_type()) {
@@ -276,11 +295,11 @@ mlir::Value mlir_generator::generate_unary_expr(unary_expr* n) {
 }
 
 mlir::Value mlir_generator::generate_call_expr(call_expr* n) {
-    if (type::isa<unknown_type>(n->get_callee()->get_resolved())) {
+    if (!n->get_callee()->is(ast_type::identifier)) {
         assert(false && "not implemented");
     }
 
-    if (!n->get_callee()->is(ast_type::identifier)) {
+    if (type::isa<unknown_type>(n->get_callee()->get_resolved())) {
         assert(false && "not implemented");
     }
 
@@ -288,8 +307,11 @@ mlir::Value mlir_generator::generate_call_expr(call_expr* n) {
     for (auto i : n->get_args()) {
         auto arg = generate_expr(i);
         if (llvm::isa<mlir::IndexType>(arg.getType())) {
-            arg = cast_op::create(builder, to_loc(n), arg, convert_type(i->get_resolved()))
-                      ->getResult(0);
+            arg = convert_index_value(
+                arg,
+                i->get_location(),
+                i->get_resolved()
+            );
         }
         args.push_back(arg);
     }

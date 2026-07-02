@@ -86,8 +86,16 @@ private:
             loc.begin_column + 1
         );
     }
+    mlir::Location to_loc(const span& loc) {
+        return mlir::FileLineColLoc::get(
+            builder.getStringAttr(loc.get_file()),
+            loc.begin_line,
+            loc.begin_column + 1
+        );
+    }
 
     mlir::Type convert_type(const type&);
+    mlir::Value convert_index_value(mlir::Value, const span&, const type);
     void flatten_tensor(std::vector<expr*>&, tensor*);
 
     void generate_func(func_decl*);
