@@ -1,0 +1,7 @@
+module {
+  func.func @test(%arg0: tensor<i64>) -> i64 {
+    %extracted = tensor.extract %arg0[] : tensor<i64>
+    return %extracted : i64
+  }
+}
+

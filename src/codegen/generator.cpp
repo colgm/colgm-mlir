@@ -1,10 +1,10 @@
 #include <cassert>
 
-#include "codegen/mlir_generator.hpp"
+#include "codegen/generator.hpp"
 
 namespace colgm_mlir {
 
-mlir::Type mlir_generator::convert_type(const type& t) {
+mlir::Type codegen::convert_type(const type& t) {
     if (type::isa<void_type>(t) || type::isa<unknown_type>(t)) {
         return mlir::Type();
     }
@@ -30,14 +30,14 @@ mlir::Type mlir_generator::convert_type(const type& t) {
     return mlir::RankedTensorType::get(shape, et);
 }
 
-mlir::Value mlir_generator::convert_index_value(mlir::Value val,
-                                                const span& loc,
-                                                const type t) {
+mlir::Value codegen::convert_index_value(mlir::Value val,
+                                         const span& loc,
+                                         const type t) {
     auto op = cast_op::create(builder, to_loc(loc), val, convert_type(t));
     return op->getResult(0);
 }
 
-void mlir_generator::flatten_tensor(std::vector<expr*>& v, tensor* n) {
+void codegen::flatten_tensor(std::vector<expr*>& v, tensor* n) {
     for (auto i : n->get_values()) {
         if (i->is(ast_type::tensor)) {
             flatten_tensor(v, static_cast<tensor*>(i));
@@ -47,7 +47,7 @@ void mlir_generator::flatten_tensor(std::vector<expr*>& v, tensor* n) {
     }
 }
 
-void mlir_generator::generate_func(func_decl* f) {
+void codegen::generate_func(func_decl* f) {
     vars.add_scope();
 
     auto func_ty = type::as<function_type>(f->get_resolved());
@@ -87,7 +87,7 @@ void mlir_generator::generate_func(func_decl* f) {
     vars.remove_scope();
 }
 
-void mlir_generator::generate_block(mlir::Block* entry, block_stmt* b) {
+void codegen::generate_block(mlir::Block* entry, block_stmt* b) {
     vars.add_scope();
     for (auto i : b->get_stmts()) {
         generate_stmt(entry, i);
@@ -95,7 +95,7 @@ void mlir_generator::generate_block(mlir::Block* entry, block_stmt* b) {
     vars.remove_scope();
 }
 
-void mlir_generator::generate_var_decl(mlir::Block* entry, var_decl* v) {
+void codegen::generate_var_decl(mlir::Block* entry, var_decl* v) {
     std::vector<mlir::Value> values;
     generate_expr_tuple(v->get_init(), values);
     assert(values.size() == v->get_vars().size());
@@ -104,14 +104,14 @@ void mlir_generator::generate_var_decl(mlir::Block* entry, var_decl* v) {
     }
 }
 
-void mlir_generator::generate_expr_stmt(mlir::Block* entry, expr_stmt* s) {
+void codegen::generate_expr_stmt(mlir::Block* entry, expr_stmt* s) {
     auto inner = s->get_inner();
     if (!inner) return;
     std::vector<mlir::Value> values;
     generate_expr_tuple(inner, values);
 }
 
-void mlir_generator::generate_return_stmt(mlir::Block* entry, return_stmt* r) {
+void codegen::generate_return_stmt(mlir::Block* entry, return_stmt* r) {
     if (r->get_value()) {
         auto value = generate_expr(r->get_value());
         mlir::func::ReturnOp::create(builder, to_loc(r), value);
@@ -120,7 +120,7 @@ void mlir_generator::generate_return_stmt(mlir::Block* entry, return_stmt* r) {
     }
 }
 
-void mlir_generator::generate_yield_stmt(mlir::Block* entry, yield_stmt* y) {
+void codegen::generate_yield_stmt(mlir::Block* entry, yield_stmt* y) {
     llvm::SmallVector<mlir::Value> elems;
     for (auto i : y->get_values()) {
         elems.push_back(generate_expr(i));
@@ -128,7 +128,7 @@ void mlir_generator::generate_yield_stmt(mlir::Block* entry, yield_stmt* y) {
     yield_op::create(builder, to_loc(y), elems);
 }
 
-void mlir_generator::generate_stmt(mlir::Block* entry, stmt* s) {
+void codegen::generate_stmt(mlir::Block* entry, stmt* s) {
     if (s->is(ast_type::block_stmt)) {
         generate_block(entry, static_cast<block_stmt*>(s));
     } else if (s->is(ast_type::var_decl)) {
@@ -144,7 +144,7 @@ void mlir_generator::generate_stmt(mlir::Block* entry, stmt* s) {
     }
 }
 
-mlir::Value mlir_generator::generate_int_literal(int_literal* n) {
+mlir::Value codegen::generate_int_literal(int_literal* n) {
     auto ty = convert_type(n->get_resolved());
     std::vector<i64> vals = { n->get_literal() };
     auto attr = mlir::DenseElementsAttr::get<i64>(
@@ -153,7 +153,7 @@ mlir::Value mlir_generator::generate_int_literal(int_literal* n) {
     return op->getResult(0);
 }
 
-mlir::Value mlir_generator::generate_float_literal(float_literal* n) {
+mlir::Value codegen::generate_float_literal(float_literal* n) {
     auto ty = convert_type(n->get_resolved());
     std::vector<f64> vals = { n->get_literal() };
     auto attr = mlir::DenseElementsAttr::get<f64>(
@@ -162,7 +162,7 @@ mlir::Value mlir_generator::generate_float_literal(float_literal* n) {
     return op->getResult(0);
 }
 
-mlir::Value mlir_generator::generate_bool_literal(bool_literal* n) {
+mlir::Value codegen::generate_bool_literal(bool_literal* n) {
     auto ty = convert_type(n->get_resolved());
     auto attr = mlir::DenseElementsAttr::get(
         llvm::cast<mlir::RankedTensorType>(ty),
@@ -171,7 +171,7 @@ mlir::Value mlir_generator::generate_bool_literal(bool_literal* n) {
     return op->getResult(0);
 }
 
-mlir::Value mlir_generator::generate_tensor(tensor* t) {
+mlir::Value codegen::generate_tensor(tensor* t) {
     std::vector<expr*> values;
     flatten_tensor(values, t);
 
@@ -198,11 +198,11 @@ mlir::Value mlir_generator::generate_tensor(tensor* t) {
     }
 }
 
-mlir::Value mlir_generator::generate_identifier(identifier* i) {
+mlir::Value codegen::generate_identifier(identifier* i) {
     return vars.get_var(i->get_name());
 }
 
-mlir::Value mlir_generator::generate_binary_expr(binary_expr* n) {
+mlir::Value codegen::generate_binary_expr(binary_expr* n) {
     auto lhs = generate_expr(n->get_lhs());
     auto rhs = generate_expr(n->get_rhs());
 
@@ -273,7 +273,7 @@ mlir::Value mlir_generator::generate_binary_expr(binary_expr* n) {
     return mlir::Value();
 }
 
-mlir::Value mlir_generator::generate_unary_expr(unary_expr* n) {
+mlir::Value codegen::generate_unary_expr(unary_expr* n) {
     auto v = generate_expr(n->get_operand());
 
     if (llvm::isa<mlir::IndexType>(v.getType())) {
@@ -294,7 +294,7 @@ mlir::Value mlir_generator::generate_unary_expr(unary_expr* n) {
     return mlir::Value();
 }
 
-mlir::Value mlir_generator::generate_call_expr(call_expr* n) {
+mlir::Value codegen::generate_call_expr(call_expr* n) {
     if (!n->get_callee()->is(ast_type::identifier)) {
         assert(false && "not implemented");
     }
@@ -322,14 +322,14 @@ mlir::Value mlir_generator::generate_call_expr(call_expr* n) {
     return call.getResult(0);
 }
 
-mlir::Value mlir_generator::generate_index_access(index_access* n) {
+mlir::Value codegen::generate_index_access(index_access* n) {
     auto target = generate_expr(n->get_target());
     auto index = generate_expr(n->get_index());
     auto op = slice_op::create(builder, to_loc(n), target, index, 0);
     return op->getResult(0);
 }
 
-void mlir_generator::generate_if_expr(if_expr* i, std::vector<mlir::Value>& values) {
+void codegen::generate_if_expr(if_expr* i, std::vector<mlir::Value>& values) {
     auto cond = generate_expr(i->get_condition());
 
     auto i1_ty = mlir::IntegerType::get(&ctx, 1);
@@ -379,7 +379,7 @@ void mlir_generator::generate_if_expr(if_expr* i, std::vector<mlir::Value>& valu
     }
 }
 
-void mlir_generator::generate_for_expr(for_expr* f, std::vector<mlir::Value>& values) {
+void codegen::generate_for_expr(for_expr* f, std::vector<mlir::Value>& values) {
     llvm::SmallVector<mlir::Value, 4> init_values;
 
     vars.add_scope();
@@ -433,7 +433,7 @@ void mlir_generator::generate_for_expr(for_expr* f, std::vector<mlir::Value>& va
     }
     return;
 }
-mlir::Value mlir_generator::generate_expr(expr* e) {
+mlir::Value codegen::generate_expr(expr* e) {
     if (e->is(ast_type::int_literal)) {
         return generate_int_literal(static_cast<int_literal*>(e));
     } else if (e->is(ast_type::float_literal)) {
@@ -458,7 +458,7 @@ mlir::Value mlir_generator::generate_expr(expr* e) {
     return mlir::Value();
 }
 
-void mlir_generator::generate_expr_tuple(expr* e, std::vector<mlir::Value>& values) {
+void codegen::generate_expr_tuple(expr* e, std::vector<mlir::Value>& values) {
     if (e->is(ast_type::if_expr)) {
         generate_if_expr(static_cast<if_expr*>(e), values);
     } else if (e->is(ast_type::for_expr)) {
@@ -468,7 +468,7 @@ void mlir_generator::generate_expr_tuple(expr* e, std::vector<mlir::Value>& valu
     }
 }
 
-void mlir_generator::generate(root* r) {
+void codegen::generate(root* r) {
     module = mlir::ModuleOp::create(builder, to_loc(r));
 
     for (auto f : r->get_funcs()) {

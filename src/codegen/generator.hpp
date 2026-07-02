@@ -12,6 +12,7 @@
 #include <mlir/Dialect/Arith/IR/Arith.h>
 #include <mlir/Dialect/Math/IR/Math.h>
 #include <mlir/Dialect/Tensor/IR/Tensor.h>
+#include <mlir/Dialect/Linalg/IR/Linalg.h>
 #include <mlir/Dialect/SCF/IR/SCF.h>
 
 #include <string>
@@ -69,7 +70,7 @@ struct var_stack {
     }
 };
 
-class mlir_generator {
+class codegen {
 private:
     mlir::MLIRContext& ctx;
     mlir::OpBuilder builder;
@@ -120,12 +121,13 @@ private:
     void generate_expr_tuple(expr*, std::vector<mlir::Value>&);
 
 public:
-    mlir_generator(mlir::MLIRContext& c): ctx(c), builder(&c) {
+    codegen(mlir::MLIRContext& c): ctx(c), builder(&c) {
         ctx.getOrLoadDialect<colgm_dialect>();
         ctx.getOrLoadDialect<mlir::func::FuncDialect>();
         ctx.getOrLoadDialect<mlir::arith::ArithDialect>();
         ctx.getOrLoadDialect<mlir::math::MathDialect>();
         ctx.getOrLoadDialect<mlir::tensor::TensorDialect>();
+        ctx.getOrLoadDialect<mlir::linalg::LinalgDialect>();
         ctx.getOrLoadDialect<mlir::scf::SCFDialect>();
     }
     mlir::ModuleOp get_module() { return module.get(); }

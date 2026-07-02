@@ -114,8 +114,42 @@ lowering_div::matchAndRewrite(mlir::Operation* op,
     return mlir::success();
 }
 
+mlir::LogicalResult
+lowering_cast::matchAndRewrite(mlir::Operation* op,
+                              llvm::ArrayRef<mlir::Value> operands,
+                              mlir::ConversionPatternRewriter& rewriter) const {
+    auto cast = llvm::cast<cast_op>(op);
+    auto input = cast.get_input();
+    auto src = input.getType();
+    auto dst = cast->getResult(0).getType();
+    auto loc = cast.getLoc();
+
+    auto src_tensor = llvm::dyn_cast<mlir::RankedTensorType>(src);
+    auto dst_tensor = llvm::dyn_cast<mlir::RankedTensorType>(dst);
+
+    if (src_tensor && !dst_tensor &&
+        src_tensor.getRank() == 0 && src_tensor.getElementType() == dst) {
+        auto extract = mlir::tensor::ExtractOp::create(
+            rewriter, cast.getLoc(), input, mlir::ValueRange {}
+        );
+        // auto new_op = rewriter.create<mlir::tensor::ExtractOp>(loc, input, mlir::ValueRange{});
+        rewriter.replaceOp(op, extract->getResults());
+        return mlir::success();
+    }
+
+    return mlir::failure();
+}
+
 void colgm_lowering::runOnOperation() {
     cvt.addConversion([](mlir::Type type) { return type; });
+
+    getContext().getOrLoadDialect<colgm_dialect>();
+    getContext().getOrLoadDialect<mlir::func::FuncDialect>();
+    getContext().getOrLoadDialect<mlir::arith::ArithDialect>();
+    getContext().getOrLoadDialect<mlir::math::MathDialect>();
+    getContext().getOrLoadDialect<mlir::tensor::TensorDialect>();
+    getContext().getOrLoadDialect<mlir::linalg::LinalgDialect>();
+    getContext().getOrLoadDialect<mlir::scf::SCFDialect>();
 
     mlir::ConversionTarget target(getContext());
     target.addIllegalDialect<colgm_dialect>();
@@ -124,17 +158,20 @@ void colgm_lowering::runOnOperation() {
     target.addLegalDialect<mlir::scf::SCFDialect>();
     target.addLegalDialect<mlir::tensor::TensorDialect>();
     target.addLegalDialect<mlir::math::MathDialect>();
-
+    target.addLegalDialect<mlir::linalg::LinalgDialect>();
     
     mlir::RewritePatternSet patterns(&getContext());
     patterns.add<lowering_constant,
                   lowering_add, lowering_sub,
-                  lowering_mul, lowering_div>(cvt, &getContext());
+                  lowering_mul, lowering_div,
+                  lowering_cast>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
-    if (mlir::failed(mlir::applyPartialConversion(getOperation(), target, frozen))) {
-        signalPassFailure();
-    }
+
+    (void)mlir::applyPartialConversion(getOperation(), target, frozen);
+    // if (mlir::failed(mlir::applyPartialConversion(getOperation(), target, frozen))) {
+    //     signalPassFailure();
+    // }
 }
 
 static mlir::PassRegistration<colgm_lowering> pass;

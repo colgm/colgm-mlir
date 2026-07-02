@@ -6,6 +6,7 @@
 #include <mlir/Dialect/Arith/IR/Arith.h>
 #include <mlir/Dialect/Math/IR/Math.h>
 #include <mlir/Dialect/Tensor/IR/Tensor.h>
+#include <mlir/Dialect/Linalg/IR/Linalg.h>
 #include <mlir/Dialect/SCF/IR/SCF.h>
 #include <mlir/Pass/Pass.h>
 #include <mlir/Transforms/DialectConversion.h>
@@ -76,6 +77,16 @@ struct lowering_mul : public mlir::ConversionPattern {
 struct lowering_div : public mlir::ConversionPattern {
     explicit lowering_div(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
         : mlir::ConversionPattern(cvt, div_op::getOperationName(), 1, ctx) {}
+
+    mlir::LogicalResult
+    matchAndRewrite(mlir::Operation* op,
+                    llvm::ArrayRef<mlir::Value> operands,
+                    mlir::ConversionPatternRewriter& rewriter) const override;
+};
+
+struct lowering_cast : public mlir::ConversionPattern {
+    explicit lowering_cast(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
+        : mlir::ConversionPattern(cvt, cast_op::getOperationName(), 1, ctx) {}
 
     mlir::LogicalResult
     matchAndRewrite(mlir::Operation* op,

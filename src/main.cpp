@@ -16,7 +16,7 @@
 #include "sema/sema.hpp"
 
 #include "dialect/dialect.hpp"
-#include "codegen/mlir_generator.hpp"
+#include "codegen/generator.hpp"
 #include "dialect/pass/constfold.hpp"
 #include "dialect/pass/colgm_lowering.hpp"
 
@@ -143,7 +143,7 @@ void execute(const std::string& input_file,
     }
 
     mlir::MLIRContext context;
-    colgm_mlir::mlir_generator gen(context);
+    colgm_mlir::codegen gen(context);
 
     mlir::PassManager pm(&context);
     if (po.enable_const_fold()) {
