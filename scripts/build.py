@@ -18,20 +18,26 @@ def main():
     if not build_dir.exists():
         build_dir.mkdir()
 
+    print("[INFO] chdir", build_dir.absolute())
     os.chdir(build_dir)
+
     # configure
     if not cmakefiles_dir.exists():
-        subprocess.run(
-            ["cmake", "..", "-DCMAKE_BUILD_TYPE=RelWithDebInfo", "-DENABLE_MLIR=ON"]
-        ).check_returncode()
+        cmd = ["cmake", "..", "-DCMAKE_BUILD_TYPE=RelWithDebInfo", "-DENABLE_MLIR=ON"]
+        print("[INFO] Running", " ".join(cmd))
+        subprocess.run(cmd).check_returncode()
     # build
     t0 = time.perf_counter()
-    subprocess.run(
-        ["cmake", "--build", ".", "-j", f"{cpu_count()}"]
-    ).check_returncode()
+    
+    cmd = ["cmake", "--build", ".", "-j", f"{cpu_count()}"]
+    print("[INFO] Running", " ".join(cmd))
+    subprocess.run(cmd).check_returncode()
+
+    print("[INFO] chdir", Path("..").absolute().resolve())
     os.chdir("..")
+
     elapsed = time.perf_counter() - t0
-    print(f"Build finished in {elapsed:.2f}s")
+    print(f"[INFO] Build finished in {elapsed:.2f}s")
 
 if __name__ == "__main__":
     main()

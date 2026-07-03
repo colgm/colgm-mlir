@@ -11,6 +11,10 @@ static bool is_valid_cast(mlir::Type src, mlir::Type dst) {
         return true;
     if (llvm::isa<mlir::FloatType>(src) && llvm::isa<mlir::FloatType>(dst))
         return true;
+    if (llvm::isa<mlir::IntegerType>(src) && llvm::isa<mlir::FloatType>(dst))
+        return true;
+    if (llvm::isa<mlir::FloatType>(src) && llvm::isa<mlir::IntegerType>(dst))
+        return true;
     if (llvm::isa<mlir::IntegerType>(src) && llvm::isa<mlir::IndexType>(dst))
         return true;
     if (llvm::isa<mlir::IndexType>(src) && llvm::isa<mlir::IntegerType>(dst))

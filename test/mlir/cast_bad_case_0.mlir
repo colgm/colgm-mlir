@@ -1,7 +1,7 @@
-// colgm dialect test: cast op — bad case (cross-kind)
-// parse -> print -> verify should fail: int -> float not allowed
+// colgm dialect test: cast op — bad case (tensor shape mismatch)
+// parse -> print -> verify should fail: shapes differ
 
-func.func @bad_int_to_float(%arg: i64) -> f32 {
-  %0 = colgm.cast %arg : i64 -> f32
-  return %0 : f32
+func.func @bad_shape(%arg: tensor<2x3xf32>) -> tensor<6xf32> {
+  %0 = colgm.cast %arg : tensor<2x3xf32> -> tensor<6xf32>
+  return %0 : tensor<6xf32>
 }

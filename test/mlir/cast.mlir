@@ -39,3 +39,27 @@ func.func @index_to_rank0_tensor_int(%arg: index) -> tensor<i64> {
   %0 = colgm.cast %arg : index -> tensor<i64>
   return %0 : tensor<i64>
 }
+
+// scalar int to float
+func.func @scalar_int_to_float(%arg: i64) -> f32 {
+  %0 = colgm.cast %arg : i64 -> f32
+  return %0 : f32
+}
+
+// scalar float to int
+func.func @scalar_float_to_int(%arg: f32) -> i64 {
+  %0 = colgm.cast %arg : f32 -> i64
+  return %0 : i64
+}
+
+// scalar int to rank-0 float tensor
+func.func @scalar_int_to_rank0_float_tensor(%arg: i64) -> tensor<f32> {
+  %0 = colgm.cast %arg : i64 -> tensor<f32>
+  return %0 : tensor<f32>
+}
+
+// rank-0 float tensor to scalar int
+func.func @rank0_float_tensor_to_int(%arg: tensor<f32>) -> i64 {
+  %0 = colgm.cast %arg : tensor<f32> -> i64
+  return %0 : i64
+}

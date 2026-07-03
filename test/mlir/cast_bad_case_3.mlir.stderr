@@ -1,4 +1,0 @@
-test/mlir/cast_bad_case_3.mlir:5:8: error: 'colgm.cast' op only rank-0 tensor can be cast to scalar, got rank 1
-  %0 = colgm.cast %arg : tensor<2xi1> -> i1
-       ^
-test/mlir/cast_bad_case_3.mlir:5:8: note: see current operation: %0 = "colgm.cast"(%arg0) : (tensor<2xi1>) -> i1
