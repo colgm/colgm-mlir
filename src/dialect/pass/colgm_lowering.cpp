@@ -1,3 +1,4 @@
+#include "codegen/dialect_loader.hpp"
 #include "dialect/pass/colgm_lowering.hpp"
 
 namespace colgm_mlir {
@@ -115,8 +116,8 @@ lowering_div::matchAndRewrite(mlir::Operation* op,
 }
 
 static mlir::Value arith_cast(mlir::ConversionPatternRewriter& rewriter,
-                                   mlir::Location loc,
-                                   mlir::Value val, mlir::Type src, mlir::Type dst) {
+                              mlir::Location loc,
+                              mlir::Value val, mlir::Type src, mlir::Type dst) {
     if (src == dst) {
         return val;
     }
@@ -171,8 +172,8 @@ static mlir::Value arith_cast(mlir::ConversionPatternRewriter& rewriter,
 
 mlir::LogicalResult
 lowering_cast::matchAndRewrite(mlir::Operation* op,
-                              llvm::ArrayRef<mlir::Value> operands,
-                              mlir::ConversionPatternRewriter& rewriter) const {
+                               llvm::ArrayRef<mlir::Value> operands,
+                               mlir::ConversionPatternRewriter& rewriter) const {
     auto cast = llvm::cast<cast_op>(op);
     auto input = cast.get_input();
     auto src = input.getType();
@@ -254,16 +255,39 @@ lowering_cast::matchAndRewrite(mlir::Operation* op,
     return mlir::failure();
 }
 
+mlir::LogicalResult
+lowering_slice::matchAndRewrite(mlir::Operation* op,
+                                llvm::ArrayRef<mlir::Value> operands,
+                                mlir::ConversionPatternRewriter& rewriter) const {
+    auto slice = llvm::cast<slice_op>(op);
+    auto input = slice.get_input();
+    auto input_type = llvm::cast<mlir::RankedTensorType>(input.getType());
+    auto index = slice.get_index();
+    auto axis = slice.get_axis();
+    auto result_type = llvm::cast<mlir::RankedTensorType>(slice->getResult(0).getType());
+
+    auto rank = input_type.getRank();
+    llvm::SmallVector<mlir::OpFoldResult> offsets(rank, rewriter.getIndexAttr(0));
+    llvm::SmallVector<mlir::OpFoldResult> sizes(rank);
+    llvm::SmallVector<mlir::OpFoldResult> strides(rank, rewriter.getIndexAttr(1));
+
+    offsets[axis] = index;
+    for (i64 i = 0; i < rank; ++i) {
+        sizes[i] = rewriter.getIndexAttr(input_type.getDimSize(i));
+    }
+    sizes[axis] = rewriter.getIndexAttr(1);
+
+    auto extract = mlir::tensor::ExtractSliceOp::create(
+        rewriter, slice.getLoc(), result_type, input, offsets, sizes, strides
+    );
+    rewriter.replaceOp(op, extract->getResults());
+    return mlir::success();
+}
+
 void colgm_lowering::runOnOperation() {
     cvt.addConversion([](mlir::Type type) { return type; });
 
-    getContext().getOrLoadDialect<colgm_dialect>();
-    getContext().getOrLoadDialect<mlir::func::FuncDialect>();
-    getContext().getOrLoadDialect<mlir::arith::ArithDialect>();
-    getContext().getOrLoadDialect<mlir::math::MathDialect>();
-    getContext().getOrLoadDialect<mlir::tensor::TensorDialect>();
-    getContext().getOrLoadDialect<mlir::linalg::LinalgDialect>();
-    getContext().getOrLoadDialect<mlir::scf::SCFDialect>();
+    load_dialect(getContext());
 
     mlir::ConversionTarget target(getContext());
     target.addIllegalDialect<colgm_dialect>();
@@ -273,12 +297,12 @@ void colgm_lowering::runOnOperation() {
     target.addLegalDialect<mlir::tensor::TensorDialect>();
     target.addLegalDialect<mlir::math::MathDialect>();
     target.addLegalDialect<mlir::linalg::LinalgDialect>();
-    
+
     mlir::RewritePatternSet patterns(&getContext());
     patterns.add<lowering_constant,
                   lowering_add, lowering_sub,
                   lowering_mul, lowering_div,
-                  lowering_cast>(cvt, &getContext());
+                  lowering_cast, lowering_slice>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
 

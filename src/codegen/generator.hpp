@@ -8,12 +8,6 @@
 #include <mlir/IR/Location.h>
 #include <mlir/IR/OwningOpRef.h>
 #include <mlir/Support/LogicalResult.h>
-#include <mlir/Dialect/Func/IR/FuncOps.h>
-#include <mlir/Dialect/Arith/IR/Arith.h>
-#include <mlir/Dialect/Math/IR/Math.h>
-#include <mlir/Dialect/Tensor/IR/Tensor.h>
-#include <mlir/Dialect/Linalg/IR/Linalg.h>
-#include <mlir/Dialect/SCF/IR/SCF.h>
 
 #include <string>
 #include <vector>
@@ -40,6 +34,8 @@
 #include "dialect/colgm/reshape.hpp"
 #include "dialect/colgm/yield.hpp"
 #include "dialect/dialect.hpp"
+
+#include "codegen/dialect_loader.hpp"
 
 namespace colgm_mlir {
 
@@ -97,6 +93,7 @@ private:
 
     mlir::Type convert_type(const type&);
     mlir::Value convert_index_value(mlir::Value, const span&, const type);
+    mlir::Value convert_value_to_index(mlir::Value, const span&);
     void flatten_tensor(std::vector<expr*>&, tensor*);
 
     void generate_func(func_decl*);
@@ -122,13 +119,7 @@ private:
 
 public:
     codegen(mlir::MLIRContext& c): ctx(c), builder(&c) {
-        ctx.getOrLoadDialect<colgm_dialect>();
-        ctx.getOrLoadDialect<mlir::func::FuncDialect>();
-        ctx.getOrLoadDialect<mlir::arith::ArithDialect>();
-        ctx.getOrLoadDialect<mlir::math::MathDialect>();
-        ctx.getOrLoadDialect<mlir::tensor::TensorDialect>();
-        ctx.getOrLoadDialect<mlir::linalg::LinalgDialect>();
-        ctx.getOrLoadDialect<mlir::scf::SCFDialect>();
+        load_dialect(ctx);
     }
     mlir::ModuleOp get_module() { return module.get(); }
     void generate(root*);

@@ -1,4 +1,5 @@
 #include <cassert>
+#include <mlir/Dialect/Func/IR/FuncOps.h>
 
 #include "codegen/generator.hpp"
 
@@ -34,6 +35,11 @@ mlir::Value codegen::convert_index_value(mlir::Value val,
                                          const span& loc,
                                          const type t) {
     auto op = cast_op::create(builder, to_loc(loc), val, convert_type(t));
+    return op->getResult(0);
+}
+
+mlir::Value codegen::convert_value_to_index(mlir::Value val, const span& loc) {
+    auto op = cast_op::create(builder, to_loc(loc), val, mlir::IndexType::get(&ctx));
     return op->getResult(0);
 }
 
@@ -325,6 +331,9 @@ mlir::Value codegen::generate_call_expr(call_expr* n) {
 mlir::Value codegen::generate_index_access(index_access* n) {
     auto target = generate_expr(n->get_target());
     auto index = generate_expr(n->get_index());
+    if (!llvm::isa<mlir::IndexType>(index.getType())) {
+        index = convert_value_to_index(index, n->get_index()->get_location());
+    }
     auto op = slice_op::create(builder, to_loc(n), target, index, 0);
     return op->getResult(0);
 }

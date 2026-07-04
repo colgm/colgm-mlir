@@ -10,7 +10,7 @@ def cpu_count():
     n = os.cpu_count()
     if n <= 1:
         return 1
-    if n > 8:
+    if n > 5:
         return n // 2
     return n - 1
 

@@ -20,7 +20,7 @@ namespace colgm_mlir {
 std::unique_ptr<mlir::Pass> create_colgm_lowering_pass();
 
 class colgm_lowering : public mlir::PassWrapper<colgm_lowering,
-                                               mlir::OperationPass<mlir::ModuleOp>> { 
+                                               mlir::OperationPass<mlir::ModuleOp>> {
 private:
     mlir::TypeConverter cvt;
 
@@ -87,6 +87,16 @@ struct lowering_div : public mlir::ConversionPattern {
 struct lowering_cast : public mlir::ConversionPattern {
     explicit lowering_cast(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
         : mlir::ConversionPattern(cvt, cast_op::getOperationName(), 1, ctx) {}
+
+    mlir::LogicalResult
+    matchAndRewrite(mlir::Operation* op,
+                    llvm::ArrayRef<mlir::Value> operands,
+                    mlir::ConversionPatternRewriter& rewriter) const override;
+};
+
+struct lowering_slice : public mlir::ConversionPattern {
+    explicit lowering_slice(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
+        : mlir::ConversionPattern(cvt, slice_op::getOperationName(), 1, ctx) {}
 
     mlir::LogicalResult
     matchAndRewrite(mlir::Operation* op,

@@ -1,0 +1,14 @@
+module {
+  func.func @main() {
+    %cst = arith.constant dense<[1.200000e+00, 2.300000e+00, 3.400000e+00]> : tensor<3xf64> loc(#loc1)
+    %cst_0 = arith.constant dense<0> : tensor<i64> loc(#loc2)
+    %extracted = tensor.extract %cst_0[] : tensor<i64> loc(#loc2)
+    %0 = arith.index_cast %extracted : i64 to index loc(#loc2)
+    %extracted_slice = tensor.extract_slice %cst[%0] [1] [1] : tensor<3xf64> to tensor<f64> loc(#loc3)
+    return loc(#loc)
+  } loc(#loc)
+} loc(#loc)
+#loc = loc("test/lowering/slice_op.colgm":1:1)
+#loc1 = loc("test/lowering/slice_op.colgm":2:13)
+#loc2 = loc("test/lowering/slice_op.colgm":3:15)
+#loc3 = loc("test/lowering/slice_op.colgm":3:14)

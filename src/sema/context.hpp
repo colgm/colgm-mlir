@@ -38,9 +38,7 @@ private:
     std::vector<std::unordered_map<std::string, type>> variables;
 
 public:
-    context(type_storage& ts) : ts(ts) {
-        
-    }
+    context(type_storage& ts) : ts(ts) {}
     void regist_function(const std::string& name, func_info&& fi) {
         functions.emplace(name, fi);
     }

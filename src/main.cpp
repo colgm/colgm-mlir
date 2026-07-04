@@ -154,6 +154,10 @@ void execute(const std::string& input_file,
     }
 
     gen.generate(parser.get_tree());
+    if (mlir::failed(gen.get_module().verify())) {
+        gen.dump();
+        std::exit(-1);
+    }
     if (mlir::failed(pm.run(gen.get_module()))) {
         std::exit(-1);
     }
