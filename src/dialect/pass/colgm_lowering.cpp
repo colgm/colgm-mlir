@@ -284,6 +284,137 @@ lowering_slice::matchAndRewrite(mlir::Operation* op,
     return mlir::success();
 }
 
+static mlir::LogicalResult
+lowering_cmp_impl(mlir::Operation* op,
+                  mlir::arith::CmpIPredicate iPred,
+                  mlir::arith::CmpFPredicate fPred,
+                  mlir::ConversionPatternRewriter& rewriter) {
+    auto lhs = op->getOperand(0);
+    auto rhs = op->getOperand(1);
+    auto ty = llvm::cast<mlir::RankedTensorType>(lhs.getType());
+    auto base_type = ty.getElementType();
+
+    if (llvm::isa<mlir::IntegerType>(base_type)) {
+        auto new_op = mlir::arith::CmpIOp::create(
+            rewriter, op->getLoc(), iPred, lhs, rhs
+        );
+        rewriter.replaceOp(op, new_op->getResults());
+    } else if (llvm::isa<mlir::FloatType>(base_type)) {
+        auto new_op = mlir::arith::CmpFOp::create(
+            rewriter, op->getLoc(), fPred, lhs, rhs
+        );
+        rewriter.replaceOp(op, new_op->getResults());
+    } else {
+        return mlir::failure();
+    }
+    return mlir::success();
+}
+
+mlir::LogicalResult
+lowering_cmp_eq::matchAndRewrite(mlir::Operation* op,
+                                 llvm::ArrayRef<mlir::Value> operands,
+                                 mlir::ConversionPatternRewriter& rewriter) const {
+    return lowering_cmp_impl(op,
+        mlir::arith::CmpIPredicate::eq,
+        mlir::arith::CmpFPredicate::OEQ,
+        rewriter);
+}
+
+mlir::LogicalResult
+lowering_cmp_ne::matchAndRewrite(mlir::Operation* op,
+                                 llvm::ArrayRef<mlir::Value> operands,
+                                 mlir::ConversionPatternRewriter& rewriter) const {
+    return lowering_cmp_impl(op,
+        mlir::arith::CmpIPredicate::ne,
+        mlir::arith::CmpFPredicate::ONE,
+        rewriter
+    );
+}
+
+mlir::LogicalResult
+lowering_cmp_lt::matchAndRewrite(mlir::Operation* op,
+                                 llvm::ArrayRef<mlir::Value> operands,
+                                 mlir::ConversionPatternRewriter& rewriter) const {
+    return lowering_cmp_impl(op,
+        mlir::arith::CmpIPredicate::slt,
+        mlir::arith::CmpFPredicate::OLT,
+        rewriter
+    );
+}
+
+mlir::LogicalResult
+lowering_cmp_le::matchAndRewrite(mlir::Operation* op,
+                                 llvm::ArrayRef<mlir::Value> operands,
+                                 mlir::ConversionPatternRewriter& rewriter) const {
+    return lowering_cmp_impl(op,
+        mlir::arith::CmpIPredicate::sle,
+        mlir::arith::CmpFPredicate::OLE,
+        rewriter
+    );
+}
+
+mlir::LogicalResult
+lowering_cmp_gt::matchAndRewrite(mlir::Operation* op,
+                                 llvm::ArrayRef<mlir::Value> operands,
+                                 mlir::ConversionPatternRewriter& rewriter) const {
+    return lowering_cmp_impl(op,
+        mlir::arith::CmpIPredicate::sgt,
+        mlir::arith::CmpFPredicate::OGT,
+        rewriter
+    );
+}
+
+mlir::LogicalResult
+lowering_cmp_ge::matchAndRewrite(mlir::Operation* op,
+                                 llvm::ArrayRef<mlir::Value> operands,
+                                 mlir::ConversionPatternRewriter& rewriter) const {
+    return lowering_cmp_impl(op,
+        mlir::arith::CmpIPredicate::sge,
+        mlir::arith::CmpFPredicate::OGE,
+        rewriter
+    );
+}
+
+mlir::LogicalResult
+lowering_neg::matchAndRewrite(mlir::Operation* op,
+                              llvm::ArrayRef<mlir::Value> operands,
+                              mlir::ConversionPatternRewriter& rewriter) const {
+    auto neg = llvm::cast<neg_op>(op);
+    auto input = neg.get_input();
+    auto ty = llvm::cast<mlir::RankedTensorType>(input.getType());
+    auto base_type = ty.getElementType();
+
+    mlir::TypedAttr zero_attr;
+    if (llvm::isa<mlir::IntegerType>(base_type)) {
+        auto it = llvm::cast<mlir::IntegerType>(base_type);
+        zero_attr = mlir::DenseElementsAttr::get(
+            ty, llvm::APInt(it.getWidth(), 0)
+        );
+    } else if (llvm::isa<mlir::FloatType>(base_type)) {
+        auto ft = llvm::cast<mlir::FloatType>(base_type);
+        zero_attr = mlir::DenseElementsAttr::get(
+            ty, llvm::APFloat(ft.getFloatSemantics(), "0")
+        );
+    } else {
+        return mlir::failure();
+    }
+
+    auto zero = mlir::arith::ConstantOp::create(rewriter, op->getLoc(), zero_attr);
+
+    if (llvm::isa<mlir::IntegerType>(base_type)) {
+        auto sub = mlir::arith::SubIOp::create(
+            rewriter, op->getLoc(), mlir::ValueRange{ zero, input }
+        );
+        rewriter.replaceOp(op, sub->getResults());
+    } else {
+        auto sub = mlir::arith::SubFOp::create(
+            rewriter, op->getLoc(), mlir::ValueRange{ zero, input }
+        );
+        rewriter.replaceOp(op, sub->getResults());
+    }
+    return mlir::success();
+}
+
 void colgm_lowering::runOnOperation() {
     cvt.addConversion([](mlir::Type type) { return type; });
 
@@ -302,7 +433,11 @@ void colgm_lowering::runOnOperation() {
     patterns.add<lowering_constant,
                   lowering_add, lowering_sub,
                   lowering_mul, lowering_div,
-                  lowering_cast, lowering_slice>(cvt, &getContext());
+                  lowering_cast, lowering_slice,
+                  lowering_cmp_eq, lowering_cmp_ne,
+                  lowering_cmp_lt, lowering_cmp_le,
+                  lowering_cmp_gt, lowering_cmp_ge,
+                  lowering_neg>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
 

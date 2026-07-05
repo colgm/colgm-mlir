@@ -1,0 +1,6 @@
+func neg_i64(x: i64) -> i64 {
+    return -x
+}
+func neg_f64(x: f64) -> f64 {
+    return -x
+}

@@ -36,6 +36,7 @@
 #include "dialect/dialect.hpp"
 
 #include "codegen/dialect_loader.hpp"
+#include "codegen/intrinsic.hpp"
 
 namespace colgm_mlir {
 
@@ -71,6 +72,7 @@ private:
     mlir::MLIRContext& ctx;
     mlir::OpBuilder builder;
     mlir::OwningOpRef<mlir::ModuleOp> module;
+    intrinsic_generator_registry intrinsic_generators;
 
     var_stack vars;
 

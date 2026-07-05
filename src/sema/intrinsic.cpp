@@ -14,7 +14,7 @@ intrinsic_registry::intrinsic_registry() {
 
 intrinsic_find_res intrinsic_registry::find(const std::string& name) const {
     if (intrinsics.find(name) != intrinsics.end()) {
-        return intrinsic_find_res { intrinsics.at(name).infer, true };
+        return intrinsic_find_res { intrinsics.at(name), true };
     }
     return intrinsic_find_res { nullptr, false };
 }

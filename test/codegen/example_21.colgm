@@ -1,0 +1,9 @@
+func main() {
+    var x = [-2.0, -1.0, 0.0, 1.0, 2.0]
+    var a = abs(x)
+    var b = exp(x)
+    var c = log([0.1, 1.0, 2.0])
+    var d = sqrt([0.0, 1.0, 4.0])
+    var e = tanh(x)
+    var f = sigmoid(x)
+}

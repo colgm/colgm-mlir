@@ -66,6 +66,7 @@ set(COLGM_LIB_SOURCES
     src/ast/dumper.cpp
     src/codegen/dialect_loader.cpp
     src/codegen/generator.cpp
+    src/codegen/intrinsic.cpp
     src/dialect/colgm/binary_op.cpp
     src/dialect/colgm/cmp_op.cpp
     src/dialect/colgm/broadcast.cpp

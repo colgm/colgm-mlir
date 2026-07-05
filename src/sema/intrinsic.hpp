@@ -28,11 +28,11 @@ struct intrinsic_find_res {
 
 class intrinsic_registry {
 private:
-    std::unordered_map<std::string, intrinsic> intrinsics;
+    std::unordered_map<std::string, infer_func> intrinsics;
 
 private:
     void regist(const char* name, infer_func fp) {
-        intrinsics.emplace(name, intrinsic { name, fp });
+        intrinsics.emplace(name, fp);
     }
 
 public:

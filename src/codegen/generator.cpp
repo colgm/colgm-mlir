@@ -322,7 +322,12 @@ mlir::Value codegen::generate_call_expr(call_expr* n) {
         args.push_back(arg);
     }
 
-    auto f = static_cast<identifier*>(n->get_callee())->get_name();
+    const auto& f = static_cast<identifier*>(n->get_callee())->get_name();
+    auto find_res = intrinsic_generators.find(f);
+    if (find_res.found) {
+        return find_res.generate(builder, to_loc(n), args);
+    }
+
     auto ret_type = convert_type(n->get_resolved());
     auto call = mlir::func::CallOp::create(builder, to_loc(n), f, { ret_type }, args);
     return call.getResult(0);

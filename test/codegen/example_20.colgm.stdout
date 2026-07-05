@@ -1,0 +1,18 @@
+module {
+  func.func @main() {
+    %0 = colgm.constant dense<1.000000e+00> : tensor<f64> loc(#loc1)
+    %1 = colgm.neg %0 : tensor<f64> loc(#loc2)
+    %2 = colgm.constant dense<1.200000e+00> : tensor<f64> loc(#loc3)
+    %3 = colgm.constant dense<3.100000e+00> : tensor<f64> loc(#loc4)
+    %4 = colgm.elements(%1, %2, %3) {target_shape = [3]} : tensor<f64> -> tensor<3xf64> loc(#loc5)
+    %5 = colgm.relu %4 : tensor<3xf64> loc(#loc6)
+    return loc(#loc)
+  } loc(#loc)
+} loc(#loc)
+#loc = loc("test/codegen/example_20.colgm":1:1)
+#loc1 = loc("test/codegen/example_20.colgm":2:15)
+#loc2 = loc("test/codegen/example_20.colgm":2:14)
+#loc3 = loc("test/codegen/example_20.colgm":2:20)
+#loc4 = loc("test/codegen/example_20.colgm":2:25)
+#loc5 = loc("test/codegen/example_20.colgm":2:13)
+#loc6 = loc("test/codegen/example_20.colgm":3:17)
