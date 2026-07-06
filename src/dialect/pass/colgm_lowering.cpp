@@ -415,6 +415,139 @@ lowering_neg::matchAndRewrite(mlir::Operation* op,
     return mlir::success();
 }
 
+mlir::LogicalResult
+lowering_relu::matchAndRewrite(mlir::Operation* op,
+                               llvm::ArrayRef<mlir::Value> operands,
+                               mlir::ConversionPatternRewriter& rewriter) const {
+    auto relu = llvm::cast<relu_op>(op);
+    auto input = relu.get_input();
+    auto ty = llvm::cast<mlir::RankedTensorType>(input.getType());
+    auto base_type = ty.getElementType();
+
+    mlir::TypedAttr zero_attr;
+    if (llvm::isa<mlir::IntegerType>(base_type)) {
+        auto it = llvm::cast<mlir::IntegerType>(base_type);
+        zero_attr = mlir::DenseElementsAttr::get(
+            ty, llvm::APInt(it.getWidth(), 0)
+        );
+    } else if (llvm::isa<mlir::FloatType>(base_type)) {
+        auto ft = llvm::cast<mlir::FloatType>(base_type);
+        zero_attr = mlir::DenseElementsAttr::get(
+            ty, llvm::APFloat(ft.getFloatSemantics(), "0")
+        );
+    } else {
+        return mlir::failure();
+    }
+
+    auto zero = mlir::arith::ConstantOp::create(rewriter, op->getLoc(), zero_attr);
+
+    if (llvm::isa<mlir::IntegerType>(base_type)) {
+        auto new_max = mlir::arith::MaxSIOp::create(
+            rewriter, op->getLoc(), mlir::ValueRange{ zero, input }
+        );
+        rewriter.replaceOp(op, new_max->getResults());
+    } else {
+        auto new_max = mlir::arith::MaximumFOp::create(
+            rewriter, op->getLoc(), mlir::ValueRange{ zero, input }
+        );
+        rewriter.replaceOp(op, new_max->getResults());
+    }
+    return mlir::success();
+}
+
+mlir::LogicalResult
+lowering_abs::matchAndRewrite(mlir::Operation* op,
+                              llvm::ArrayRef<mlir::Value> operands,
+                              mlir::ConversionPatternRewriter& rewriter) const {
+    auto abs = llvm::cast<abs_op>(op);
+    auto input = abs.get_input();
+    auto loc = abs.getLoc();
+    auto ty = llvm::cast<mlir::RankedTensorType>(input.getType());
+    auto base_type = ty.getElementType();
+
+    if (llvm::isa<mlir::IntegerType>(base_type)) {
+        auto new_op = mlir::math::AbsIOp::create(rewriter, loc, input);
+        rewriter.replaceOp(op, new_op->getResults());
+    } else if (llvm::isa<mlir::FloatType>(base_type)) {
+        auto fastmath = mlir::arith::FastMathFlagsAttr::get(
+            rewriter.getContext(), mlir::arith::FastMathFlags::none
+        );
+        auto new_op = mlir::math::AbsFOp::create(rewriter, loc, input, fastmath);
+        rewriter.replaceOp(op, new_op->getResults());
+    } else {
+        return mlir::failure();
+    }
+    return mlir::success();
+}
+
+static mlir::LogicalResult
+lowering_math_unary(mlir::Operation* op,
+                    mlir::Value input,
+                    mlir::ConversionPatternRewriter& rewriter,
+                    llvm::function_ref<mlir::Operation*(mlir::OpBuilder&, mlir::Location, mlir::Value, mlir::arith::FastMathFlagsAttr)> createFn) {
+    auto ty = llvm::cast<mlir::RankedTensorType>(input.getType());
+    auto base_type = ty.getElementType();
+
+    if (!llvm::isa<mlir::FloatType>(base_type)) {
+        return mlir::failure();
+    }
+
+    auto fastmath = mlir::arith::FastMathFlagsAttr::get(
+        rewriter.getContext(), mlir::arith::FastMathFlags::none
+    );
+    auto new_op = createFn(rewriter, op->getLoc(), input, fastmath);
+    rewriter.replaceOp(op, new_op->getResults());
+    return mlir::success();
+}
+
+mlir::LogicalResult
+lowering_exp::matchAndRewrite(mlir::Operation* op,
+                              llvm::ArrayRef<mlir::Value> operands,
+                              mlir::ConversionPatternRewriter& rewriter) const {
+    auto exp = llvm::cast<exp_op>(op);
+    return lowering_math_unary(op, exp.get_input(), rewriter,
+        [](mlir::OpBuilder& b, mlir::Location loc, mlir::Value v, mlir::arith::FastMathFlagsAttr fm) {
+            return mlir::math::ExpOp::create(b, loc, v, fm);
+        }
+    );
+}
+
+mlir::LogicalResult
+lowering_log::matchAndRewrite(mlir::Operation* op,
+                              llvm::ArrayRef<mlir::Value> operands,
+                              mlir::ConversionPatternRewriter& rewriter) const {
+    auto log = llvm::cast<log_op>(op);
+    return lowering_math_unary(op, log.get_input(), rewriter,
+        [](mlir::OpBuilder& b, mlir::Location loc, mlir::Value v, mlir::arith::FastMathFlagsAttr fm) {
+            return mlir::math::LogOp::create(b, loc, v, fm);
+        }
+    );
+}
+
+mlir::LogicalResult
+lowering_sqrt::matchAndRewrite(mlir::Operation* op,
+                               llvm::ArrayRef<mlir::Value> operands,
+                               mlir::ConversionPatternRewriter& rewriter) const {
+    auto sqrt = llvm::cast<sqrt_op>(op);
+    return lowering_math_unary(op, sqrt.get_input(), rewriter,
+        [](mlir::OpBuilder& b, mlir::Location loc, mlir::Value v, mlir::arith::FastMathFlagsAttr fm) {
+            return mlir::math::SqrtOp::create(b, loc, v, fm);
+        }
+    );
+}
+
+mlir::LogicalResult
+lowering_tanh::matchAndRewrite(mlir::Operation* op,
+                               llvm::ArrayRef<mlir::Value> operands,
+                               mlir::ConversionPatternRewriter& rewriter) const {
+    auto tanh = llvm::cast<tanh_op>(op);
+    return lowering_math_unary(op, tanh.get_input(), rewriter,
+        [](mlir::OpBuilder& b, mlir::Location loc, mlir::Value v, mlir::arith::FastMathFlagsAttr fm) {
+            return mlir::math::TanhOp::create(b, loc, v, fm);
+        }
+    );
+}
+
 void colgm_lowering::runOnOperation() {
     cvt.addConversion([](mlir::Type type) { return type; });
 
@@ -431,13 +564,16 @@ void colgm_lowering::runOnOperation() {
 
     mlir::RewritePatternSet patterns(&getContext());
     patterns.add<lowering_constant,
-                  lowering_add, lowering_sub,
-                  lowering_mul, lowering_div,
-                  lowering_cast, lowering_slice,
-                  lowering_cmp_eq, lowering_cmp_ne,
-                  lowering_cmp_lt, lowering_cmp_le,
-                  lowering_cmp_gt, lowering_cmp_ge,
-                  lowering_neg>(cvt, &getContext());
+                 lowering_add, lowering_sub,
+                 lowering_mul, lowering_div,
+                 lowering_cast, lowering_slice,
+                 lowering_cmp_eq, lowering_cmp_ne,
+                 lowering_cmp_lt, lowering_cmp_le,
+                 lowering_cmp_gt, lowering_cmp_ge,
+                 lowering_neg, lowering_relu,
+                 lowering_abs, lowering_exp,
+                 lowering_log, lowering_sqrt,
+                 lowering_tanh>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
 

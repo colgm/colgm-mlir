@@ -1,0 +1,6 @@
+func abs_i64(x: i64) -> i64 {
+    return abs(x)
+}
+func abs_f64(x: f64) -> f64 {
+    return abs(x)
+}

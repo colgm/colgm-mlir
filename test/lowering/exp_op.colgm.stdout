@@ -1,0 +1,9 @@
+#loc = loc("test/lowering/exp_op.colgm":1:1)
+module {
+  func.func @exp_f64(%arg0: tensor<f64> loc("test/lowering/exp_op.colgm":1:1)) -> tensor<f64> {
+    %0 = math.exp %arg0 : tensor<f64> loc(#loc1)
+    return %0 : tensor<f64> loc(#loc2)
+  } loc(#loc)
+} loc(#loc)
+#loc1 = loc("test/lowering/exp_op.colgm":2:15)
+#loc2 = loc("test/lowering/exp_op.colgm":2:5)
