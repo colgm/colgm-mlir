@@ -5,6 +5,17 @@
 
 namespace colgm_mlir {
 
+static bool is_float_type(mlir::Type type) {
+    if (llvm::isa<mlir::FloatType>(type)) {
+        return true;
+    }
+
+    if (auto tensor = llvm::dyn_cast<mlir::RankedTensorType>(type)) {
+        return llvm::isa<mlir::FloatType>(tensor.getElementType());
+    }
+    return false;
+}
+
 void relu_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                     mlir::Value input) {
     state.addOperands({input});
@@ -146,6 +157,14 @@ void exp_op::print(mlir::OpAsmPrinter& p) {
       << " : " << get_input().getType();
 }
 
+mlir::LogicalResult exp_op::verify() {
+    auto type = get_input().getType();
+    if (!is_float_type(type)) {
+        return mlir::emitError(getLoc(), "exp input must be a float type");
+    }
+    return mlir::success();
+}
+
 void log_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                    mlir::Value input) {
     state.addOperands({input});
@@ -179,6 +198,14 @@ mlir::ParseResult log_op::parse(mlir::OpAsmParser& parser,
 void log_op::print(mlir::OpAsmPrinter& p) {
     p << " " << get_input()
       << " : " << get_input().getType();
+}
+
+mlir::LogicalResult log_op::verify() {
+    auto type = get_input().getType();
+    if (!is_float_type(type)) {
+        return mlir::emitError(getLoc(), "log input must be a float type");
+    }
+    return mlir::success();
 }
 
 void sqrt_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
@@ -216,6 +243,14 @@ void sqrt_op::print(mlir::OpAsmPrinter& p) {
       << " : " << get_input().getType();
 }
 
+mlir::LogicalResult sqrt_op::verify() {
+    auto type = get_input().getType();
+    if (!is_float_type(type)) {
+        return mlir::emitError(getLoc(), "sqrt input must be a float type");
+    }
+    return mlir::success();
+}
+
 void sigmoid_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                        mlir::Value input) {
     state.addOperands({input});
@@ -251,6 +286,14 @@ void sigmoid_op::print(mlir::OpAsmPrinter& p) {
       << " : " << get_input().getType();
 }
 
+mlir::LogicalResult sigmoid_op::verify() {
+    auto type = get_input().getType();
+    if (!is_float_type(type)) {
+        return mlir::emitError(getLoc(), "sigmoid input must be a float type");
+    }
+    return mlir::success();
+}
+
 void tanh_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
                     mlir::Value input) {
     state.addOperands({input});
@@ -284,6 +327,14 @@ mlir::ParseResult tanh_op::parse(mlir::OpAsmParser& parser,
 void tanh_op::print(mlir::OpAsmPrinter& p) {
     p << " " << get_input()
       << " : " << get_input().getType();
+}
+
+mlir::LogicalResult tanh_op::verify() {
+    auto type = get_input().getType();
+    if (!is_float_type(type)) {
+        return mlir::emitError(getLoc(), "tanh input must be a float type");
+    }
+    return mlir::success();
 }
 
 }

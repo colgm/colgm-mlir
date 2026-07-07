@@ -29,6 +29,15 @@ static bool is_calculation_type(const type& t) {
            type::isa<float_type>(tt.get_element_type());
 }
 
+static bool is_float_type(const type& t) {
+    if (!type::isa<tensor_type>(t)) {
+        return false;
+    }
+
+    auto tt = type::as<tensor_type>(t);
+    return type::isa<float_type>(tt.get_element_type());
+}
+
 type relu_infer(error& err, call_expr* node, type_storage& ts) {
     if (node->get_args().size() < 1) {
         err.err(node->get_location(), "relu takes at least one argument");
@@ -75,11 +84,11 @@ type exp_infer(error& err, call_expr* node, type_storage& ts) {
     }
 
     auto arg = node->get_args()[0]->get_resolved();
-    if (is_calculation_type(arg)) {
+    if (is_float_type(arg)) {
         return arg;
     }
 
-    err.err(node->get_location(), "exp takes only tensor, int or float argument");
+    err.err(node->get_location(), "exp takes only tensor, float argument");
     return ts.get_unknown_type();
 }
 
@@ -93,11 +102,11 @@ type log_infer(error& err, call_expr* node, type_storage& ts) {
     }
 
     auto arg = node->get_args()[0]->get_resolved();
-    if (is_calculation_type(arg)) {
+    if (is_float_type(arg)) {
         return arg;
     }
 
-    err.err(node->get_location(), "log takes only tensor, int or float argument");
+    err.err(node->get_location(), "log takes only tensor, float argument");
     return ts.get_unknown_type();
 }
 
@@ -111,11 +120,11 @@ type sqrt_infer(error& err, call_expr* node, type_storage& ts) {
     }
 
     auto arg = node->get_args()[0]->get_resolved();
-    if (is_calculation_type(arg)) {
+    if (is_float_type(arg)) {
         return arg;
     }
 
-    err.err(node->get_location(), "sqrt takes only tensor, int or float argument");
+    err.err(node->get_location(), "sqrt takes only tensor, float argument");
     return ts.get_unknown_type();
 }
 
@@ -129,11 +138,11 @@ type tanh_infer(error& err, call_expr* node, type_storage& ts) {
     }
 
     auto arg = node->get_args()[0]->get_resolved();
-    if (is_calculation_type(arg)) {
+    if (is_float_type(arg)) {
         return arg;
     }
 
-    err.err(node->get_location(), "tanh takes only tensor, int or float argument");
+    err.err(node->get_location(), "tanh takes only tensor, float argument");
     return ts.get_unknown_type();
 }
 
@@ -147,11 +156,11 @@ type sigmoid_infer(error& err, call_expr* node, type_storage& ts) {
     }
 
     auto arg = node->get_args()[0]->get_resolved();
-    if (is_calculation_type(arg)) {
+    if (is_float_type(arg)) {
         return arg;
     }
 
-    err.err(node->get_location(), "sigmoid takes only tensor, int or float argument");
+    err.err(node->get_location(), "sigmoid takes only tensor, float argument");
     return ts.get_unknown_type();
 }
 

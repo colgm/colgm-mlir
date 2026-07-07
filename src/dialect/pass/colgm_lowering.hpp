@@ -234,4 +234,14 @@ struct lowering_tanh : public mlir::ConversionPattern {
                     mlir::ConversionPatternRewriter& rewriter) const override;
 };
 
+struct lowering_sigmoid : public mlir::ConversionPattern {
+    explicit lowering_sigmoid(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
+        : mlir::ConversionPattern(cvt, sigmoid_op::getOperationName(), 1, ctx) {}
+
+    mlir::LogicalResult
+    matchAndRewrite(mlir::Operation* op,
+                    llvm::ArrayRef<mlir::Value> operands,
+                    mlir::ConversionPatternRewriter& rewriter) const override;
+};
+
 }

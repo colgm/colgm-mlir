@@ -88,7 +88,7 @@ public:
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
-    mlir::LogicalResult verify() { return mlir::success(); }
+    mlir::LogicalResult verify();
 };
 
 class log_op: public mlir::Op<log_op,
@@ -109,7 +109,7 @@ public:
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
-    mlir::LogicalResult verify() { return mlir::success(); }
+    mlir::LogicalResult verify();
 };
 
 class sqrt_op: public mlir::Op<sqrt_op,
@@ -130,7 +130,7 @@ public:
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
-    mlir::LogicalResult verify() { return mlir::success(); }
+    mlir::LogicalResult verify();
 };
 
 class sigmoid_op: public mlir::Op<sigmoid_op,
@@ -151,7 +151,7 @@ public:
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
-    mlir::LogicalResult verify() { return mlir::success(); }
+    mlir::LogicalResult verify();
 };
 
 class tanh_op: public mlir::Op<tanh_op,
@@ -172,7 +172,7 @@ public:
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);
-    mlir::LogicalResult verify() { return mlir::success(); }
+    mlir::LogicalResult verify();
 };
 
 }

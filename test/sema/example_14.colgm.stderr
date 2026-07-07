@@ -1,0 +1,30 @@
+Error: exp takes only tensor, float argument
+  --> test/sema/example_14.colgm:8:16
+  | 
+8 |     var e = exp(1);
+  |                ^^^
+
+Error: log takes only tensor, float argument
+  --> test/sema/example_14.colgm:11:16
+   | 
+11 |     var g = log(1);
+   |                ^^^
+
+Error: sqrt takes only tensor, float argument
+  --> test/sema/example_14.colgm:14:17
+   | 
+14 |     var i = sqrt(1);
+   |                 ^^^
+
+Error: tanh takes only tensor, float argument
+  --> test/sema/example_14.colgm:17:17
+   | 
+17 |     var k = tanh(1);
+   |                 ^^^
+
+Error: sigmoid takes only tensor, float argument
+  --> test/sema/example_14.colgm:20:20
+   | 
+20 |     var m = sigmoid(1);
+   |                    ^^^
+

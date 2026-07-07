@@ -1,0 +1,22 @@
+func main() {
+    var a = relu(1);
+    var b = relu(1.0);
+
+    var c = abs(1);
+    var d = abs(1.0);
+
+    var e = exp(1);
+    var f = exp(1.0);
+
+    var g = log(1);
+    var h = log(1.0);
+
+    var i = sqrt(1);
+    var j = sqrt(1.0);
+
+    var k = tanh(1);
+    var l = tanh(1.0);
+
+    var m = sigmoid(1);
+    var n = sigmoid(1.0);
+}

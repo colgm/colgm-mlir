@@ -548,6 +548,59 @@ lowering_tanh::matchAndRewrite(mlir::Operation* op,
     );
 }
 
+mlir::LogicalResult
+lowering_sigmoid::matchAndRewrite(mlir::Operation* op,
+                                  llvm::ArrayRef<mlir::Value> operands,
+                                  mlir::ConversionPatternRewriter& rewriter) const {
+    auto sigmoid = llvm::cast<sigmoid_op>(op);
+    auto input = sigmoid.get_input();
+    auto ty = llvm::cast<mlir::RankedTensorType>(input.getType());
+    auto base_type = ty.getElementType();
+
+    if (!llvm::isa<mlir::FloatType>(base_type)) {
+        return mlir::failure();
+    }
+
+    auto ft = llvm::cast<mlir::FloatType>(base_type);
+    mlir::TypedAttr zero_attr = mlir::DenseElementsAttr::get(
+        ty, llvm::APFloat(ft.getFloatSemantics(), "0")
+    );
+    mlir::TypedAttr one_attr = mlir::DenseElementsAttr::get(
+        ty, llvm::APFloat(ft.getFloatSemantics(), "1")
+    );
+
+    auto zero = mlir::arith::ConstantOp::create(rewriter, op->getLoc(), zero_attr);
+    auto one = mlir::arith::ConstantOp::create(rewriter, op->getLoc(), one_attr);
+
+    // -x
+    auto neg_x = mlir::arith::SubFOp::create(
+        rewriter, op->getLoc(), mlir::ValueRange { zero, input }
+    );
+
+    // exp(-x)
+    auto fastmath = mlir::arith::FastMathFlagsAttr::get(
+        rewriter.getContext(), mlir::arith::FastMathFlags::none
+    );
+    auto exp_neg = mlir::math::ExpOp::create(
+        rewriter, op->getLoc(), neg_x->getResult(0), fastmath
+    );
+
+    // 1.0 + exp(-x)
+    auto one_plus_exp = mlir::arith::AddFOp::create(
+        rewriter, op->getLoc(),
+        mlir::ValueRange { one, exp_neg->getResult(0) }
+    );
+
+    // 1.0 / (1.0 + exp(-x))
+    auto result = mlir::arith::DivFOp::create(
+        rewriter, op->getLoc(),
+        mlir::ValueRange { one, one_plus_exp->getResult(0) }
+    );
+
+    rewriter.replaceOp(op, result->getResults());
+    return mlir::success();
+}
+
 void colgm_lowering::runOnOperation() {
     cvt.addConversion([](mlir::Type type) { return type; });
 
@@ -573,7 +626,7 @@ void colgm_lowering::runOnOperation() {
                  lowering_neg, lowering_relu,
                  lowering_abs, lowering_exp,
                  lowering_log, lowering_sqrt,
-                 lowering_tanh>(cvt, &getContext());
+                 lowering_tanh, lowering_sigmoid>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
 

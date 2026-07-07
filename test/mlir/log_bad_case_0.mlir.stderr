@@ -1,0 +1,3 @@
+test/mlir/log_bad_case_0.mlir:5:8: error: log input must be a float type
+  %0 = colgm.log %arg : tensor<i64>
+       ^

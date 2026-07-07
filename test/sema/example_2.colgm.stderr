@@ -22,61 +22,61 @@ Error: abs takes only tensor, int or float argument
 6 |     var d = abs(false);
   |                ^^^^^^^
 
-Error: exp takes only tensor, int or float argument
+Error: exp takes only tensor, float argument
   --> test/sema/example_2.colgm:8:16
   | 
 8 |     var e = exp(true);
   |                ^^^^^^
 
-Error: exp takes only tensor, int or float argument
+Error: exp takes only tensor, float argument
   --> test/sema/example_2.colgm:9:16
   | 
 9 |     var f = exp(false);
   |                ^^^^^^^
 
-Error: log takes only tensor, int or float argument
+Error: log takes only tensor, float argument
   --> test/sema/example_2.colgm:11:16
    | 
 11 |     var g = log(true);
    |                ^^^^^^
 
-Error: log takes only tensor, int or float argument
+Error: log takes only tensor, float argument
   --> test/sema/example_2.colgm:12:16
    | 
 12 |     var h = log(false);
    |                ^^^^^^^
 
-Error: sqrt takes only tensor, int or float argument
+Error: sqrt takes only tensor, float argument
   --> test/sema/example_2.colgm:14:17
    | 
 14 |     var i = sqrt(true);
    |                 ^^^^^^
 
-Error: sqrt takes only tensor, int or float argument
+Error: sqrt takes only tensor, float argument
   --> test/sema/example_2.colgm:15:17
    | 
 15 |     var j = sqrt(false);
    |                 ^^^^^^^
 
-Error: tanh takes only tensor, int or float argument
+Error: tanh takes only tensor, float argument
   --> test/sema/example_2.colgm:17:17
    | 
 17 |     var k = tanh(true);
    |                 ^^^^^^
 
-Error: tanh takes only tensor, int or float argument
+Error: tanh takes only tensor, float argument
   --> test/sema/example_2.colgm:18:17
    | 
 18 |     var l = tanh(false);
    |                 ^^^^^^^
 
-Error: sigmoid takes only tensor, int or float argument
+Error: sigmoid takes only tensor, float argument
   --> test/sema/example_2.colgm:20:20
    | 
 20 |     var m = sigmoid(true);
    |                    ^^^^^^
 
-Error: sigmoid takes only tensor, int or float argument
+Error: sigmoid takes only tensor, float argument
   --> test/sema/example_2.colgm:21:20
    | 
 21 |     var n = sigmoid(false);

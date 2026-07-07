@@ -1,0 +1,3 @@
+test/mlir/sigmoid_bad_case_0.mlir:5:8: error: sigmoid input must be a float type
+  %0 = colgm.sigmoid %arg : tensor<i32>
+       ^
