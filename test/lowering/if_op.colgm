@@ -1,0 +1,13 @@
+func test_void_if(x: i64) {
+    if x > 0 {
+        var y = x
+    }
+}
+
+func test_void_if_else(x: i64) {
+    if x > 0 {
+        var y = 1
+    } else {
+        var y = -1
+    }
+}

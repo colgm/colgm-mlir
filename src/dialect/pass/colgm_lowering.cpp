@@ -601,6 +601,42 @@ lowering_sigmoid::matchAndRewrite(mlir::Operation* op,
     return mlir::success();
 }
 
+mlir::LogicalResult
+lowering_yield::matchAndRewrite(mlir::Operation* op,
+                                llvm::ArrayRef<mlir::Value> operands,
+                                mlir::ConversionPatternRewriter& rewriter) const {
+    rewriter.replaceOpWithNewOp<mlir::scf::YieldOp>(op, operands);
+    return mlir::success();
+}
+
+mlir::LogicalResult
+lowering_if::matchAndRewrite(mlir::Operation* op,
+                             llvm::ArrayRef<mlir::Value> operands,
+                             mlir::ConversionPatternRewriter& rewriter) const {
+    auto ifop = llvm::cast<if_op>(op);
+    auto loc = op->getLoc();
+
+    auto scf_if = mlir::scf::IfOp::create(
+        rewriter, loc, ifop.getResultTypes(), operands[0],
+        /*withElseRegion=*/true
+    );
+
+    // then region: inline colgm.if's then block into scf.if's then region
+    rewriter.inlineRegionBefore(ifop.get_then_region(),
+                                scf_if.getThenRegion(),
+                                scf_if.getThenRegion().begin());
+    scf_if.getThenRegion().back().erase(); // remove default empty block
+
+    // else region: inline colgm.if's else block into scf.if's else region
+    rewriter.inlineRegionBefore(ifop.get_else_region(),
+                                scf_if.getElseRegion(),
+                                scf_if.getElseRegion().begin());
+    scf_if.getElseRegion().back().erase(); // remove default empty block
+
+    rewriter.replaceOp(op, scf_if.getResults());
+    return mlir::success();
+}
+
 void colgm_lowering::runOnOperation() {
     cvt.addConversion([](mlir::Type type) { return type; });
 
@@ -626,7 +662,8 @@ void colgm_lowering::runOnOperation() {
                  lowering_neg, lowering_relu,
                  lowering_abs, lowering_exp,
                  lowering_log, lowering_sqrt,
-                 lowering_tanh, lowering_sigmoid>(cvt, &getContext());
+                 lowering_tanh, lowering_sigmoid,
+                 lowering_yield, lowering_if>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
 

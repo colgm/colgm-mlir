@@ -384,6 +384,10 @@ void codegen::generate_if_expr(if_expr* i, std::vector<mlir::Value>& values) {
         if (block.empty() || !block.back().hasTrait<mlir::OpTrait::IsTerminator>()) {
             yield_op::create(builder, to_loc(i));
         }
+    } else {
+        auto& block = op.get_else_region().front();
+        builder.setInsertionPointToEnd(&block);
+        yield_op::create(builder, to_loc(i));
     }
 
     builder.setInsertionPointAfter(op);

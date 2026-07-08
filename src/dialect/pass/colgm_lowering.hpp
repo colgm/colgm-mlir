@@ -244,4 +244,24 @@ struct lowering_sigmoid : public mlir::ConversionPattern {
                     mlir::ConversionPatternRewriter& rewriter) const override;
 };
 
+struct lowering_yield : public mlir::ConversionPattern {
+    explicit lowering_yield(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
+        : mlir::ConversionPattern(cvt, yield_op::getOperationName(), 1, ctx) {}
+
+    mlir::LogicalResult
+    matchAndRewrite(mlir::Operation* op,
+                    llvm::ArrayRef<mlir::Value> operands,
+                    mlir::ConversionPatternRewriter& rewriter) const override;
+};
+
+struct lowering_if : public mlir::ConversionPattern {
+    explicit lowering_if(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
+        : mlir::ConversionPattern(cvt, if_op::getOperationName(), 1, ctx) {}
+
+    mlir::LogicalResult
+    matchAndRewrite(mlir::Operation* op,
+                    llvm::ArrayRef<mlir::Value> operands,
+                    mlir::ConversionPatternRewriter& rewriter) const override;
+};
+
 }

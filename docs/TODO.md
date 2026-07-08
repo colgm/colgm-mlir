@@ -79,8 +79,7 @@
 
 ## Phase 6 — MLIR Passes & Optimization
 
-- [ ] Shape inference pass (if not fully resolved during lowering)
-- [ ] Canonicalization patterns for each op (e.g., `AddOp(x, 0) → x`, constant folding)
+- [x] Canonicalization patterns for each op (e.g., `AddOp(x, 0) → x`, constant folding)
 - [ ] Inline pass (inline small functions)
 - [ ] Run the standard MLIR lowering pipeline:
   - `-canonicalize`, `-cse`
@@ -143,11 +142,3 @@
 - [x] Test suite: run each test case through the full pipeline and compare output values
 - [x] CI (GitHub Actions) with a pinned LLVM build
 - [x] Editor syntax highlighting (VSCode extension)
-
----
-
-## Open Design Questions (to resolve as we go)
-
-- Function-call style for ops vs operators: `a + b` vs `add(a, b)` vs both?
-- Should `reshape` / `transpose` expose axis arguments inline or via a separate `@config` / annotation syntax?
-- Does `for` loop stay general-purpose, or should it be specialized for tensor iteration (like `for i in 0..N`)?
