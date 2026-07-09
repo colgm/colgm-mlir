@@ -637,6 +637,33 @@ lowering_if::matchAndRewrite(mlir::Operation* op,
     return mlir::success();
 }
 
+mlir::LogicalResult
+lowering_for::matchAndRewrite(mlir::Operation* op,
+                             llvm::ArrayRef<mlir::Value> operands,
+                             mlir::ConversionPatternRewriter& rewriter) const {
+    auto forop = llvm::cast<for_op>(op);
+    auto loc = op->getLoc();
+    auto upper_bound = forop.get_upper_bound();
+    auto lower_bound = forop.get_lower_bound();
+    auto init_args = forop.get_iter_args();
+    auto step = mlir::arith::ConstantOp::create(
+        rewriter, loc, rewriter.getIndexAttr(1)
+    );
+
+    auto scf_for = mlir::scf::ForOp::create(
+        rewriter, loc, lower_bound, upper_bound, step, init_args
+    );
+
+    // body region: inline colgm.for's body block into scf.for's body region
+    rewriter.inlineRegionBefore(forop.get_body(),
+                                scf_for.getBodyRegion(),
+                                scf_for.getBodyRegion().begin());
+    scf_for.getBodyRegion().back().erase(); // remove default empty block
+
+    rewriter.replaceOp(op, scf_for.getResults());
+    return mlir::success();
+}
+
 void colgm_lowering::runOnOperation() {
     cvt.addConversion([](mlir::Type type) { return type; });
 
@@ -663,7 +690,7 @@ void colgm_lowering::runOnOperation() {
                  lowering_abs, lowering_exp,
                  lowering_log, lowering_sqrt,
                  lowering_tanh, lowering_sigmoid,
-                 lowering_yield, lowering_if>(cvt, &getContext());
+                 lowering_yield, lowering_if, lowering_for>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
 

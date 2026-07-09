@@ -1,0 +1,6 @@
+func main() {
+    var x = [0.1, 0.2, 0.3]
+    var y, z = for i in 0..2 init(acc = 0.0, acc2 = 0.6) {
+        yield acc + x[i], acc2 - x[i]
+    }
+}
