@@ -9,7 +9,7 @@
 
 #include "dialect/pass/constfold.hpp"
 #include "dialect/dialect.hpp"
-#include "dialect/pass/colgm_lowering.hpp"
+#include "dialect/pass/lowering.hpp"
 
 int main(int argc, char **argv) {
     mlir::DialectRegistry registry;

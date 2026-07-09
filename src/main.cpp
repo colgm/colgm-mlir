@@ -18,7 +18,7 @@
 #include "dialect/dialect.hpp"
 #include "codegen/generator.hpp"
 #include "dialect/pass/constfold.hpp"
-#include "dialect/pass/colgm_lowering.hpp"
+#include "dialect/pass/lowering.hpp"
 
 using colgm_mlir::u32;
 using colgm_mlir::i32;

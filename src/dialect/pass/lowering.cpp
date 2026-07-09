@@ -1,5 +1,5 @@
 #include "codegen/dialect_loader.hpp"
-#include "dialect/pass/colgm_lowering.hpp"
+#include "dialect/pass/lowering.hpp"
 
 namespace colgm_mlir {
 
