@@ -39,7 +39,8 @@ colgm_dialect::colgm_dialect(mlir::MLIRContext* ctx):
         slice_op,
         yield_op,
         if_op,
-        for_op
+        for_op,
+        print_op
     >();
 }
 

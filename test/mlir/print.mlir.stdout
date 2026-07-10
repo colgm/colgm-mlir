@@ -1,0 +1,23 @@
+module {
+  func.func @print_single(%arg0: tensor<f32>) {
+    colgm.print %arg0 : tensor<f32>
+    return
+  }
+  func.func @print_multi(%arg0: tensor<f32>, %arg1: tensor<i64>, %arg2: tensor<f64>) {
+    colgm.print %arg0, %arg1, %arg2 : tensor<f32>, tensor<i64>, tensor<f64>
+    return
+  }
+  func.func @print_two(%arg0: tensor<f32>, %arg1: tensor<f32>) {
+    colgm.print %arg0, %arg1 : tensor<f32>, tensor<f32>
+    return
+  }
+  func.func @print_int(%arg0: tensor<i32>) {
+    colgm.print %arg0 : tensor<i32>
+    return
+  }
+  func.func @print_empty() {
+    colgm.print
+    return
+  }
+}
+

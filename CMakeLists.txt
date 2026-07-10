@@ -76,6 +76,7 @@ set(COLGM_LIB_SOURCES
     src/dialect/colgm/stack.cpp
     src/dialect/colgm/for_op.cpp
     src/dialect/colgm/if_op.cpp
+    src/dialect/colgm/print_op.cpp
     src/dialect/colgm/reduce_sum.cpp
     src/dialect/colgm/reshape.cpp
     src/dialect/colgm/slice.cpp

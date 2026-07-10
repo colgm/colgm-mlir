@@ -18,6 +18,7 @@
 #include "dialect/colgm/yield.hpp"
 #include "dialect/colgm/if_op.hpp"
 #include "dialect/colgm/for_op.hpp"
+#include "dialect/colgm/print_op.hpp"
 
 namespace colgm_mlir {
 
