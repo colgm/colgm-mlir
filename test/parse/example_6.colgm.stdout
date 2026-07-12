@@ -1,0 +1,15 @@
+Root -> test/parse/example_6.colgm:1:1
+`--FuncDecl main -> test/parse/example_6.colgm:1:1
+   `--BlockStmt -> test/parse/example_6.colgm:1:13
+      |--VarDecl a -> test/parse/example_6.colgm:2:5
+      |  `--Tensor -> test/parse/example_6.colgm:2:13
+      |     |--Tensor -> test/parse/example_6.colgm:2:14
+      |     |  |--IntLiteral 0 -> test/parse/example_6.colgm:2:15
+      |     |  `--IntLiteral 1 -> test/parse/example_6.colgm:2:18
+      |     `--Tensor -> test/parse/example_6.colgm:2:22
+      |        |--IntLiteral 2 -> test/parse/example_6.colgm:2:23
+      |        `--IntLiteral 3 -> test/parse/example_6.colgm:2:26
+      `--ExprStmt -> test/parse/example_6.colgm:4:1
+         `--CallExpr -> test/parse/example_6.colgm:3:10
+            |--identifier print -> test/parse/example_6.colgm:3:5
+            `--identifier a -> test/parse/example_6.colgm:3:11

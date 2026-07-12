@@ -130,6 +130,8 @@ stmt* parser::parse_stmt() {
         return parse_return_stmt();
     } else if (lookahead(tok::tk_yield)) {
         return parse_yield_stmt();
+    } else if (lookahead(tok::tk_id)) {
+        return parse_expr_stmt();
     } else {
         err.err(tokens[ptr].loc,
             "Unexpected statement token '" + tokens[ptr].str + "'"
@@ -203,6 +205,8 @@ expr_stmt* parser::parse_expr_stmt() {
         inner = parse_if_expr();
     } else if (lookahead(tok::tk_for)) {
         inner = parse_for_expr();
+    } else if (lookahead(tok::tk_id)) {
+        inner = parse_call_expr();
     }
     auto node = new expr_stmt(tokens[ptr].loc);
     node->set_inner(inner);
