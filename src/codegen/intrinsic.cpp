@@ -10,6 +10,7 @@ intrinsic_generator_registry::intrinsic_generator_registry() {
     regist("sqrt", sqrt_gen);
     regist("tanh", tanh_gen);
     regist("sigmoid", sigmoid_gen);
+    regist("print", print_gen);
 }
 
 intrinsic_gen_find_res
@@ -67,6 +68,13 @@ mlir::Value sigmoid_gen(mlir::OpBuilder& builder,
                         llvm::SmallVector<mlir::Value>& args) {
     auto sigmoid = sigmoid_op::create(builder, loc, args[0]);
     return sigmoid->getResult(0);
+}
+
+mlir::Value print_gen(mlir::OpBuilder& builder,
+                      mlir::Location loc,
+                      llvm::SmallVector<mlir::Value>& args) {
+    auto print = print_op::create(builder, loc, args);
+    return print->getResult(0);
 }
 
 }

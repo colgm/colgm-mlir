@@ -10,6 +10,7 @@ intrinsic_registry::intrinsic_registry() {
     regist("sqrt", sqrt_infer);
     regist("tanh", tanh_infer);
     regist("sigmoid", sigmoid_infer);
+    regist("print", print_infer);
 }
 
 intrinsic_find_res intrinsic_registry::find(const std::string& name) const {
@@ -162,6 +163,15 @@ type sigmoid_infer(error& err, call_expr* node, type_storage& ts) {
 
     err.err(node->get_location(), "sigmoid takes only tensor, float argument");
     return ts.get_unknown_type();
+}
+
+type print_infer(error& err, call_expr* node, type_storage& ts) {
+    if (node->get_args().size() < 1) {
+        err.warn(node->get_location(), "useless print");
+        return ts.get_unknown_type();
+    }
+
+    return ts.get_void_type();
 }
 
 }

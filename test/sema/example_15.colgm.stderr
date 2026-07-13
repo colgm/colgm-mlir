@@ -1,0 +1,11 @@
+Warning: useless print
+  --> test/sema/example_15.colgm:2:10
+2 |     print()
+  |          ^^
+
+Error: variable 'foo' must have type but get void type
+  --> test/sema/example_15.colgm:5:5
+  | 
+5 |     var foo = print(bar)
+  |     ^^^^^^^^^^^^^^^^^^^^
+
