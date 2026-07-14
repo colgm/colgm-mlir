@@ -11,6 +11,7 @@ intrinsic_registry::intrinsic_registry() {
     regist("tanh", tanh_infer);
     regist("sigmoid", sigmoid_infer);
     regist("print", print_infer);
+    regist("matmul", matmul_infer);
 }
 
 intrinsic_find_res intrinsic_registry::find(const std::string& name) const {
@@ -172,6 +173,58 @@ type print_infer(error& err, call_expr* node, type_storage& ts) {
     }
 
     return ts.get_void_type();
+}
+
+type matmul_infer(error& err, call_expr* node, type_storage& ts) {
+    if (node->get_args().size() != 2) {
+        err.err(node->get_location(), "matmul takes exactly two arguments");
+        return ts.get_unknown_type();
+    }
+
+    auto lhs = node->get_args()[0]->get_resolved();
+    auto rhs = node->get_args()[1]->get_resolved();
+
+    if (!type::isa<tensor_type>(lhs) || !type::isa<tensor_type>(rhs)) {
+        err.err(node->get_location(), "matmul takes only tensor arguments");
+        return ts.get_unknown_type();
+    }
+
+    auto lhs_tt = type::as<tensor_type>(lhs);
+    auto rhs_tt = type::as<tensor_type>(rhs);
+    const auto& lhs_shape = lhs_tt.get_shape();
+    const auto& rhs_shape = rhs_tt.get_shape();
+    auto rank = lhs_shape.size();
+
+    if (rank < 2 || rhs_shape.size() < 2) {
+        err.err(node->get_location(), "matmul requires tensors with rank >= 2");
+        return ts.get_unknown_type();
+    }
+
+    if (rank != rhs_shape.size()) {
+        err.err(node->get_location(), "matmul tensors must have the same rank");
+        return ts.get_unknown_type();
+    }
+
+    for (usize i = 0; i < rank - 2; i++) {
+        if (lhs_shape[i] != rhs_shape[i]) {
+            err.err(node->get_location(), "matmul batch dimensions must match");
+            return ts.get_unknown_type();
+        }
+    }
+
+    if (lhs_shape[rank - 1] != rhs_shape[rank - 2]) {
+        err.err(node->get_location(), "matmul inner dimensions must match");
+        return ts.get_unknown_type();
+    }
+
+    std::vector<i64> res_shape;
+    for (usize i = 0; i < rank - 2; i++) {
+        res_shape.push_back(lhs_shape[i]);
+    }
+    res_shape.push_back(lhs_shape[rank - 2]);
+    res_shape.push_back(rhs_shape[rank - 1]);
+
+    return ts.get_tensor_type(lhs_tt.get_element_type(), res_shape);
 }
 
 }

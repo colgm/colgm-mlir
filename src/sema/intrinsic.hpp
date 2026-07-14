@@ -48,5 +48,6 @@ type sqrt_infer(error&, call_expr*, type_storage&);
 type tanh_infer(error&, call_expr*, type_storage&);
 type sigmoid_infer(error&, call_expr*, type_storage&);
 type print_infer(error&, call_expr*, type_storage&);
+type matmul_infer(error&, call_expr*, type_storage&);
 
 }

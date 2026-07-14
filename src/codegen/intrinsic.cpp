@@ -11,6 +11,7 @@ intrinsic_generator_registry::intrinsic_generator_registry() {
     regist("tanh", tanh_gen);
     regist("sigmoid", sigmoid_gen);
     regist("print", print_gen);
+    regist("matmul", matmul_gen);
 }
 
 intrinsic_gen_find_res
@@ -75,6 +76,13 @@ mlir::Value print_gen(mlir::OpBuilder& builder,
                       llvm::SmallVector<mlir::Value>& args) {
     auto print = print_op::create(builder, loc, args);
     return print->getResult(0);
+}
+
+mlir::Value matmul_gen(mlir::OpBuilder& builder,
+                       mlir::Location loc,
+                       llvm::SmallVector<mlir::Value>& args) {
+    auto matmul = matmul_op::create(builder, loc, args[0], args[1]);
+    return matmul->getResult(0);
 }
 
 }

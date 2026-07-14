@@ -44,5 +44,6 @@ mlir::Value sqrt_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::V
 mlir::Value tanh_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 mlir::Value sigmoid_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 mlir::Value print_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
+mlir::Value matmul_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 
 }
