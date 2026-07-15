@@ -25,6 +25,8 @@ public:
 
     static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
                       mlir::Value input, mlir::ArrayRef<i64> shape);
+    static reshape_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                             mlir::Value input, mlir::ArrayRef<i64> shape);
     static mlir::ParseResult parse(mlir::OpAsmParser& parser,
                                    mlir::OperationState& result);
     void print(mlir::OpAsmPrinter& p);

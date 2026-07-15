@@ -1,0 +1,7 @@
+func main() {
+    var x = [1, 2]
+    var a = broadcast(x)           // too few args
+    var b = broadcast(x, [2], [3]) // too many args
+    var c = broadcast(x, x)        // non-array second arg
+    var d = broadcast(x, [1.0])    // non-int array element
+}

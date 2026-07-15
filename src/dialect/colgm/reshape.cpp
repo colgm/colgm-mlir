@@ -17,6 +17,13 @@ void reshape_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
     state.addAttribute("target_shape", builder.getI64ArrayAttr(shape));
 }
 
+reshape_op reshape_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                               mlir::Value input, mlir::ArrayRef<i64> shape) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input, shape);
+    return llvm::cast<reshape_op>(builder.create(state));
+}
+
 mlir::ParseResult reshape_op::parse(mlir::OpAsmParser& parser,
                                     mlir::OperationState& result) {
     mlir::OpAsmParser::UnresolvedOperand input;

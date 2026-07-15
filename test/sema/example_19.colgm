@@ -1,0 +1,8 @@
+func main() {
+    var x = [[1, 2], [3, 4]]
+    var a = transpose(x)           // too few args
+    var b = transpose(x, [1], [0]) // too many args
+    var c = transpose(x, x)        // non-array second arg
+    var d = transpose(x, [0])      // permutation size mismatch
+    var e = transpose(x, [0, 2])   // permutation index out of range
+}

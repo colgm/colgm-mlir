@@ -49,5 +49,9 @@ type tanh_infer(error&, call_expr*, type_storage&);
 type sigmoid_infer(error&, call_expr*, type_storage&);
 type print_infer(error&, call_expr*, type_storage&);
 type matmul_infer(error&, call_expr*, type_storage&);
+type broadcast_infer(error&, call_expr*, type_storage&);
+type reduce_sum_infer(error&, call_expr*, type_storage&);
+type reshape_infer(error&, call_expr*, type_storage&);
+type transpose_infer(error&, call_expr*, type_storage&);
 
 }

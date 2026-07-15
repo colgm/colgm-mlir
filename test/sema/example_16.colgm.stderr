@@ -1,0 +1,24 @@
+Error: broadcast takes exactly two arguments
+  --> test/sema/example_16.colgm:3:22
+  | 
+3 |     var a = broadcast(x)           // too few args
+  |                      ^^^
+
+Error: broadcast takes exactly two arguments
+  --> test/sema/example_16.colgm:4:22
+  | 
+4 |     var b = broadcast(x, [2], [3]) // too many args
+  |                      ^^^^^^^^^^^^^
+
+Error: argument must be an array literal
+  --> test/sema/example_16.colgm:5:22
+  | 
+5 |     var c = broadcast(x, x)        // non-array second arg
+  |                      ^^^^^^
+
+Error: array elements must be integer literals
+  --> test/sema/example_16.colgm:6:22
+  | 
+6 |     var d = broadcast(x, [1.0])    // non-int array element
+  |                      ^^^^^^^^^^
+

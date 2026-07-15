@@ -30,6 +30,13 @@ void reduce_sum::build(mlir::OpBuilder& builder, mlir::OperationState& state,
     state.addAttribute("axes", builder.getI64ArrayAttr(axes));
 }
 
+reduce_sum reduce_sum::create(mlir::OpBuilder& builder, mlir::Location loc,
+                               mlir::Value input, mlir::ArrayRef<i64> axes) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input, axes);
+    return llvm::cast<reduce_sum>(builder.create(state));
+}
+
 mlir::ParseResult reduce_sum::parse(mlir::OpAsmParser& parser,
                                     mlir::OperationState& result) {
     mlir::OpAsmParser::UnresolvedOperand input;

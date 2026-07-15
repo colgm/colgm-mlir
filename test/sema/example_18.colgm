@@ -1,0 +1,7 @@
+func main() {
+    var x = [1, 2, 3, 4]
+    var a = reshape(x)             // too few args
+    var b = reshape(x, [4], [1])   // too many args
+    var c = reshape(x, x)          // non-array second arg
+    var d = reshape(x, [3])        // total elements mismatch
+}

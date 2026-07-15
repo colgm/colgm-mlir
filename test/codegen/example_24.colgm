@@ -1,0 +1,7 @@
+func main() {
+    var x = [[1, 2], [3, 4]]
+    var b = broadcast(x, [2, 2, 2])
+    var r = reduce_sum(x, [0])
+    var s = reshape(x, [4])
+    var t = transpose(x, [1, 0])
+}

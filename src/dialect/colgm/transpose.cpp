@@ -23,6 +23,13 @@ void transpose_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
     state.addAttribute("permutation", builder.getI64ArrayAttr(permutation));
 }
 
+transpose_op transpose_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                                   mlir::Value input, mlir::ArrayRef<i64> permutation) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input, permutation);
+    return llvm::cast<transpose_op>(builder.create(state));
+}
+
 mlir::ParseResult transpose_op::parse(mlir::OpAsmParser& parser,
                                       mlir::OperationState& result) {
     mlir::OpAsmParser::UnresolvedOperand input;

@@ -1,4 +1,5 @@
 #include "codegen/intrinsic.hpp"
+#include <mlir/IR/BuiltinAttributes.h>
 
 namespace colgm_mlir {
 
@@ -12,6 +13,10 @@ intrinsic_generator_registry::intrinsic_generator_registry() {
     regist("sigmoid", sigmoid_gen);
     regist("print", print_gen);
     regist("matmul", matmul_gen);
+    regist("broadcast", broadcast_gen);
+    regist("reduce_sum", reduce_sum_gen);
+    regist("reshape", reshape_gen);
+    regist("transpose", transpose_gen);
 }
 
 intrinsic_gen_find_res
@@ -83,6 +88,76 @@ mlir::Value matmul_gen(mlir::OpBuilder& builder,
                        llvm::SmallVector<mlir::Value>& args) {
     auto matmul = matmul_op::create(builder, loc, args[0], args[1]);
     return matmul->getResult(0);
+}
+
+static bool extract_i64_constants(mlir::Value val,
+                                   llvm::SmallVectorImpl<i64>& out) {
+    auto* def_op = val.getDefiningOp();
+    if (!def_op) return false;
+
+    if (auto const_op = llvm::dyn_cast<constant_op>(def_op)) {
+        auto attr = const_op.get_value();
+        if (auto dense = llvm::dyn_cast<mlir::DenseIntElementsAttr>(attr)) {
+            for (auto v : dense.getValues<i64>()) {
+                out.push_back(v);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    if (auto elem_op = llvm::dyn_cast<elements_op>(def_op)) {
+        for (auto operand : elem_op->getOperands()) {
+            auto* op_def = operand.getDefiningOp();
+            auto cst = llvm::dyn_cast_or_null<constant_op>(op_def);
+            if (!cst) return false;
+            auto attr = cst.get_value();
+            auto dense = llvm::dyn_cast<mlir::DenseElementsAttr>(attr);
+            if (!dense) return false;
+            auto vals = dense.getValues<i64>();
+            if (vals.empty()) return false;
+            out.push_back(*vals.begin());
+        }
+        return true;
+    }
+
+    return false;
+}
+
+mlir::Value broadcast_gen(mlir::OpBuilder& builder,
+                           mlir::Location loc,
+                           llvm::SmallVector<mlir::Value>& args) {
+    llvm::SmallVector<i64> shape;
+    extract_i64_constants(args[1], shape);
+    auto op = broadcast_op::create(builder, loc, args[0], shape);
+    return op->getResult(0);
+}
+
+mlir::Value reduce_sum_gen(mlir::OpBuilder& builder,
+                            mlir::Location loc,
+                            llvm::SmallVector<mlir::Value>& args) {
+    llvm::SmallVector<i64> axes;
+    extract_i64_constants(args[1], axes);
+    auto op = reduce_sum::create(builder, loc, args[0], axes);
+    return op->getResult(0);
+}
+
+mlir::Value reshape_gen(mlir::OpBuilder& builder,
+                         mlir::Location loc,
+                         llvm::SmallVector<mlir::Value>& args) {
+    llvm::SmallVector<i64> shape;
+    extract_i64_constants(args[1], shape);
+    auto op = reshape_op::create(builder, loc, args[0], shape);
+    return op->getResult(0);
+}
+
+mlir::Value transpose_gen(mlir::OpBuilder& builder,
+                           mlir::Location loc,
+                           llvm::SmallVector<mlir::Value>& args) {
+    llvm::SmallVector<i64> perm;
+    extract_i64_constants(args[1], perm);
+    auto op = transpose_op::create(builder, loc, args[0], perm);
+    return op->getResult(0);
 }
 
 }

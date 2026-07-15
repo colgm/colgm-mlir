@@ -1,0 +1,24 @@
+Error: reduce_sum takes exactly two arguments
+  --> test/sema/example_17.colgm:3:23
+  | 
+3 |     var a = reduce_sum(x)          // too few args
+  |                       ^^^
+
+Error: reduce_sum takes exactly two arguments
+  --> test/sema/example_17.colgm:4:23
+  | 
+4 |     var b = reduce_sum(x, [0], [1]) // too many args
+  |                       ^^^^^^^^^^^^^
+
+Error: argument must be an array literal
+  --> test/sema/example_17.colgm:5:23
+  | 
+5 |     var c = reduce_sum(x, x)       // non-array second arg
+  |                       ^^^^^^
+
+Error: reduce_sum axis out of range
+  --> test/sema/example_17.colgm:6:23
+  | 
+6 |     var d = reduce_sum(x, [3])     // axis out of range
+  |                       ^^^^^^^^
+

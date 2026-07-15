@@ -1,0 +1,24 @@
+Error: reshape takes exactly two arguments
+  --> test/sema/example_18.colgm:3:20
+  | 
+3 |     var a = reshape(x)             // too few args
+  |                    ^^^
+
+Error: reshape takes exactly two arguments
+  --> test/sema/example_18.colgm:4:20
+  | 
+4 |     var b = reshape(x, [4], [1])   // too many args
+  |                    ^^^^^^^^^^^^^
+
+Error: argument must be an array literal
+  --> test/sema/example_18.colgm:5:20
+  | 
+5 |     var c = reshape(x, x)          // non-array second arg
+  |                    ^^^^^^
+
+Error: reshape total elements mismatch
+  --> test/sema/example_18.colgm:6:20
+  | 
+6 |     var d = reshape(x, [3])        // total elements mismatch
+  |                    ^^^^^^^^
+

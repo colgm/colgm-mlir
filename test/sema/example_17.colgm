@@ -1,0 +1,7 @@
+func main() {
+    var x = [1, 2, 3]
+    var a = reduce_sum(x)          // too few args
+    var b = reduce_sum(x, [0], [1]) // too many args
+    var c = reduce_sum(x, x)       // non-array second arg
+    var d = reduce_sum(x, [3])     // axis out of range
+}

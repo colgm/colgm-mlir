@@ -1,0 +1,30 @@
+Error: transpose takes exactly two arguments
+  --> test/sema/example_19.colgm:3:22
+  | 
+3 |     var a = transpose(x)           // too few args
+  |                      ^^^
+
+Error: transpose takes exactly two arguments
+  --> test/sema/example_19.colgm:4:22
+  | 
+4 |     var b = transpose(x, [1], [0]) // too many args
+  |                      ^^^^^^^^^^^^^
+
+Error: argument must be an array literal
+  --> test/sema/example_19.colgm:5:22
+  | 
+5 |     var c = transpose(x, x)        // non-array second arg
+  |                      ^^^^^^
+
+Error: transpose permutation size must match tensor rank
+  --> test/sema/example_19.colgm:6:22
+  | 
+6 |     var d = transpose(x, [0])      // permutation size mismatch
+  |                      ^^^^^^^^
+
+Error: transpose permutation index out of range
+  --> test/sema/example_19.colgm:7:22
+  | 
+7 |     var e = transpose(x, [0, 2])   // permutation index out of range
+  |                      ^^^^^^^^^^^
+

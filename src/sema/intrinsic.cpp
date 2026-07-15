@@ -1,4 +1,5 @@
 #include "sema/intrinsic.hpp"
+#include "ast/expr.hpp"
 
 namespace colgm_mlir {
 
@@ -12,6 +13,10 @@ intrinsic_registry::intrinsic_registry() {
     regist("sigmoid", sigmoid_infer);
     regist("print", print_infer);
     regist("matmul", matmul_infer);
+    regist("broadcast", broadcast_infer);
+    regist("reduce_sum", reduce_sum_infer);
+    regist("reshape", reshape_infer);
+    regist("transpose", transpose_infer);
 }
 
 intrinsic_find_res intrinsic_registry::find(const std::string& name) const {
@@ -225,6 +230,139 @@ type matmul_infer(error& err, call_expr* node, type_storage& ts) {
     res_shape.push_back(rhs_shape[rank - 1]);
 
     return ts.get_tensor_type(lhs_tt.get_element_type(), res_shape);
+}
+
+static bool extract_i64_array(const std::vector<expr*>& args, usize idx,
+                               std::vector<i64>& out, error& err,
+                               call_expr* node) {
+    if (idx >= args.size()) return false;
+    if (!args[idx]->is(ast_type::tensor)) {
+        err.err(node->get_location(), "argument must be an array literal");
+        return false;
+    }
+    auto t = static_cast<tensor*>(args[idx]);
+    for (auto v : t->get_values()) {
+        if (!v->is(ast_type::int_literal)) {
+            err.err(node->get_location(), "array elements must be integer literals");
+            return false;
+        }
+        out.push_back(static_cast<int_literal*>(v)->get_literal());
+    }
+    return true;
+}
+
+type broadcast_infer(error& err, call_expr* node, type_storage& ts) {
+    if (node->get_args().size() != 2) {
+        err.err(node->get_location(), "broadcast takes exactly two arguments");
+        return ts.get_unknown_type();
+    }
+    auto arg = node->get_args()[0]->get_resolved();
+    if (!type::isa<tensor_type>(arg)) {
+        err.err(node->get_location(), "broadcast's first argument must be a tensor");
+        return ts.get_unknown_type();
+    }
+    std::vector<i64> shape;
+    if (!extract_i64_array(node->get_args(), 1, shape, err, node)) {
+        return ts.get_unknown_type();
+    }
+    auto tt = type::as<tensor_type>(arg);
+    return ts.get_tensor_type(tt.get_element_type(), shape);
+}
+
+type reduce_sum_infer(error& err, call_expr* node, type_storage& ts) {
+    if (node->get_args().size() != 2) {
+        err.err(node->get_location(), "reduce_sum takes exactly two arguments");
+        return ts.get_unknown_type();
+    }
+    auto arg = node->get_args()[0]->get_resolved();
+    if (!type::isa<tensor_type>(arg)) {
+        err.err(node->get_location(), "reduce_sum's first argument must be a tensor");
+        return ts.get_unknown_type();
+    }
+    std::vector<i64> axes;
+    if (!extract_i64_array(node->get_args(), 1, axes, err, node)) {
+        return ts.get_unknown_type();
+    }
+    auto tt = type::as<tensor_type>(arg);
+    const auto& input_shape = tt.get_shape();
+    auto rank = static_cast<i64>(input_shape.size());
+    for (auto axis : axes) {
+        if (axis < 0 || axis >= rank) {
+            err.err(node->get_location(), "reduce_sum axis out of range");
+            return ts.get_unknown_type();
+        }
+    }
+    std::vector<i64> output_shape;
+    for (i64 i = 0; i < rank; ++i) {
+        if (std::find(axes.begin(), axes.end(), i) == axes.end()) {
+            output_shape.push_back(input_shape[i]);
+        }
+    }
+    return ts.get_tensor_type(tt.get_element_type(), output_shape);
+}
+
+type reshape_infer(error& err, call_expr* node, type_storage& ts) {
+    if (node->get_args().size() != 2) {
+        err.err(node->get_location(), "reshape takes exactly two arguments");
+        return ts.get_unknown_type();
+    }
+    auto arg = node->get_args()[0]->get_resolved();
+    if (!type::isa<tensor_type>(arg)) {
+        err.err(node->get_location(), "reshape's first argument must be a tensor");
+        return ts.get_unknown_type();
+    }
+    std::vector<i64> shape;
+    if (!extract_i64_array(node->get_args(), 1, shape, err, node)) {
+        return ts.get_unknown_type();
+    }
+    auto tt = type::as<tensor_type>(arg);
+    i64 input_elems = 1;
+    for (auto d : tt.get_shape()) {
+        input_elems *= d;
+    }
+    i64 output_elems = 1;
+    for (auto d : shape) {
+        output_elems *= d;
+    }
+    if (input_elems != output_elems) {
+        err.err(node->get_location(), "reshape total elements mismatch");
+        return ts.get_unknown_type();
+    }
+    return ts.get_tensor_type(tt.get_element_type(), shape);
+}
+
+type transpose_infer(error& err, call_expr* node, type_storage& ts) {
+    if (node->get_args().size() != 2) {
+        err.err(node->get_location(), "transpose takes exactly two arguments");
+        return ts.get_unknown_type();
+    }
+    auto arg = node->get_args()[0]->get_resolved();
+    if (!type::isa<tensor_type>(arg)) {
+        err.err(node->get_location(), "transpose's first argument must be a tensor");
+        return ts.get_unknown_type();
+    }
+    std::vector<i64> perm;
+    if (!extract_i64_array(node->get_args(), 1, perm, err, node)) {
+        return ts.get_unknown_type();
+    }
+    auto tt = type::as<tensor_type>(arg);
+    const auto& input_shape = tt.get_shape();
+    auto rank = static_cast<i64>(input_shape.size());
+    if (static_cast<i64>(perm.size()) != rank) {
+        err.err(node->get_location(), "transpose permutation size must match tensor rank");
+        return ts.get_unknown_type();
+    }
+    for (auto p : perm) {
+        if (p < 0 || p >= rank) {
+            err.err(node->get_location(), "transpose permutation index out of range");
+            return ts.get_unknown_type();
+        }
+    }
+    std::vector<i64> output_shape;
+    for (auto p : perm) {
+        output_shape.push_back(input_shape[p]);
+    }
+    return ts.get_tensor_type(tt.get_element_type(), output_shape);
 }
 
 }
