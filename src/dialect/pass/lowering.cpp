@@ -664,6 +664,43 @@ lowering_for::matchAndRewrite(mlir::Operation* op,
     return mlir::success();
 }
 
+mlir::LogicalResult
+lowering_matmul::matchAndRewrite(mlir::Operation* op,
+                                 llvm::ArrayRef<mlir::Value> operands,
+                                 mlir::ConversionPatternRewriter& rewriter) const {
+    auto matmul = llvm::cast<matmul_op>(op);
+    auto lhs = matmul.get_lhs();
+    auto rhs = matmul.get_rhs();
+    auto loc = matmul.getLoc();
+    auto result_type = llvm::cast<mlir::RankedTensorType>(matmul->getResult(0).getType());
+
+    auto rank = result_type.getRank();
+    auto elem_type = result_type.getElementType();
+
+    // create empty output tensor
+    auto init = mlir::tensor::EmptyOp::create(
+        rewriter, loc, result_type.getShape(), elem_type
+    );
+
+    if (rank == 2) {
+        auto matmul_2d = mlir::linalg::MatmulOp::create(
+            rewriter, loc,
+            mlir::ValueRange { lhs, rhs },
+            mlir::ValueRange { init }
+        );
+        rewriter.replaceOp(op, matmul_2d->getResults());
+    } else {
+        auto batch_matmul = mlir::linalg::BatchMatmulOp::create(
+            rewriter, loc,
+            mlir::ValueRange { lhs, rhs },
+            mlir::ValueRange { init }
+        );
+        rewriter.replaceOp(op, batch_matmul->getResults());
+    }
+
+    return mlir::success();
+}
+
 void colgm_lowering::runOnOperation() {
     cvt.addConversion([](mlir::Type type) { return type; });
 
@@ -690,7 +727,8 @@ void colgm_lowering::runOnOperation() {
                  lowering_abs, lowering_exp,
                  lowering_log, lowering_sqrt,
                  lowering_tanh, lowering_sigmoid,
-                 lowering_yield, lowering_if, lowering_for>(cvt, &getContext());
+                 lowering_yield, lowering_if, lowering_for,
+                 lowering_matmul>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
 

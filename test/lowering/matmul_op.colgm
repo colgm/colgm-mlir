@@ -1,0 +1,7 @@
+func matmul_2d(a: f64[2, 4], b: f64[4, 3]) -> f64[2, 3] {
+    return matmul(a, b)
+}
+
+func matmul_batch(a: f64[4, 2, 3], b: f64[4, 3, 5]) -> f64[4, 2, 5] {
+    return matmul(a, b)
+}

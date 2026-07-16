@@ -1,0 +1,18 @@
+#loc = loc("test/lowering/matmul_op.colgm":1:1)
+#loc1 = loc("test/lowering/matmul_op.colgm":5:1)
+module {
+  func.func @matmul_batch(%arg0: tensor<4x2x3xf64> loc("test/lowering/matmul_op.colgm":5:1), %arg1: tensor<4x3x5xf64> loc("test/lowering/matmul_op.colgm":5:1)) -> tensor<4x2x5xf64> {
+    %0 = tensor.empty() : tensor<4x2x5xf64> loc(#loc2)
+    %1 = linalg.batch_matmul ins(%arg0, %arg1 : tensor<4x2x3xf64>, tensor<4x3x5xf64>) outs(%0 : tensor<4x2x5xf64>) -> tensor<4x2x5xf64> loc(#loc2)
+    return %1 : tensor<4x2x5xf64> loc(#loc3)
+  } loc(#loc1)
+  func.func @matmul_2d(%arg0: tensor<2x4xf64> loc("test/lowering/matmul_op.colgm":1:1), %arg1: tensor<4x3xf64> loc("test/lowering/matmul_op.colgm":1:1)) -> tensor<2x3xf64> {
+    %0 = tensor.empty() : tensor<2x3xf64> loc(#loc4)
+    %1 = linalg.matmul ins(%arg0, %arg1 : tensor<2x4xf64>, tensor<4x3xf64>) outs(%0 : tensor<2x3xf64>) -> tensor<2x3xf64> loc(#loc4)
+    return %1 : tensor<2x3xf64> loc(#loc5)
+  } loc(#loc)
+} loc(#loc)
+#loc2 = loc("test/lowering/matmul_op.colgm":6:18)
+#loc3 = loc("test/lowering/matmul_op.colgm":6:5)
+#loc4 = loc("test/lowering/matmul_op.colgm":2:18)
+#loc5 = loc("test/lowering/matmul_op.colgm":2:5)
