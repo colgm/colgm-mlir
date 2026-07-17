@@ -1,0 +1,20 @@
+module {
+  func.func @test_elements_1d(%arg0: tensor<f32>, %arg1: tensor<f32>, %arg2: tensor<f32>) -> tensor<3xf32> {
+    %extracted = tensor.extract %arg0[] : tensor<f32>
+    %extracted_0 = tensor.extract %arg1[] : tensor<f32>
+    %extracted_1 = tensor.extract %arg2[] : tensor<f32>
+    %from_elements = tensor.from_elements %extracted, %extracted_0, %extracted_1 : tensor<3xf32>
+    return %from_elements : tensor<3xf32>
+  }
+  func.func @test_elements_2d(%arg0: tensor<f64>, %arg1: tensor<f64>, %arg2: tensor<f64>, %arg3: tensor<f64>) -> tensor<2x2xf64> {
+    %extracted = tensor.extract %arg0[] : tensor<f64>
+    %extracted_0 = tensor.extract %arg1[] : tensor<f64>
+    %extracted_1 = tensor.extract %arg2[] : tensor<f64>
+    %extracted_2 = tensor.extract %arg3[] : tensor<f64>
+    %from_elements = tensor.from_elements %extracted, %extracted_0, %extracted_1, %extracted_2 : tensor<4xf64>
+    %cst = arith.constant dense<2> : tensor<2xindex>
+    %reshape = tensor.reshape %from_elements(%cst) : (tensor<4xf64>, tensor<2xindex>) -> tensor<2x2xf64>
+    return %reshape : tensor<2x2xf64>
+  }
+}
+

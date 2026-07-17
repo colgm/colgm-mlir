@@ -1,0 +1,23 @@
+#loc = loc("test/lowering/elements_op.colgm":2:1)
+#loc1 = loc("test/lowering/elements_op.colgm":6:1)
+module {
+  func.func @test_elements_2d(%arg0: tensor<i64> loc("test/lowering/elements_op.colgm":6:1), %arg1: tensor<i64> loc("test/lowering/elements_op.colgm":6:1), %arg2: tensor<i64> loc("test/lowering/elements_op.colgm":6:1), %arg3: tensor<i64> loc("test/lowering/elements_op.colgm":6:1)) {
+    %extracted = tensor.extract %arg0[] : tensor<i64> loc(#loc2)
+    %extracted_0 = tensor.extract %arg1[] : tensor<i64> loc(#loc2)
+    %extracted_1 = tensor.extract %arg2[] : tensor<i64> loc(#loc2)
+    %extracted_2 = tensor.extract %arg3[] : tensor<i64> loc(#loc2)
+    %from_elements = tensor.from_elements %extracted, %extracted_0, %extracted_1, %extracted_2 : tensor<4xi64> loc(#loc2)
+    %cst = arith.constant dense<2> : tensor<2xindex> loc(#loc2)
+    %reshape = tensor.reshape %from_elements(%cst) : (tensor<4xi64>, tensor<2xindex>) -> tensor<2x2xi64> loc(#loc2)
+    return loc(#loc1)
+  } loc(#loc1)
+  func.func @test_elements_1d(%arg0: tensor<i64> loc("test/lowering/elements_op.colgm":2:1), %arg1: tensor<i64> loc("test/lowering/elements_op.colgm":2:1), %arg2: tensor<i64> loc("test/lowering/elements_op.colgm":2:1)) {
+    %extracted = tensor.extract %arg0[] : tensor<i64> loc(#loc3)
+    %extracted_0 = tensor.extract %arg1[] : tensor<i64> loc(#loc3)
+    %extracted_1 = tensor.extract %arg2[] : tensor<i64> loc(#loc3)
+    %from_elements = tensor.from_elements %extracted, %extracted_0, %extracted_1 : tensor<3xi64> loc(#loc3)
+    return loc(#loc)
+  } loc(#loc)
+} loc(#loc)
+#loc2 = loc("test/lowering/elements_op.colgm":7:13)
+#loc3 = loc("test/lowering/elements_op.colgm":3:13)

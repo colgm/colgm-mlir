@@ -1,0 +1,8 @@
+// Test elements lowering: function params produce colgm.elements
+func test_elements_1d(a: i64, b: i64, c: i64) {
+    var x = [a, b, c]
+}
+
+func test_elements_2d(a: i64, b: i64, c: i64, d: i64) {
+    var x = [[a, b], [c, d]]
+}

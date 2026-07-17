@@ -701,6 +701,123 @@ lowering_matmul::matchAndRewrite(mlir::Operation* op,
     return mlir::success();
 }
 
+mlir::LogicalResult
+lowering_elements::matchAndRewrite(mlir::Operation* op,
+                                   llvm::ArrayRef<mlir::Value> operands,
+                                   mlir::ConversionPatternRewriter& rewriter) const {
+    auto elem = llvm::cast<elements_op>(op);
+    auto loc = op->getLoc();
+    auto num_ops = elem->getNumOperands();
+
+    // extract scalars from each rank-0 operand
+    llvm::SmallVector<mlir::Value> scalars;
+    for (unsigned i = 0; i < num_ops; ++i) {
+        auto extract = mlir::tensor::ExtractOp::create(
+            rewriter, loc, elem->getOperand(i), mlir::ValueRange{}
+        );
+        scalars.push_back(extract);
+    }
+
+    auto result_type = llvm::cast<mlir::RankedTensorType>(elem->getResult(0).getType());
+    auto elt_type = result_type.getElementType();
+    auto flat_type = mlir::RankedTensorType::get({static_cast<i64>(num_ops)}, elt_type);
+
+    auto fe = mlir::tensor::FromElementsOp::create(rewriter, loc, flat_type, scalars);
+
+    if (result_type.getRank() == 1) {
+        rewriter.replaceOp(op, fe->getResults());
+    } else {
+        auto rank = result_type.getRank();
+        auto shape_type = mlir::RankedTensorType::get({rank}, rewriter.getIndexType());
+        auto shape_attr = mlir::DenseIntElementsAttr::get(shape_type, result_type.getShape());
+        auto shape_val = mlir::arith::ConstantOp::create(rewriter, loc, shape_attr);
+        auto reshape = mlir::tensor::ReshapeOp::create(
+            rewriter, loc, result_type, fe->getResult(0), shape_val
+        );
+        rewriter.replaceOp(op, reshape->getResults());
+    }
+
+    return mlir::success();
+}
+
+mlir::LogicalResult
+lowering_stack::matchAndRewrite(mlir::Operation* op,
+                                llvm::ArrayRef<mlir::Value> operands,
+                                mlir::ConversionPatternRewriter& rewriter) const {
+    auto stack = llvm::cast<stack_op>(op);
+    auto loc = op->getLoc();
+    auto target_attr = stack.get_target_shape();
+
+    // decode target_shape
+    llvm::SmallVector<i64> target_shape;
+    for (auto a : target_attr) {
+        target_shape.push_back(llvm::cast<mlir::IntegerAttr>(a).getInt());
+    }
+
+    auto result_type = llvm::cast<mlir::RankedTensorType>(stack->getResult(0).getType());
+    auto elt_type = result_type.getElementType();
+    auto result_rank = result_type.getRank();
+    i64 target_rank = target_shape.size();
+    i64 operand_rank = result_rank - target_rank;
+
+    // operand shape
+    auto operand_type = llvm::cast<mlir::RankedTensorType>(stack->getOperand(0).getType());
+    auto operand_shape = operand_type.getShape();
+
+    // create empty result tensor
+    auto empty = mlir::tensor::EmptyOp::create(
+        rewriter, loc, result_type.getShape(), elt_type
+    );
+
+    mlir::Value curr = empty;
+
+    // for each operand, compute multi-dim position in target_shape,
+    // expand rank to result_rank, then insert_slice
+    i64 num_operands = stack->getNumOperands();
+    for (i64 n = 0; n < num_operands; ++n) {
+        // linear index n → multi-dimensional position
+        llvm::SmallVector<i64> pos(target_rank);
+        i64 remaining = n;
+        for (i64 d = target_rank - 1; d >= 0; --d) {
+            pos[d] = remaining % target_shape[d];
+            remaining /= target_shape[d];
+        }
+
+        // reshape operand to have result_rank (add leading 1s)
+        llvm::SmallVector<i64> expanded_shape;
+        for (i64 d = 0; d < target_rank; ++d) expanded_shape.push_back(1);
+        for (auto s : operand_shape) expanded_shape.push_back(s);
+
+        auto expanded_type = mlir::RankedTensorType::get(expanded_shape, elt_type);
+        auto shape_type = mlir::RankedTensorType::get({result_rank}, rewriter.getIndexType());
+        auto shape_attr = mlir::DenseIntElementsAttr::get(shape_type, expanded_shape);
+        auto shape_val = mlir::arith::ConstantOp::create(rewriter, loc, shape_attr);
+        auto expanded = mlir::tensor::ReshapeOp::create(
+            rewriter, loc, expanded_type, stack->getOperand(n), shape_val
+        );
+
+        // insert_slice
+        llvm::SmallVector<mlir::OpFoldResult> offsets(result_rank, rewriter.getIndexAttr(0));
+        llvm::SmallVector<mlir::OpFoldResult> sizes(result_rank);
+        llvm::SmallVector<mlir::OpFoldResult> strides(result_rank, rewriter.getIndexAttr(1));
+
+        for (i64 d = 0; d < target_rank; ++d) {
+            offsets[d] = rewriter.getIndexAttr(pos[d]);
+            sizes[d] = rewriter.getIndexAttr(1);
+        }
+        for (i64 d = 0; d < operand_rank; ++d) {
+            sizes[target_rank + d] = rewriter.getIndexAttr(operand_shape[d]);
+        }
+
+        curr = mlir::tensor::InsertSliceOp::create(
+            rewriter, loc, expanded->getResult(0), curr, offsets, sizes, strides
+        );
+    }
+
+    rewriter.replaceOp(op, curr);
+    return mlir::success();
+}
+
 void colgm_lowering::runOnOperation() {
     cvt.addConversion([](mlir::Type type) { return type; });
 
@@ -728,7 +845,8 @@ void colgm_lowering::runOnOperation() {
                  lowering_log, lowering_sqrt,
                  lowering_tanh, lowering_sigmoid,
                  lowering_yield, lowering_if, lowering_for,
-                 lowering_matmul>(cvt, &getContext());
+                 lowering_matmul,
+                 lowering_elements, lowering_stack>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
 

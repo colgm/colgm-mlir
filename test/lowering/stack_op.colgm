@@ -1,0 +1,8 @@
+// Test stack lowering: function params with tensor types produce colgm.stack
+func test_stack_1d_to_2d(x: i64[3], y: i64[3]) {
+    var z = [x, y]
+}
+
+func test_stack_2d_to_3d(a: i64[2, 4], b: i64[2, 4]) {
+    var z = [a, b]
+}
