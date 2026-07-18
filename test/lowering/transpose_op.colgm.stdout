@@ -1,0 +1,16 @@
+module {
+  func.func @main() {
+    %cst = arith.constant dense<[1, 2, 3]> : tensor<3xi64> loc(#loc1)
+    %0 = tensor.empty() : tensor<3xi64> loc(#loc2)
+    %transposed = linalg.transpose ins(%cst : tensor<3xi64>) outs(%0 : tensor<3xi64>) permutation = [0]  loc(#loc2)
+    %cst_0 = arith.constant dense<[[-1.400000e-01, 2.000000e-01, 4.000000e-01], [4.000000e-01, 5.000000e-01, 8.000000e-01]]> : tensor<2x3xf64> loc(#loc3)
+    %1 = tensor.empty() : tensor<3x2xf64> loc(#loc4)
+    %transposed_1 = linalg.transpose ins(%cst_0 : tensor<2x3xf64>) outs(%1 : tensor<3x2xf64>) permutation = [1, 0]  loc(#loc4)
+    return loc(#loc)
+  } loc(#loc)
+} loc(#loc)
+#loc = loc("test/lowering/transpose_op.colgm":1:1)
+#loc1 = loc("test/lowering/transpose_op.colgm":2:13)
+#loc2 = loc("test/lowering/transpose_op.colgm":3:22)
+#loc3 = loc("test/lowering/transpose_op.colgm":5:13)
+#loc4 = loc("test/lowering/transpose_op.colgm":6:22)

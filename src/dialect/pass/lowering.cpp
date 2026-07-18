@@ -818,6 +818,57 @@ lowering_stack::matchAndRewrite(mlir::Operation* op,
     return mlir::success();
 }
 
+mlir::LogicalResult
+lowering_reshape::matchAndRewrite(mlir::Operation* op,
+                                  llvm::ArrayRef<mlir::Value> operands,
+                                  mlir::ConversionPatternRewriter& rewriter) const {
+    auto reshape = llvm::cast<reshape_op>(op);
+    auto loc = reshape.getLoc();
+    auto input = reshape.get_input();
+    auto result_type = llvm::cast<mlir::RankedTensorType>(reshape->getResult(0).getType());
+    auto shape = reshape.get_target_shape();
+
+    // decode target_shape
+    llvm::SmallVector<i64> target_shape;
+    for (auto a : shape) {
+        target_shape.push_back(llvm::cast<mlir::IntegerAttr>(a).getInt());
+    }
+
+    auto rank = static_cast<long long>(shape.size());
+    auto shape_type = mlir::RankedTensorType::get({rank}, rewriter.getIndexType());
+    auto shape_attr = mlir::DenseIntElementsAttr::get(shape_type, target_shape);
+    auto shape_val = mlir::arith::ConstantOp::create(rewriter, loc, shape_attr);
+
+    auto rs = mlir::tensor::ReshapeOp::create(rewriter, loc, result_type, input, shape_val);
+    rewriter.replaceOp(op, rs->getResults());
+    return mlir::success();
+}
+
+mlir::LogicalResult
+lowering_transpose::matchAndRewrite(mlir::Operation* op,
+                                    llvm::ArrayRef<mlir::Value> operands,
+                                    mlir::ConversionPatternRewriter& rewriter) const {
+    auto transpose = llvm::cast<transpose_op>(op);
+    auto loc = transpose.getLoc();
+    auto input = transpose.get_input();
+    auto permutation = transpose.get_permutation();
+    auto result_type = llvm::cast<mlir::RankedTensorType>(transpose->getResult(0).getType());
+
+    llvm::SmallVector<i64> perm;
+    for (auto a : permutation) {
+        perm.push_back(llvm::cast<mlir::IntegerAttr>(a).getInt());
+    }
+
+    auto out_init = mlir::tensor::EmptyOp::create(
+        rewriter, loc, result_type.getShape(), result_type.getElementType()
+    );
+    auto trans = mlir::linalg::TransposeOp::create(
+        rewriter, loc, input, out_init, perm
+    );
+    rewriter.replaceOp(op, trans->getResults());
+    return mlir::success();
+}
+
 void colgm_lowering::runOnOperation() {
     cvt.addConversion([](mlir::Type type) { return type; });
 
@@ -846,7 +897,8 @@ void colgm_lowering::runOnOperation() {
                  lowering_tanh, lowering_sigmoid,
                  lowering_yield, lowering_if, lowering_for,
                  lowering_matmul,
-                 lowering_elements, lowering_stack>(cvt, &getContext());
+                 lowering_elements, lowering_stack,
+                 lowering_reshape, lowering_transpose>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
 

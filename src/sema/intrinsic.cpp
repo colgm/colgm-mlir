@@ -1,6 +1,8 @@
 #include "sema/intrinsic.hpp"
 #include "ast/expr.hpp"
 
+#include <unordered_set>
+
 namespace colgm_mlir {
 
 intrinsic_registry::intrinsic_registry() {
@@ -235,7 +237,9 @@ type matmul_infer(error& err, call_expr* node, type_storage& ts) {
 static bool extract_i64_array(const std::vector<expr*>& args, usize idx,
                                std::vector<i64>& out, error& err,
                                call_expr* node) {
-    if (idx >= args.size()) return false;
+    if (idx >= args.size()) {
+        return false;
+    }
     if (!args[idx]->is(ast_type::tensor)) {
         err.err(node->get_location(), "argument must be an array literal");
         return false;
@@ -352,12 +356,24 @@ type transpose_infer(error& err, call_expr* node, type_storage& ts) {
         err.err(node->get_location(), "transpose permutation size must match tensor rank");
         return ts.get_unknown_type();
     }
+
+    std::unordered_set<i64> seen;
     for (auto p : perm) {
         if (p < 0 || p >= rank) {
             err.err(node->get_location(), "transpose permutation index out of range");
             return ts.get_unknown_type();
         }
+        if (seen.count(p)) {
+            err.err(
+                node->get_args()[1]->get_location(),
+                "transpose permutation index `" + std::to_string(p) + "` is not unique"
+            );
+            return ts.get_unknown_type();
+        } else {
+            seen.insert(p);
+        }
     }
+
     std::vector<i64> output_shape;
     for (auto p : perm) {
         output_shape.push_back(input_shape[p]);

@@ -1,7 +1,39 @@
 #include "codegen/intrinsic.hpp"
 #include <mlir/IR/BuiltinAttributes.h>
 
+#include <functional>
+
 namespace colgm_mlir {
+
+// Recursively erase a Value's defining op and its dead operand chain.
+// Handles both `colgm.constant` (direct) and `colgm.elements` (with
+// rank-0 constant operands) — both paths from extract_i64_constants.
+//
+// Erase order matters: ancestors first, then children, to avoid
+// dangling operand references (child results are operands of parent).
+static void erase_dead_value(mlir::Value val) {
+    auto* def_op = val.getDefiningOp();
+    if (!def_op) return;
+
+    // Post-order collect: leaves pushed first, ancestors last
+    llvm::SmallVector<mlir::Operation*> chain;
+    std::function<void(mlir::Operation*)> collect = [&](mlir::Operation* op) {
+        for (auto operand : op->getOperands()) {
+            if (auto* operand_op = operand.getDefiningOp()) {
+                if (operand_op->hasOneUse()) {
+                    collect(operand_op);
+                }
+            }
+        }
+        chain.push_back(op);
+    };
+    collect(def_op);
+
+    // Erase ancestors first (reverse of collection order)
+    for (auto* op : llvm::reverse(chain)) {
+        op->erase();
+    }
+}
 
 intrinsic_generator_registry::intrinsic_generator_registry() {
     regist("relu", relu_gen);
@@ -130,6 +162,7 @@ mlir::Value broadcast_gen(mlir::OpBuilder& builder,
     llvm::SmallVector<i64> shape;
     extract_i64_constants(args[1], shape);
     auto op = broadcast_op::create(builder, loc, args[0], shape);
+    erase_dead_value(args[1]);
     return op->getResult(0);
 }
 
@@ -139,6 +172,7 @@ mlir::Value reduce_sum_gen(mlir::OpBuilder& builder,
     llvm::SmallVector<i64> axes;
     extract_i64_constants(args[1], axes);
     auto op = reduce_sum::create(builder, loc, args[0], axes);
+    erase_dead_value(args[1]);
     return op->getResult(0);
 }
 
@@ -148,6 +182,7 @@ mlir::Value reshape_gen(mlir::OpBuilder& builder,
     llvm::SmallVector<i64> shape;
     extract_i64_constants(args[1], shape);
     auto op = reshape_op::create(builder, loc, args[0], shape);
+    erase_dead_value(args[1]);
     return op->getResult(0);
 }
 
@@ -157,6 +192,7 @@ mlir::Value transpose_gen(mlir::OpBuilder& builder,
     llvm::SmallVector<i64> perm;
     extract_i64_constants(args[1], perm);
     auto op = transpose_op::create(builder, loc, args[0], perm);
+    erase_dead_value(args[1]);
     return op->getResult(0);
 }
 

@@ -1,0 +1,10 @@
+func main() {
+    var x = [[1, 2], [3, 4]]
+    var y = reshape(x, [1, 4])
+
+    var a = [1, 2, 3, 4]
+    var b = reshape(a, [2, 2])
+
+    var c = [1, 2, 3, 4, 5, 6]
+    var d = reshape(c, [1, 2, 3])
+}

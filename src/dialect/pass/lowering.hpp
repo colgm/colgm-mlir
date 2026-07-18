@@ -304,4 +304,24 @@ struct lowering_stack : public mlir::ConversionPattern {
                     mlir::ConversionPatternRewriter& rewriter) const override;
 };
 
+struct lowering_reshape : public mlir::ConversionPattern {
+    explicit lowering_reshape(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
+        : mlir::ConversionPattern(cvt, reshape_op::getOperationName(), 1, ctx) {}
+
+    mlir::LogicalResult
+    matchAndRewrite(mlir::Operation* op,
+                    llvm::ArrayRef<mlir::Value> operands,
+                    mlir::ConversionPatternRewriter& rewriter) const override;
+};
+
+struct lowering_transpose : public mlir::ConversionPattern {
+    explicit lowering_transpose(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
+        : mlir::ConversionPattern(cvt, transpose_op::getOperationName(), 1, ctx) {}
+
+    mlir::LogicalResult
+    matchAndRewrite(mlir::Operation* op,
+                    llvm::ArrayRef<mlir::Value> operands,
+                    mlir::ConversionPatternRewriter& rewriter) const override;
+};
+
 }

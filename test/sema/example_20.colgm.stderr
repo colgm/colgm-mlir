@@ -1,0 +1,6 @@
+Error: transpose permutation index `1` is not unique
+  --> test/sema/example_20.colgm:6:26
+  | 
+6 |     var d = transpose(c, [1, 1])
+  |                          ^^^^^^
+
