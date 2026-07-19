@@ -1,0 +1,6 @@
+Error: target shape's rank must be larger than the input's
+  --> test/sema/example_21.colgm:7:26
+  | 
+7 |     var a = broadcast(z, [2, 2])
+  |                          ^^^^^^
+

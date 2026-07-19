@@ -1,0 +1,44 @@
+#loc1 = loc("test/lowering/broadcast_op.colgm":2:13)
+#loc2 = loc("test/lowering/broadcast_op.colgm":3:24)
+#loc3 = loc("test/lowering/broadcast_op.colgm":4:24)
+#loc4 = loc("test/lowering/broadcast_op.colgm":6:24)
+#loc5 = loc("test/lowering/broadcast_op.colgm":7:24)
+#loc6 = loc("test/lowering/broadcast_op.colgm":9:15)
+#loc7 = loc("test/lowering/broadcast_op.colgm":10:24)
+#map = affine_map<(d0) -> ()>
+#map1 = affine_map<(d0) -> (d0)>
+#map2 = affine_map<(d0, d1) -> (d1)>
+#map3 = affine_map<(d0, d1) -> (d0, d1)>
+module {
+  func.func @main() {
+    %cst = arith.constant dense<1.100000e+00> : tensor<f64> loc(#loc1)
+    %0 = tensor.empty() : tensor<1xf64> loc(#loc2)
+    %1 = linalg.generic {indexing_maps = [#map, #map1], iterator_types = ["parallel"]} ins(%cst : tensor<f64>) outs(%0 : tensor<1xf64>) {
+    ^bb0(%in: f64 loc("test/lowering/broadcast_op.colgm":2:13), %out: f64 loc("test/lowering/broadcast_op.colgm":3:24)):
+      linalg.yield %in : f64 loc(#loc2)
+    } -> tensor<1xf64> loc(#loc2)
+    %2 = tensor.empty() : tensor<2xf64> loc(#loc3)
+    %3 = linalg.generic {indexing_maps = [#map, #map1], iterator_types = ["parallel"]} ins(%cst : tensor<f64>) outs(%2 : tensor<2xf64>) {
+    ^bb0(%in: f64 loc("test/lowering/broadcast_op.colgm":2:13), %out: f64 loc("test/lowering/broadcast_op.colgm":4:24)):
+      linalg.yield %in : f64 loc(#loc3)
+    } -> tensor<2xf64> loc(#loc3)
+    %4 = tensor.empty() : tensor<1x1xf64> loc(#loc4)
+    %5 = linalg.generic {indexing_maps = [#map2, #map3], iterator_types = ["parallel", "parallel"]} ins(%1 : tensor<1xf64>) outs(%4 : tensor<1x1xf64>) {
+    ^bb0(%in: f64 loc("test/lowering/broadcast_op.colgm":3:24), %out: f64 loc("test/lowering/broadcast_op.colgm":6:24)):
+      linalg.yield %in : f64 loc(#loc4)
+    } -> tensor<1x1xf64> loc(#loc4)
+    %6 = tensor.empty() : tensor<2x2xf64> loc(#loc5)
+    %7 = linalg.generic {indexing_maps = [#map2, #map3], iterator_types = ["parallel", "parallel"]} ins(%3 : tensor<2xf64>) outs(%6 : tensor<2x2xf64>) {
+    ^bb0(%in: f64 loc("test/lowering/broadcast_op.colgm":4:24), %out: f64 loc("test/lowering/broadcast_op.colgm":7:24)):
+      linalg.yield %in : f64 loc(#loc5)
+    } -> tensor<2x2xf64> loc(#loc5)
+    %cst_0 = arith.constant dense<[1.000000e-01, 2.000000e-01, 0.30000000000000004]> : tensor<3xf64> loc(#loc6)
+    %8 = tensor.empty() : tensor<1x3xf64> loc(#loc7)
+    %9 = linalg.generic {indexing_maps = [#map2, #map3], iterator_types = ["parallel", "parallel"]} ins(%cst_0 : tensor<3xf64>) outs(%8 : tensor<1x3xf64>) {
+    ^bb0(%in: f64 loc("test/lowering/broadcast_op.colgm":9:15), %out: f64 loc("test/lowering/broadcast_op.colgm":10:24)):
+      linalg.yield %in : f64 loc(#loc7)
+    } -> tensor<1x3xf64> loc(#loc7)
+    return loc(#loc)
+  } loc(#loc)
+} loc(#loc)
+#loc = loc("test/lowering/broadcast_op.colgm":1:1)

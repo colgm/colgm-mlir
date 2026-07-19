@@ -869,6 +869,91 @@ lowering_transpose::matchAndRewrite(mlir::Operation* op,
     return mlir::success();
 }
 
+mlir::LogicalResult
+lowering_broadcast::matchAndRewrite(mlir::Operation* op,
+                                    llvm::ArrayRef<mlir::Value> operands,
+                                    mlir::ConversionPatternRewriter& rewriter) const {
+    auto broadcast = llvm::cast<broadcast_op>(op);
+    auto loc = broadcast.getLoc();
+    auto input = broadcast.get_input();
+
+    auto result_type = llvm::cast<mlir::RankedTensorType>(broadcast->getResult(0).getType());
+    auto elem_type = result_type.getElementType();
+    auto output_shape = result_type.getShape();
+    auto output_rank = static_cast<long long>(output_shape.size());
+
+    auto target_attr = broadcast.get_target_shape();
+    llvm::SmallVector<i64> target;
+    for (auto a : target_attr) {
+        target.push_back(llvm::cast<mlir::IntegerAttr>(a).getInt());
+    }
+
+    auto input_type = llvm::cast<mlir::RankedTensorType>(input.getType());
+    auto input_shape = input_type.getShape();
+    auto input_rank = static_cast<long long>(input_shape.size());
+
+    bool is_identity = (input_rank == output_rank);
+    for (i64 i = 0; i < output_rank && is_identity; ++i) {
+        is_identity &= (input_shape[i] == target[i]);
+    }
+    // all dims match, directly pass through input
+    if (is_identity) {
+        rewriter.replaceOp(op, input);
+        return mlir::success();
+    }
+
+    mlir::Value src = input;
+    auto src_rank = input_rank;
+
+    auto ctx = rewriter.getContext();
+    auto src_type = llvm::cast<mlir::RankedTensorType>(src.getType());
+    auto src_shape = src_type.getShape();
+
+    // build input affine map
+    llvm::SmallVector<mlir::AffineExpr> input_exprs;
+    if (src_rank != 0) {
+        auto offset = output_rank - src_rank;
+        for (i64 k = 0; k < src_rank; ++k) {
+            auto i = offset + k;
+            if (src_shape[k] == 1 && target[i] > 1) {
+                // existing dim, size 1 => N
+                input_exprs.push_back(mlir::getAffineConstantExpr(0, ctx));
+            } else {
+                // dims match
+                input_exprs.push_back(mlir::getAffineDimExpr(i, ctx));
+            }
+        }
+    }
+    auto input_map = mlir::AffineMap::get(output_rank, 0, input_exprs, ctx);
+
+    // output affine map
+    llvm::SmallVector<mlir::AffineExpr> output_exprs;
+    for (i64 i = 0; i < output_rank; ++i) {
+        output_exprs.push_back(mlir::getAffineDimExpr(i, ctx));
+    }
+    auto output_map = mlir::AffineMap::get(output_rank, 0, output_exprs, ctx);
+
+    llvm::SmallVector<mlir::utils::IteratorType> iter_types(
+        output_rank, mlir::utils::IteratorType::parallel
+    );
+
+    auto empty = mlir::tensor::EmptyOp::create(
+        rewriter, loc, output_shape, elem_type
+    );
+    auto generic = mlir::linalg::GenericOp::create(
+        rewriter, loc,
+        mlir::TypeRange { result_type },
+        mlir::ValueRange { src }, mlir::ValueRange { empty },
+        llvm::ArrayRef<mlir::AffineMap> { input_map, output_map },
+        iter_types,
+        [&](mlir::OpBuilder& b, mlir::Location loc, mlir::ValueRange args) {
+            mlir::linalg::YieldOp::create(b, loc, args[0]);
+        }
+    );
+    rewriter.replaceOp(op, generic->getResults());
+    return mlir::success();
+}
+
 void colgm_lowering::runOnOperation() {
     cvt.addConversion([](mlir::Type type) { return type; });
 
@@ -898,7 +983,8 @@ void colgm_lowering::runOnOperation() {
                  lowering_yield, lowering_if, lowering_for,
                  lowering_matmul,
                  lowering_elements, lowering_stack,
-                 lowering_reshape, lowering_transpose>(cvt, &getContext());
+                 lowering_reshape, lowering_transpose,
+                 lowering_broadcast>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
 

@@ -265,12 +265,19 @@ type broadcast_infer(error& err, call_expr* node, type_storage& ts) {
         err.err(node->get_location(), "broadcast's first argument must be a tensor");
         return ts.get_unknown_type();
     }
-    std::vector<i64> shape;
-    if (!extract_i64_array(node->get_args(), 1, shape, err, node)) {
+
+    std::vector<i64> target_shape;
+    if (!extract_i64_array(node->get_args(), 1, target_shape, err, node)) {
         return ts.get_unknown_type();
     }
+
     auto tt = type::as<tensor_type>(arg);
-    return ts.get_tensor_type(tt.get_element_type(), shape);
+    if (tt.get_shape().size() > target_shape.size()) {
+        err.err(node->get_args()[1]->get_location(),
+                "target shape's rank must be larger than the input's");
+    }
+
+    return ts.get_tensor_type(tt.get_element_type(), target_shape);
 }
 
 type reduce_sum_infer(error& err, call_expr* node, type_storage& ts) {

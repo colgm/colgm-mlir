@@ -103,18 +103,32 @@ def test(executable: Path, directory: Path, suffix: str, options: list[str]) -> 
         test_file_stdout = Path(str(test_file) + ".stdout")
         test_file_stderr = Path(str(test_file) + ".stderr")
         option_file = Path(str(test_file) + ".option")
-        if not test_file_stdout.exists() or not test_file_stderr.exists():
+
+        # we see not exist stdout/stderr as empty input
+        # but if both of them are not exist, we consider it invalid test
+        if not test_file_stdout.exists() and not test_file_stderr.exists():
             print(f"[FAILED] cannot find stdout/stderr file of {test_file}")
             continue
+
         cmd = [str(executable)]
         if option_file.exists():
             with open(option_file, "r") as f:
                 cmd += f.read().split(" ")
         cmd += [str(test_file)] + options
-        with open(test_file_stdout, "r") as f:
-            stdout = f.read()
-        with open(test_file_stderr, "r") as f:
-            stderr = f.read()
+
+        # expect stdout
+        if test_file_stdout.exists():
+            with open(test_file_stdout, "r") as f:
+                stdout = f.read()
+        else:
+            stdout = ""
+        # expect stderr
+        if test_file_stderr.exists():
+            with open(test_file_stderr, "r") as f:
+                stderr = f.read()
+        else:
+            stderr = ""
+
         res = check(cmd, stdout, stderr)
         passed += 1 if res else 0
         if res:
