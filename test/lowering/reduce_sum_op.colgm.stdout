@@ -1,0 +1,69 @@
+#loc = loc("test/lowering/reduce_sum_op.colgm":1:1)
+#loc2 = loc("test/lowering/reduce_sum_op.colgm":18:15)
+#loc3 = loc("test/lowering/reduce_sum_op.colgm":19:25)
+#loc4 = loc("test/lowering/reduce_sum_op.colgm":13:1)
+#loc5 = loc("test/lowering/reduce_sum_op.colgm":14:22)
+#loc7 = loc("test/lowering/reduce_sum_op.colgm":9:1)
+#loc8 = loc("test/lowering/reduce_sum_op.colgm":10:22)
+#loc10 = loc("test/lowering/reduce_sum_op.colgm":5:1)
+#loc11 = loc("test/lowering/reduce_sum_op.colgm":6:22)
+#loc13 = loc("test/lowering/reduce_sum_op.colgm":2:22)
+#map = affine_map<(d0, d1) -> (d0, d1)>
+#map1 = affine_map<(d0, d1) -> (d0)>
+#map2 = affine_map<(d0, d1) -> ()>
+#map3 = affine_map<(d0, d1, d2) -> (d0, d1, d2)>
+#map4 = affine_map<(d0, d1, d2) -> (d1)>
+#map5 = affine_map<(d0, d1) -> (d1)>
+module {
+  func.func @main() {
+    %cst = arith.constant dense<[[1.000000e+00, 2.000000e+00], [3.000000e+00, 4.000000e+00]]> : tensor<2x2xf64> loc(#loc2)
+    %0 = tensor.empty() : tensor<2xf64> loc(#loc3)
+    %1 = linalg.generic {indexing_maps = [#map, #map1], iterator_types = ["parallel", "reduction"]} ins(%cst : tensor<2x2xf64>) outs(%0 : tensor<2xf64>) {
+    ^bb0(%in: f64 loc("test/lowering/reduce_sum_op.colgm":18:15), %out: f64 loc("test/lowering/reduce_sum_op.colgm":19:25)):
+      %2 = arith.addf %in, %out : f64 loc(#loc3)
+      linalg.yield %2 : f64 loc(#loc3)
+    } -> tensor<2xf64> loc(#loc3)
+    return loc(#loc1)
+  } loc(#loc1)
+  func.func @reduce_all(%arg0: tensor<2x3xf64> loc("test/lowering/reduce_sum_op.colgm":13:1)) -> tensor<f64> {
+    %0 = tensor.empty() : tensor<f64> loc(#loc5)
+    %1 = linalg.generic {indexing_maps = [#map, #map2], iterator_types = ["reduction", "reduction"]} ins(%arg0 : tensor<2x3xf64>) outs(%0 : tensor<f64>) {
+    ^bb0(%in: f64 loc("test/lowering/reduce_sum_op.colgm":13:1), %out: f64 loc("test/lowering/reduce_sum_op.colgm":14:22)):
+      %2 = arith.addf %in, %out : f64 loc(#loc5)
+      linalg.yield %2 : f64 loc(#loc5)
+    } -> tensor<f64> loc(#loc5)
+    return %1 : tensor<f64> loc(#loc6)
+  } loc(#loc4)
+  func.func @reduce_two_axes(%arg0: tensor<2x3x4xf64> loc("test/lowering/reduce_sum_op.colgm":9:1)) -> tensor<3xf64> {
+    %0 = tensor.empty() : tensor<3xf64> loc(#loc8)
+    %1 = linalg.generic {indexing_maps = [#map3, #map4], iterator_types = ["reduction", "parallel", "reduction"]} ins(%arg0 : tensor<2x3x4xf64>) outs(%0 : tensor<3xf64>) {
+    ^bb0(%in: f64 loc("test/lowering/reduce_sum_op.colgm":9:1), %out: f64 loc("test/lowering/reduce_sum_op.colgm":10:22)):
+      %2 = arith.addf %in, %out : f64 loc(#loc8)
+      linalg.yield %2 : f64 loc(#loc8)
+    } -> tensor<3xf64> loc(#loc8)
+    return %1 : tensor<3xf64> loc(#loc9)
+  } loc(#loc7)
+  func.func @reduce_axis1(%arg0: tensor<4x5xf64> loc("test/lowering/reduce_sum_op.colgm":5:1)) -> tensor<4xf64> {
+    %0 = tensor.empty() : tensor<4xf64> loc(#loc11)
+    %1 = linalg.generic {indexing_maps = [#map, #map1], iterator_types = ["parallel", "reduction"]} ins(%arg0 : tensor<4x5xf64>) outs(%0 : tensor<4xf64>) {
+    ^bb0(%in: f64 loc("test/lowering/reduce_sum_op.colgm":5:1), %out: f64 loc("test/lowering/reduce_sum_op.colgm":6:22)):
+      %2 = arith.addf %in, %out : f64 loc(#loc11)
+      linalg.yield %2 : f64 loc(#loc11)
+    } -> tensor<4xf64> loc(#loc11)
+    return %1 : tensor<4xf64> loc(#loc12)
+  } loc(#loc10)
+  func.func @reduce_axis0(%arg0: tensor<4x5xf64> loc("test/lowering/reduce_sum_op.colgm":1:1)) -> tensor<5xf64> {
+    %0 = tensor.empty() : tensor<5xf64> loc(#loc13)
+    %1 = linalg.generic {indexing_maps = [#map, #map5], iterator_types = ["reduction", "parallel"]} ins(%arg0 : tensor<4x5xf64>) outs(%0 : tensor<5xf64>) {
+    ^bb0(%in: f64 loc("test/lowering/reduce_sum_op.colgm":1:1), %out: f64 loc("test/lowering/reduce_sum_op.colgm":2:22)):
+      %2 = arith.addf %in, %out : f64 loc(#loc13)
+      linalg.yield %2 : f64 loc(#loc13)
+    } -> tensor<5xf64> loc(#loc13)
+    return %1 : tensor<5xf64> loc(#loc14)
+  } loc(#loc)
+} loc(#loc)
+#loc1 = loc("test/lowering/reduce_sum_op.colgm":17:1)
+#loc6 = loc("test/lowering/reduce_sum_op.colgm":14:5)
+#loc9 = loc("test/lowering/reduce_sum_op.colgm":10:5)
+#loc12 = loc("test/lowering/reduce_sum_op.colgm":6:5)
+#loc14 = loc("test/lowering/reduce_sum_op.colgm":2:5)

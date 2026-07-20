@@ -902,18 +902,15 @@ lowering_broadcast::matchAndRewrite(mlir::Operation* op,
         return mlir::success();
     }
 
-    mlir::Value src = input;
-    auto src_rank = input_rank;
-
     auto ctx = rewriter.getContext();
-    auto src_type = llvm::cast<mlir::RankedTensorType>(src.getType());
+    auto src_type = llvm::cast<mlir::RankedTensorType>(input.getType());
     auto src_shape = src_type.getShape();
 
     // build input affine map
     llvm::SmallVector<mlir::AffineExpr> input_exprs;
-    if (src_rank != 0) {
-        auto offset = output_rank - src_rank;
-        for (i64 k = 0; k < src_rank; ++k) {
+    if (input_rank != 0) {
+        auto offset = output_rank - input_rank;
+        for (i64 k = 0; k < input_rank; ++k) {
             auto i = offset + k;
             if (src_shape[k] == 1 && target[i] > 1) {
                 // existing dim, size 1 => N
@@ -943,11 +940,84 @@ lowering_broadcast::matchAndRewrite(mlir::Operation* op,
     auto generic = mlir::linalg::GenericOp::create(
         rewriter, loc,
         mlir::TypeRange { result_type },
-        mlir::ValueRange { src }, mlir::ValueRange { empty },
+        mlir::ValueRange { input }, mlir::ValueRange { empty },
         llvm::ArrayRef<mlir::AffineMap> { input_map, output_map },
         iter_types,
         [&](mlir::OpBuilder& b, mlir::Location loc, mlir::ValueRange args) {
             mlir::linalg::YieldOp::create(b, loc, args[0]);
+        }
+    );
+    rewriter.replaceOp(op, generic->getResults());
+    return mlir::success();
+}
+
+mlir::LogicalResult
+lowering_reduce_sum::matchAndRewrite(mlir::Operation* op,
+                                     llvm::ArrayRef<mlir::Value> operands,
+                                     mlir::ConversionPatternRewriter& rewriter) const {
+    auto rs = llvm::cast<reduce_sum>(op);
+    auto loc = rs.getLoc();
+    auto input = rs.get_input();
+    auto axes_attr = rs.get_axes();
+    auto result_type = llvm::cast<mlir::RankedTensorType>(rs->getResult(0).getType());
+
+    auto input_type = llvm::cast<mlir::RankedTensorType>(input.getType());
+    auto input_shape = input_type.getShape();
+    auto input_rank = static_cast<i64>(input_shape.size());
+    auto elem_type = input_type.getElementType();
+
+    llvm::SmallBitVector reduced(static_cast<unsigned>(input_rank));
+    for (auto a : axes_attr) {
+        reduced.set(static_cast<unsigned>(llvm::cast<mlir::IntegerAttr>(a).getInt()));
+    }
+
+    llvm::SmallVector<mlir::utils::IteratorType> iter_types;
+    for (i64 i = 0; i < input_rank; ++i) {
+        if (reduced[i]) {
+            iter_types.push_back(mlir::utils::IteratorType::reduction);
+        } else {
+            iter_types.push_back(mlir::utils::IteratorType::parallel);
+        }
+    }
+
+    auto ctx = rewriter.getContext();
+
+    llvm::SmallVector<mlir::AffineExpr> input_exprs;
+    for (i64 i = 0; i < input_rank; ++i) {
+        input_exprs.push_back(mlir::getAffineDimExpr(i, ctx));
+    }
+    auto input_map = mlir::AffineMap::get(input_rank, 0, input_exprs, ctx);
+
+    llvm::SmallVector<mlir::AffineExpr> output_exprs;
+    for (i64 i = 0; i < input_rank; ++i) {
+        if (!reduced[i]) {
+            output_exprs.push_back(mlir::getAffineDimExpr(i, ctx));
+        }
+    }
+    auto output_map = mlir::AffineMap::get(input_rank, 0, output_exprs, ctx);
+
+    auto empty = mlir::tensor::EmptyOp::create(
+        rewriter, loc, result_type.getShape(), elem_type
+    );
+
+    auto generic = mlir::linalg::GenericOp::create(
+        rewriter, loc,
+        mlir::TypeRange { result_type },
+        mlir::ValueRange { input }, mlir::ValueRange { empty },
+        llvm::ArrayRef<mlir::AffineMap> { input_map, output_map },
+        iter_types,
+        [&](mlir::OpBuilder& b, mlir::Location loc, mlir::ValueRange args) {
+            mlir::Value acc;
+            if (llvm::isa<mlir::FloatType>(elem_type)) {
+                auto add = mlir::arith::AddFOp::create(b, loc, mlir::ValueRange{args[0], args[1]});
+                acc = add->getResult(0);
+            } else if (llvm::isa<mlir::IntegerType>(elem_type)) {
+                auto add = mlir::arith::AddIOp::create(b, loc, mlir::ValueRange{args[0], args[1]});
+                acc = add->getResult(0);
+            } else {
+                return;
+            }
+            mlir::linalg::YieldOp::create(b, loc, acc);
         }
     );
     rewriter.replaceOp(op, generic->getResults());
@@ -984,7 +1054,7 @@ void colgm_lowering::runOnOperation() {
                  lowering_matmul,
                  lowering_elements, lowering_stack,
                  lowering_reshape, lowering_transpose,
-                 lowering_broadcast>(cvt, &getContext());
+                 lowering_broadcast, lowering_reduce_sum>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
 

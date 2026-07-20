@@ -1,0 +1,20 @@
+func reduce_axis0(x: f64[4, 5]) -> f64[5] {
+    return reduce_sum(x, [0])
+}
+
+func reduce_axis1(x: f64[4, 5]) -> f64[4] {
+    return reduce_sum(x, [1])
+}
+
+func reduce_two_axes(x: f64[2, 3, 4]) -> f64[3] {
+    return reduce_sum(x, [0, 2])
+}
+
+func reduce_all(x: f64[2, 3]) -> f64 {
+    return reduce_sum(x, [0, 1])
+}
+
+func main() {
+    var foo = [[1.0, 2.0], [3.0, 4.0]]
+    var bar = reduce_sum(foo, [1])
+}
