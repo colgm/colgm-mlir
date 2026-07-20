@@ -1,0 +1,20 @@
+func print_scalar(x: f64) {
+    print(x)
+}
+
+func print_1d(x: f64[3]) {
+    print(x)
+}
+
+func print_2d(x: f64[2, 2]) {
+    print(x)
+}
+
+func print_multi(a: i64[3], b: f64[3]) {
+    print(a, b)
+}
+
+func main() {
+    var a = [1, 2, 3]
+    print(a)
+}

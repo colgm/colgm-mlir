@@ -1024,6 +1024,128 @@ lowering_reduce_sum::matchAndRewrite(mlir::Operation* op,
     return mlir::success();
 }
 
+static void emit_print_scalar(mlir::OpBuilder& builder, mlir::Location loc,
+                              mlir::Value scalar, mlir::Type elem_type) {
+    llvm::StringRef callee;
+    if (llvm::isa<mlir::FloatType>(elem_type)) {
+        callee = elem_type.isF64() ? "__colgm_print_f64" : "__colgm_print_f32";
+    } else if (auto it = llvm::dyn_cast<mlir::IntegerType>(elem_type)) {
+        if (it.getWidth() == 1)       callee = "__colgm_print_i1";
+        else if (it.getWidth() == 64) callee = "__colgm_print_i64";
+        else                          callee = "__colgm_print_i32";
+    } else {
+        return;
+    }
+    mlir::func::CallOp::create(builder, loc, /*results=*/{}, callee,
+                               mlir::ValueRange{scalar});
+}
+
+static void emit_print_tensor(mlir::OpBuilder& builder, mlir::Location loc,
+                              mlir::Value tensor,
+                              llvm::ArrayRef<i64> shape, mlir::Type elem_type,
+                              llvm::SmallVectorImpl<mlir::Value>& indices,
+                              unsigned dim) {
+    i64 rank = static_cast<i64>(shape.size());
+
+    if (dim == static_cast<unsigned>(rank)) {
+        auto extract = mlir::tensor::ExtractOp::create(builder, loc, tensor, indices);
+        emit_print_scalar(builder, loc, extract, elem_type);
+        return;
+    }
+
+    mlir::func::CallOp::create(builder, loc, {}, "__colgm_print_open_bracket", {});
+
+    i64 size = shape[dim];
+    auto c0 = mlir::arith::ConstantOp::create(builder, loc, builder.getIndexAttr(0));
+    auto c1 = mlir::arith::ConstantOp::create(builder, loc, builder.getIndexAttr(1));
+    auto ub = mlir::arith::ConstantOp::create(builder, loc, builder.getIndexAttr(size));
+
+    auto for_op = mlir::scf::ForOp::create(builder, loc, c0, ub, c1);
+
+    {
+        mlir::OpBuilder::InsertionGuard guard(builder);
+        builder.setInsertionPointToStart(for_op.getBody());
+        auto iv = for_op.getInductionVar();
+
+        auto is_not_zero = mlir::arith::CmpIOp::create(
+            builder, loc,
+            mlir::arith::CmpIPredicate::ne, iv, c0);
+        mlir::scf::IfOp::create(builder, loc, is_not_zero,
+            [&](mlir::OpBuilder& then_b, mlir::Location then_loc) {
+                mlir::func::CallOp::create(then_b, then_loc, {},
+                                           "__colgm_print_comma", {});
+                mlir::scf::YieldOp::create(then_b, then_loc);
+            });
+
+        indices.push_back(iv);
+        emit_print_tensor(builder, loc, tensor, shape, elem_type,
+                          indices, dim + 1);
+        indices.pop_back();
+    }
+
+    mlir::func::CallOp::create(builder, loc, {}, "__colgm_print_close_bracket", {});
+}
+
+mlir::LogicalResult
+lowering_print::matchAndRewrite(mlir::Operation* op,
+                                llvm::ArrayRef<mlir::Value> operands,
+                                mlir::ConversionPatternRewriter& rewriter) const {
+    auto print = llvm::cast<print_op>(op);
+    auto loc = print.getLoc();
+
+    // declare external print runtime functions in the parent module
+    auto module = op->getParentOfType<mlir::ModuleOp>();
+    if (module) {
+        auto ctx = rewriter.getContext();
+        auto void_ty = mlir::FunctionType::get(ctx, {}, {});
+        auto f32_fn_ty = mlir::FunctionType::get(ctx, {mlir::Float32Type::get(ctx)}, {});
+        auto f64_fn_ty = mlir::FunctionType::get(ctx, {mlir::Float64Type::get(ctx)}, {});
+        auto i1_fn_ty = mlir::FunctionType::get(ctx, {mlir::IntegerType::get(ctx, 1)}, {});
+        auto i32_fn_ty = mlir::FunctionType::get(ctx, {mlir::IntegerType::get(ctx, 32)}, {});
+        auto i64_fn_ty = mlir::FunctionType::get(ctx, {mlir::IntegerType::get(ctx, 64)}, {});
+
+        auto declare_extern = [&](llvm::StringRef name, mlir::FunctionType fn_ty) {
+            if (module.lookupSymbol<mlir::func::FuncOp>(name)) {
+                return;
+            }
+            mlir::OpBuilder b(ctx);
+            b.setInsertionPointToStart(module.getBody());
+            auto fn = mlir::func::FuncOp::create(b, b.getUnknownLoc(), name, fn_ty);
+            fn.setPrivate();
+        };
+        declare_extern("__colgm_print_open_bracket", void_ty);
+        declare_extern("__colgm_print_close_bracket", void_ty);
+        declare_extern("__colgm_print_comma", void_ty);
+        declare_extern("__colgm_print_newline", void_ty);
+        declare_extern("__colgm_print_f32", f32_fn_ty);
+        declare_extern("__colgm_print_f64", f64_fn_ty);
+        declare_extern("__colgm_print_i1", i1_fn_ty);
+        declare_extern("__colgm_print_i32", i32_fn_ty);
+        declare_extern("__colgm_print_i64", i64_fn_ty);
+    }
+
+    rewriter.setInsertionPoint(op);
+
+    i64 num_operands = print->getNumOperands();
+    for (i64 i = 0; i < num_operands; ++i) {
+        auto tensor = print->getOperand(i);
+        auto tensor_type = llvm::cast<mlir::RankedTensorType>(tensor.getType());
+        auto shape = tensor_type.getShape();
+        auto elem_type = tensor_type.getElementType();
+
+        llvm::SmallVector<mlir::Value> indices;
+        emit_print_tensor(rewriter, loc, tensor, shape, elem_type, indices, 0);
+
+        if (i < num_operands - 1) {
+            mlir::func::CallOp::create(rewriter, loc, {},
+                                       "__colgm_print_newline", {});
+        }
+    }
+
+    rewriter.eraseOp(op);
+    return mlir::success();
+}
+
 void colgm_lowering::runOnOperation() {
     cvt.addConversion([](mlir::Type type) { return type; });
 
@@ -1054,14 +1176,15 @@ void colgm_lowering::runOnOperation() {
                  lowering_matmul,
                  lowering_elements, lowering_stack,
                  lowering_reshape, lowering_transpose,
-                 lowering_broadcast, lowering_reduce_sum>(cvt, &getContext());
+                 lowering_broadcast, lowering_reduce_sum,
+                 lowering_print>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
 
-    (void)mlir::applyPartialConversion(getOperation(), target, frozen);
-    // if (mlir::failed(mlir::applyPartialConversion(getOperation(), target, frozen))) {
-    //     signalPassFailure();
-    // }
+    // (void)mlir::applyPartialConversion(getOperation(), target, frozen);
+    if (mlir::failed(mlir::applyPartialConversion(getOperation(), target, frozen))) {
+        signalPassFailure();
+    }
 }
 
 static mlir::PassRegistration<colgm_lowering> pass;
