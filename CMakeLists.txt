@@ -102,6 +102,7 @@ set(COLGM_LIB_SOURCES
 set(COLGM_SOURCES
     ${COLGM_LIB_SOURCES}
     src/main.cpp
+    src/runtime/print.c
 )
 
 # ---- colgm mlir core library ----
@@ -119,7 +120,7 @@ if(NOT WIN32)
 endif()
 
 # ---- colgm mlir executable ----
-add_executable(colgm-mlir src/main.cpp)
+add_executable(colgm-mlir src/main.cpp src/runtime/print.c)
 
 target_include_directories(colgm-mlir PRIVATE
     "${CMAKE_SOURCE_DIR}/src"
@@ -183,6 +184,17 @@ if(ENABLE_MLIR)
         MLIRFuncDialect
         MLIRTensorDialect
         MLIROptLib
+    )
+
+    # JIT support for colgm-mlir
+    target_link_libraries(colgm-mlir PRIVATE
+        MLIRExecutionEngine
+        MLIRFuncToLLVM
+        MLIRArithToLLVM
+        MLIRReconcileUnrealizedCasts
+        MLIRTransforms
+        MLIRLLVMDialect
+        /usr/lib/x86_64-linux-gnu/libzstd.so.1
     )
 endif()
 
