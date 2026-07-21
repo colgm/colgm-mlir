@@ -23,7 +23,7 @@ jobs:
       uses: actions/checkout@v6
     - name: fetch mlir
       run: |
-          apt-get install -y libzstd-dev
+          sudo apt-get install -y libzstd-dev
           python3 scripts/download_llvm.py --github
     - name: build
       run: |
