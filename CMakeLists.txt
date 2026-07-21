@@ -45,9 +45,15 @@ if(ENABLE_MLIR)
     endif()
     message(STATUS "Found zstd: ${ZSTD_LIBRARY}")
 
-    # Provide the stub target that LLVM's cmake expects
+    # Provide the stub target that LLVM's cmake expects, wired to the real lib.
+    # LLVM's static archives list zstd::libzstd_static as a link dependency;
+    # an empty stub won't pull in the actual symbols.  Point it at the real
+    # library so the linker resolves ZSTD_createCCtx etc.
     if(NOT TARGET zstd::libzstd_static)
       add_library(zstd::libzstd_static INTERFACE IMPORTED)
+      set_target_properties(zstd::libzstd_static PROPERTIES
+          INTERFACE_LINK_LIBRARIES "${ZSTD_LIBRARY}"
+      )
     endif()
 
     # try to auto-discover from the local bin/ directory
@@ -213,7 +219,6 @@ if(ENABLE_MLIR)
         MLIRBufferizationPipelines
         MLIRTransforms
         MLIRLLVMDialect
-        ${ZSTD_LIBRARY}
     )
 endif()
 
