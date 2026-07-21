@@ -27,10 +27,25 @@ set(MLIR_DIR "" CACHE PATH "Path to MLIR cmake directory")
 option(ENABLE_MLIR "Enable MLIR support" OFF)
 
 if(ENABLE_MLIR)
-    # zstd is an optional LLVM dependency for compressed debug-info / bitcode.
-    # Our pipeline (text .mlir → IR → JIT) never touches compressed data, so an
-    # empty stub target is safe.  Install libzstd-dev if you later need to read
-    # compressed .bc.zst files.
+    # zstd is required by LLVM's static libraries (symbols like ZSTD_createCCtx).
+    # Without libzstd-dev, only libzstd.so.1 exists (no .so symlink), so
+    # find_library("zstd") won't find it.  Glob for the real .so file directly.
+    find_library(ZSTD_LIBRARY zstd)
+    if(NOT ZSTD_LIBRARY)
+        file(GLOB ZSTD_CANDIDATES
+            /usr/lib/*-linux-gnu/libzstd.so*
+            /usr/lib64/libzstd.so*
+        )
+        if(ZSTD_CANDIDATES)
+            list(GET ZSTD_CANDIDATES 0 ZSTD_LIBRARY)
+        endif()
+    endif()
+    if(NOT ZSTD_LIBRARY)
+        message(FATAL_ERROR "libzstd not found. Install libzstd1 or zstd.")
+    endif()
+    message(STATUS "Found zstd: ${ZSTD_LIBRARY}")
+
+    # Provide the stub target that LLVM's cmake expects
     if(NOT TARGET zstd::libzstd_static)
       add_library(zstd::libzstd_static INTERFACE IMPORTED)
     endif()
@@ -102,7 +117,7 @@ set(COLGM_LIB_SOURCES
 set(COLGM_SOURCES
     ${COLGM_LIB_SOURCES}
     src/main.cpp
-    src/runtime/print.c
+    src/runtime/print.cpp
 )
 
 # ---- colgm mlir core library ----
@@ -120,7 +135,7 @@ if(NOT WIN32)
 endif()
 
 # ---- colgm mlir executable ----
-add_executable(colgm-mlir src/main.cpp src/runtime/print.c)
+add_executable(colgm-mlir src/main.cpp src/runtime/print.cpp)
 
 target_include_directories(colgm-mlir PRIVATE
     "${CMAKE_SOURCE_DIR}/src"
@@ -189,12 +204,16 @@ if(ENABLE_MLIR)
     # JIT support for colgm-mlir
     target_link_libraries(colgm-mlir PRIVATE
         MLIRExecutionEngine
-        MLIRFuncToLLVM
         MLIRArithToLLVM
+        MLIRControlFlowToLLVM
+        MLIRFuncToLLVM
+        MLIRMemRefToLLVM
         MLIRReconcileUnrealizedCasts
+        MLIRSCFToControlFlow
+        MLIRBufferizationPipelines
         MLIRTransforms
         MLIRLLVMDialect
-        /usr/lib/x86_64-linux-gnu/libzstd.so.1
+        ${ZSTD_LIBRARY}
     )
 endif()
 

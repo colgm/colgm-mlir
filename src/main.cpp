@@ -24,21 +24,21 @@
 #include <llvm/ExecutionEngine/Orc/Shared/ExecutorSymbolDef.h>
 #include <llvm/Support/TargetSelect.h>
 #include <mlir/Conversion/ArithToLLVM/ArithToLLVM.h>
+#include <mlir/Conversion/ControlFlowToLLVM/ControlFlowToLLVM.h>
 #include <mlir/Conversion/FuncToLLVM/ConvertFuncToLLVMPass.h>
+#include <mlir/Conversion/MemRefToLLVM/MemRefToLLVM.h>
 #include <mlir/Conversion/ReconcileUnrealizedCasts/ReconcileUnrealizedCasts.h>
+#include <mlir/Conversion/SCFToControlFlow/SCFToControlFlow.h>
+#include <mlir/Dialect/Bufferization/Transforms/Passes.h>
+#include <mlir/Dialect/Arith/Transforms/BufferizableOpInterfaceImpl.h>
+#include <mlir/Dialect/SCF/Transforms/BufferizableOpInterfaceImpl.h>
+#include <mlir/Dialect/Tensor/Transforms/BufferizableOpInterfaceImpl.h>
+#include <mlir/Dialect/Bufferization/Transforms/FuncBufferizableOpInterfaceImpl.h>
 #include <mlir/Transforms/Passes.h>
 #include <mlir/Target/LLVMIR/Dialect/Builtin/BuiltinToLLVMIRTranslation.h>
 #include <mlir/Target/LLVMIR/Dialect/LLVMIR/LLVMToLLVMIRTranslation.h>
 
-extern "C" {
-void __colgm_print_f64(double v);
-void __colgm_print_i64(int64_t v);
-void __colgm_print_i1(bool v);
-void __colgm_print_open_bracket(void);
-void __colgm_print_close_bracket(void);
-void __colgm_print_comma(void);
-void __colgm_print_newline(void);
-}
+#include "runtime/print.hpp"
 
 using colgm_mlir::u32;
 using colgm_mlir::i32;
@@ -126,10 +126,72 @@ std::ostream& version(std::ostream& out) {
 
 [[noreturn]]
 void err() {
-    std::cerr
-    << "invalid argument(s).\n"
-    << "use <colgm-mlir -h> to get help.\n";
+    std::cerr << "invalid argument(s).\n"
+              << "use <colgm-mlir -h> to get help.\n";
     std::exit(1);
+}
+
+void run_jit(mlir::MLIRContext& context, colgm_mlir::codegen& gen) {
+    llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmPrinter();
+
+    mlir::PassManager jit_pm(&context);
+    jit_pm.addPass(mlir::createCanonicalizerPass());
+    jit_pm.addPass(mlir::bufferization::createOneShotBufferizePass());
+    jit_pm.addPass(mlir::createSCFToControlFlowPass());
+    jit_pm.addPass(mlir::createArithToLLVMConversionPass());
+    jit_pm.addPass(mlir::createConvertControlFlowToLLVMPass());
+    jit_pm.addPass(mlir::createConvertFuncToLLVMPass());
+    jit_pm.addPass(mlir::createFinalizeMemRefToLLVMConversionPass());
+    jit_pm.addPass(mlir::createReconcileUnrealizedCastsPass());
+
+    if (mlir::failed(jit_pm.run(gen.get_module()))) {
+        llvm::errs() << "LLVM conversion failed\n";
+        std::exit(-1);
+    }
+
+    auto maybeEngine = mlir::ExecutionEngine::create(gen.get_module());
+    if (!maybeEngine) {
+        llvm::errs() << "Failed to create ExecutionEngine: "
+                        << maybeEngine.takeError() << "\n";
+        std::exit(-1);
+    }
+    auto& engine = *maybeEngine;
+
+    engine->registerSymbols([](llvm::orc::MangleAndInterner interner) {
+        llvm::orc::SymbolMap map;
+        map[interner("__colgm_print_f64")] =
+            llvm::orc::ExecutorSymbolDef::fromPtr(&__colgm_print_f64);
+        map[interner("__colgm_print_f32")] =
+            llvm::orc::ExecutorSymbolDef::fromPtr(&__colgm_print_f32);
+        map[interner("__colgm_print_i64")] =
+            llvm::orc::ExecutorSymbolDef::fromPtr(&__colgm_print_i64);
+        map[interner("__colgm_print_i32")] =
+            llvm::orc::ExecutorSymbolDef::fromPtr(&__colgm_print_i32);
+        map[interner("__colgm_print_i1")] =
+            llvm::orc::ExecutorSymbolDef::fromPtr(&__colgm_print_i1);
+        map[interner("__colgm_print_open_bracket")] =
+            llvm::orc::ExecutorSymbolDef::fromPtr(
+                &__colgm_print_open_bracket);
+        map[interner("__colgm_print_close_bracket")] =
+            llvm::orc::ExecutorSymbolDef::fromPtr(
+                &__colgm_print_close_bracket);
+        map[interner("__colgm_print_comma")] =
+            llvm::orc::ExecutorSymbolDef::fromPtr(&__colgm_print_comma);
+        map[interner("__colgm_print_newline")] =
+            llvm::orc::ExecutorSymbolDef::fromPtr(&__colgm_print_newline);
+        return map;
+    });
+
+    auto main_fn = engine->lookup("main");
+    if (!main_fn) {
+        llvm::errs() << "Failed to lookup 'main': "
+                        << main_fn.takeError() << "\n";
+        std::exit(-1);
+    }
+    auto* main_ptr = reinterpret_cast<void (*)()>(*main_fn);
+    main_ptr();
+    return;
 }
 
 void execute(const std::string& input_file,
@@ -173,6 +235,10 @@ void execute(const std::string& input_file,
         mlir::DialectRegistry registry;
         mlir::registerBuiltinDialectTranslation(registry);
         mlir::registerLLVMDialectTranslation(registry);
+        mlir::arith::registerBufferizableOpInterfaceExternalModels(registry);
+        mlir::scf::registerBufferizableOpInterfaceExternalModels(registry);
+        mlir::tensor::registerBufferizableOpInterfaceExternalModels(registry);
+        mlir::bufferization::func_ext::registerBufferizableOpInterfaceExternalModels(registry);
         context.appendDialectRegistry(registry);
     }
     colgm_mlir::codegen gen(context);
@@ -195,63 +261,13 @@ void execute(const std::string& input_file,
         std::exit(-1);
     }
 
-    if (po.enable_jit()) {
-        llvm::InitializeNativeTarget();
-        llvm::InitializeNativeTargetAsmPrinter();
-
-        mlir::PassManager jit_pm(&context);
-        jit_pm.addPass(mlir::createCanonicalizerPass());
-        jit_pm.addPass(mlir::createArithToLLVMConversionPass());
-        jit_pm.addPass(mlir::createConvertFuncToLLVMPass());
-        jit_pm.addPass(mlir::createReconcileUnrealizedCastsPass());
-
-        if (mlir::failed(jit_pm.run(gen.get_module()))) {
-            llvm::errs() << "LLVM conversion failed\n";
-            std::exit(-1);
-        }
-
-        auto maybeEngine = mlir::ExecutionEngine::create(gen.get_module());
-        if (!maybeEngine) {
-            llvm::errs() << "Failed to create ExecutionEngine: "
-                         << maybeEngine.takeError() << "\n";
-            std::exit(-1);
-        }
-        auto& engine = *maybeEngine;
-
-        engine->registerSymbols([](llvm::orc::MangleAndInterner interner) {
-            llvm::orc::SymbolMap map;
-            map[interner("__colgm_print_f64")] =
-                llvm::orc::ExecutorSymbolDef::fromPtr(&__colgm_print_f64);
-            map[interner("__colgm_print_i64")] =
-                llvm::orc::ExecutorSymbolDef::fromPtr(&__colgm_print_i64);
-            map[interner("__colgm_print_i1")] =
-                llvm::orc::ExecutorSymbolDef::fromPtr(&__colgm_print_i1);
-            map[interner("__colgm_print_open_bracket")] =
-                llvm::orc::ExecutorSymbolDef::fromPtr(
-                    &__colgm_print_open_bracket);
-            map[interner("__colgm_print_close_bracket")] =
-                llvm::orc::ExecutorSymbolDef::fromPtr(
-                    &__colgm_print_close_bracket);
-            map[interner("__colgm_print_comma")] =
-                llvm::orc::ExecutorSymbolDef::fromPtr(&__colgm_print_comma);
-            map[interner("__colgm_print_newline")] =
-                llvm::orc::ExecutorSymbolDef::fromPtr(&__colgm_print_newline);
-            return map;
-        });
-
-        auto main_fn = engine->lookup("main");
-        if (!main_fn) {
-            llvm::errs() << "Failed to lookup 'main': "
-                         << main_fn.takeError() << "\n";
-            std::exit(-1);
-        }
-        auto* main_ptr = reinterpret_cast<void (*)()>(*main_fn);
-        main_ptr();
+    if (cmd & COMPILE_VIEW_MLIR) {
+        gen.dump();
         return;
     }
 
-    if (cmd & COMPILE_VIEW_MLIR) {
-        gen.dump();
+    if (po.enable_jit()) {
+        run_jit(context, gen);
         return;
     }
 }

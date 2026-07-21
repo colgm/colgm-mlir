@@ -1181,7 +1181,6 @@ void colgm_lowering::runOnOperation() {
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));
 
-    // (void)mlir::applyPartialConversion(getOperation(), target, frozen);
     if (mlir::failed(mlir::applyPartialConversion(getOperation(), target, frozen))) {
         signalPassFailure();
     }
