@@ -1136,10 +1136,8 @@ lowering_print::matchAndRewrite(mlir::Operation* op,
         llvm::SmallVector<mlir::Value> indices;
         emit_print_tensor(rewriter, loc, tensor, shape, elem_type, indices, 0);
 
-        if (i < num_operands - 1) {
-            mlir::func::CallOp::create(rewriter, loc, {},
-                                       "__colgm_print_newline", {});
-        }
+        mlir::func::CallOp::create(rewriter, loc, {},
+                                   "__colgm_print_newline", {});
     }
 
     rewriter.eraseOp(op);
