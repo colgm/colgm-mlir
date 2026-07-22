@@ -217,6 +217,7 @@ if(ENABLE_MLIR)
         MLIRReconcileUnrealizedCasts
         MLIRSCFToControlFlow
         MLIRBufferizationPipelines
+        MLIRLinalgTransforms
         MLIRTransforms
         MLIRLLVMDialect
     )

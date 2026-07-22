@@ -27,6 +27,7 @@ module {
       func.call @__colgm_print_i64(%extracted) : (i64) -> () loc(#loc4)
     } loc(#loc4)
     call @__colgm_print_close_bracket() : () -> () loc(#loc4)
+    call @__colgm_print_newline() : () -> () loc(#loc4)
     return loc(#loc2)
   } loc(#loc2)
   func.func @print_multi(%arg0: tensor<3xi64> loc("test/lowering/print_op.colgm":13:1), %arg1: tensor<3xf64> loc("test/lowering/print_op.colgm":13:1)) {
@@ -57,6 +58,7 @@ module {
       func.call @__colgm_print_f64(%extracted) : (f64) -> () loc(#loc6)
     } loc(#loc6)
     call @__colgm_print_close_bracket() : () -> () loc(#loc6)
+    call @__colgm_print_newline() : () -> () loc(#loc6)
     return loc(#loc5)
   } loc(#loc5)
   func.func @print_2d(%arg0: tensor<2x2xf64> loc("test/lowering/print_op.colgm":9:1)) {
@@ -84,6 +86,7 @@ module {
       func.call @__colgm_print_close_bracket() : () -> () loc(#loc8)
     } loc(#loc8)
     call @__colgm_print_close_bracket() : () -> () loc(#loc8)
+    call @__colgm_print_newline() : () -> () loc(#loc8)
     return loc(#loc7)
   } loc(#loc7)
   func.func @print_1d(%arg0: tensor<3xf64> loc("test/lowering/print_op.colgm":5:1)) {
@@ -100,11 +103,13 @@ module {
       func.call @__colgm_print_f64(%extracted) : (f64) -> () loc(#loc10)
     } loc(#loc10)
     call @__colgm_print_close_bracket() : () -> () loc(#loc10)
+    call @__colgm_print_newline() : () -> () loc(#loc10)
     return loc(#loc9)
   } loc(#loc9)
   func.func @print_scalar(%arg0: tensor<f64> loc("test/lowering/print_op.colgm":1:1)) {
     %extracted = tensor.extract %arg0[] : tensor<f64> loc(#loc11)
     call @__colgm_print_f64(%extracted) : (f64) -> () loc(#loc11)
+    call @__colgm_print_newline() : () -> () loc(#loc11)
     return loc(#loc)
   } loc(#loc)
 } loc(#loc)

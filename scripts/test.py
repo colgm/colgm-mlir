@@ -152,6 +152,9 @@ def test_codegen(executable: Path) -> tuple[int, int]:
 def test_lowering(executable: Path) -> tuple[int, int]:
     return test(executable, Path("test/lowering"), "colgm", ["--mlir"])
 
+def test_jit(executable: Path) -> tuple[int, int]:
+    return test(executable, Path("test/jit"), "colgm", ["--jit"])
+
 def test_colgm_opt(executable: Path) -> tuple[int, int]:
     return test(executable, Path("test/mlir"), "mlir", [])
 
@@ -201,6 +204,13 @@ if __name__ == "__main__":
     lowering_passed, len_lowering_test = test_lowering(colgm_mlir)
     passed += lowering_passed
     len_test += len_lowering_test
+
+    print("=" * 60)
+    print("Testing colgm-mlir::jit")
+    print("=" * 60)
+    jit_passed, len_jit_test = test_jit(colgm_mlir)
+    passed += jit_passed
+    len_test += len_jit_test
 
     print("=" * 60)
     print("Testing colgm-opt")
