@@ -677,10 +677,12 @@ lowering_matmul::matchAndRewrite(mlir::Operation* op,
     auto rank = result_type.getRank();
     auto elem_type = result_type.getElementType();
 
-    // create empty output tensor
-    auto init = mlir::tensor::EmptyOp::create(
-        rewriter, loc, result_type.getShape(), elem_type
-    );
+    // create zero-filled output tensor for matmul accumulation:
+    // linalg.matmul computes C[i][j] = init[i][j] + Σₖ A[i][k] * B[k][j],
+    // so init must be zero (tensor.empty would leave undefined values)
+    auto zero_attr = mlir::DenseElementsAttr::get(result_type,
+        llvm::ArrayRef<mlir::Attribute>{rewriter.getZeroAttr(elem_type)});
+    auto init = mlir::arith::ConstantOp::create(rewriter, loc, zero_attr);
 
     if (rank == 2) {
         auto matmul_2d = mlir::linalg::MatmulOp::create(
@@ -996,14 +998,16 @@ lowering_reduce_sum::matchAndRewrite(mlir::Operation* op,
     }
     auto output_map = mlir::AffineMap::get(input_rank, 0, output_exprs, ctx);
 
-    auto empty = mlir::tensor::EmptyOp::create(
-        rewriter, loc, result_type.getShape(), elem_type
-    );
+    // zero-filled init for reduce_sum accumulation:
+    // the generic region computes init[i] + input[j], so init must be zero
+    auto zero_attr = mlir::DenseElementsAttr::get(result_type,
+        llvm::ArrayRef<mlir::Attribute>{rewriter.getZeroAttr(elem_type)});
+    auto init = mlir::arith::ConstantOp::create(rewriter, loc, zero_attr);
 
     auto generic = mlir::linalg::GenericOp::create(
         rewriter, loc,
         mlir::TypeRange { result_type },
-        mlir::ValueRange { input }, mlir::ValueRange { empty },
+        mlir::ValueRange { input }, mlir::ValueRange { init },
         llvm::ArrayRef<mlir::AffineMap> { input_map, output_map },
         iter_types,
         [&](mlir::OpBuilder& b, mlir::Location loc, mlir::ValueRange args) {
