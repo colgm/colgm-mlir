@@ -39,6 +39,7 @@
 #include <mlir/Transforms/Passes.h>
 #include <mlir/Target/LLVMIR/Dialect/Builtin/BuiltinToLLVMIRTranslation.h>
 #include <mlir/Target/LLVMIR/Dialect/LLVMIR/LLVMToLLVMIRTranslation.h>
+#include <mlir/Conversion/MathToLLVM/MathToLLVM.h>
 
 #include "runtime/print.hpp"
 
@@ -139,9 +140,11 @@ void run_jit(mlir::MLIRContext& context, colgm_mlir::codegen& gen) {
 
     mlir::PassManager jit_pm(&context);
     jit_pm.addPass(mlir::createCanonicalizerPass());
+    jit_pm.addPass(mlir::createConvertElementwiseToLinalgPass());
     jit_pm.addPass(mlir::bufferization::createOneShotBufferizePass());
     jit_pm.addPass(mlir::createConvertLinalgToLoopsPass());
     jit_pm.addPass(mlir::createSCFToControlFlowPass());
+    jit_pm.addPass(mlir::createConvertMathToLLVMPass());
     jit_pm.addPass(mlir::createArithToLLVMConversionPass());
     jit_pm.addPass(mlir::createConvertControlFlowToLLVMPass());
     jit_pm.addPass(mlir::createConvertFuncToLLVMPass());
@@ -238,6 +241,7 @@ void execute(const std::string& input_file,
         mlir::DialectRegistry registry;
         mlir::registerBuiltinDialectTranslation(registry);
         mlir::registerLLVMDialectTranslation(registry);
+        mlir::registerConvertMathToLLVMInterface(registry);
         mlir::arith::registerBufferizableOpInterfaceExternalModels(registry);
         mlir::scf::registerBufferizableOpInterfaceExternalModels(registry);
         mlir::tensor::registerBufferizableOpInterfaceExternalModels(registry);

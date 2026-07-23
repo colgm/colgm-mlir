@@ -265,6 +265,22 @@ lowering_slice::matchAndRewrite(mlir::Operation* op,
     auto index = slice.get_index();
     auto axis = slice.get_axis();
     auto result_type = llvm::cast<mlir::RankedTensorType>(slice->getResult(0).getType());
+    auto loc = slice.getLoc();
+
+    // Rank-0 result: use tensor.extract + tensor.from_elements
+    // to avoid rank-0 memref.subview issues during LLVM lowering.
+    // this is an issue, tensor.extract_slice should accept rank-0 tensor return.
+    // but it could not now. maybe fixed in the future.
+    if (result_type.getRank() == 0) {
+        auto extracted = mlir::tensor::ExtractOp::create(
+            rewriter, loc, input, mlir::ValueRange { index }
+        );
+        auto fe = mlir::tensor::FromElementsOp::create(
+            rewriter, loc, result_type, mlir::ValueRange { extracted->getResult(0) }
+        );
+        rewriter.replaceOp(op, fe->getResults());
+        return mlir::success();
+    }
 
     auto rank = input_type.getRank();
     llvm::SmallVector<mlir::OpFoldResult> offsets(rank, rewriter.getIndexAttr(0));
@@ -278,7 +294,7 @@ lowering_slice::matchAndRewrite(mlir::Operation* op,
     sizes[axis] = rewriter.getIndexAttr(1);
 
     auto extract = mlir::tensor::ExtractSliceOp::create(
-        rewriter, slice.getLoc(), result_type, input, offsets, sizes, strides
+        rewriter, loc, result_type, input, offsets, sizes, strides
     );
     rewriter.replaceOp(op, extract->getResults());
     return mlir::success();

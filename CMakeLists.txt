@@ -214,6 +214,7 @@ if(ENABLE_MLIR)
         MLIRControlFlowToLLVM
         MLIRFuncToLLVM
         MLIRMemRefToLLVM
+        MLIRMathToLLVM
         MLIRReconcileUnrealizedCasts
         MLIRSCFToControlFlow
         MLIRBufferizationPipelines
