@@ -141,14 +141,18 @@ void run_jit(mlir::MLIRContext& context, colgm_mlir::codegen& gen) {
     mlir::PassManager jit_pm(&context);
     jit_pm.addPass(mlir::createCanonicalizerPass());
     jit_pm.addPass(mlir::createConvertElementwiseToLinalgPass());
-    jit_pm.addPass(mlir::bufferization::createOneShotBufferizePass());
+    {
+      mlir::bufferization::OneShotBufferizePassOptions buf_opts;
+      buf_opts.bufferizeFunctionBoundaries = true;
+      jit_pm.addPass(mlir::bufferization::createOneShotBufferizePass(buf_opts));
+    }
     jit_pm.addPass(mlir::createConvertLinalgToLoopsPass());
     jit_pm.addPass(mlir::createSCFToControlFlowPass());
     jit_pm.addPass(mlir::createConvertMathToLLVMPass());
     jit_pm.addPass(mlir::createArithToLLVMConversionPass());
     jit_pm.addPass(mlir::createConvertControlFlowToLLVMPass());
-    jit_pm.addPass(mlir::createConvertFuncToLLVMPass());
     jit_pm.addPass(mlir::createFinalizeMemRefToLLVMConversionPass());
+    jit_pm.addPass(mlir::createConvertFuncToLLVMPass());
     jit_pm.addPass(mlir::createReconcileUnrealizedCastsPass());
 
     if (mlir::failed(jit_pm.run(gen.get_module()))) {

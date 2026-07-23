@@ -1,0 +1,10 @@
+func add_one(x: i64) -> i64 {
+    return x + 1;
+}
+
+func main() {
+    var x = 41;
+    var y = add_one(x);
+
+    print(y);
+}

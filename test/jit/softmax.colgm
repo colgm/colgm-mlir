@@ -1,0 +1,33 @@
+// ============================================================
+// Softmax implementations in colgm-mlir
+// ============================================================
+
+// 1D softmax: softmax(x_i) = exp(x_i) / sum(exp(x))
+func softmax1d(x: f64[4]) -> f64[4] {
+    var e = exp(x)
+    var s = reduce_sum(e, [0])
+    var sb = broadcast(s, [4])
+    return e / sb
+}
+
+// 2D row-wise softmax: softmax along last dimension for each row
+func softmax2d(x: f64[2, 3]) -> f64[2, 3] {
+    var e = exp(x)
+    var s = reduce_sum(e, [1])
+    var sr = reshape(s, [2, 1])
+    var sb = broadcast(sr, [2, 3])
+    return e / sb
+}
+
+func main() {
+    var x = [0.1, 0.2, 0.3, 0.4]
+
+    // 1D softmax
+    var y = softmax1d(x)
+    print(y)
+
+    // 2D row-wise softmax
+    var m = [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
+    var n = softmax2d(m)
+    print(n)
+}
