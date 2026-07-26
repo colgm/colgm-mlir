@@ -5,6 +5,7 @@
 
 #include <mlir/ExecutionEngine/ExecutionEngine.h>
 #include <mlir/Pass/PassManager.h>
+#include <mlir/Dialect/Func/IR/FuncOps.h>
 #include <mlir/Dialect/Bufferization/Transforms/Passes.h>
 #include <mlir/Dialect/Linalg/Passes.h>
 #include <mlir/Transforms/Passes.h>
@@ -17,6 +18,7 @@
 #include <mlir/Conversion/MathToLLVM/MathToLLVM.h>
 
 #include "runtime/print.hpp"
+#include "dialect/pass/scf_for_rank0_scalar.hpp"
 
 namespace colgm_mlir {
 
@@ -26,6 +28,8 @@ void run_jit(mlir::MLIRContext& context, colgm_mlir::codegen& gen) {
 
     mlir::PassManager jit_pm(&context);
     jit_pm.addPass(mlir::createCanonicalizerPass());
+    jit_pm.addNestedPass<mlir::func::FuncOp>(
+        colgm_mlir::create_scf_for_rank0_scalar_pass());
     jit_pm.addPass(mlir::createConvertElementwiseToLinalgPass());
     {
       mlir::bufferization::OneShotBufferizePassOptions buf_opts;

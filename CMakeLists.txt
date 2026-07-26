@@ -107,6 +107,7 @@ set(COLGM_LIB_SOURCES
     src/dialect/colgm/yield.cpp
     src/dialect/pass/constfold.cpp
     src/dialect/pass/lowering.cpp
+    src/dialect/pass/scf_for_rank0_scalar.cpp
     src/dialect/dialect.cpp
     src/lexer/lexer.cpp
     src/lexer/token.cpp
