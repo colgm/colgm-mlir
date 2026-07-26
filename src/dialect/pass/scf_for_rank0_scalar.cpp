@@ -8,6 +8,16 @@
 
 namespace colgm_mlir {
 
+// one-shot-bufferize requires yielded values inside scf.for to be buffer-equivalent
+// to the corresponding iter_args. for rank-0 tensor iter_args (tensor<f64> etc.),
+// no existing operation can perform an in-place update — arith.addf, linalg.generic,
+// and tensor.from_elements all allocate new buffers. bufferization therefore cannot
+// prove equivalence and fails with "yield operand not equivalent to iter bbArg".
+//
+// this pass works around the limitation by converting rank-0 tensor iter_args to
+// scalar iter_args (f64 etc.), which bypass bufferization entirely. tensor↔scalar
+// wrapping/unwrapping via from_elements/extract is inserted at loop boundaries,
+// then canonicalized away, leaving pure scalar arithmetic in the loop body.
 struct ScfForRank0Scalar
     : public mlir::PassWrapper<ScfForRank0Scalar,
                                 mlir::OperationPass<mlir::func::FuncOp>> {
@@ -45,12 +55,12 @@ void rewriteForOp(mlir::scf::ForOp oldFor) {
     auto oldInitArgs = oldFor.getInitArgs();
     auto oldIterArgs = oldFor.getRegionIterArgs();
 
-    // Track which iter_args are rank-0 tensors, and capture their original
+    // track which iter_args are rank-0 tensors, and capture their original
     // types BEFORE modifying block args (ValueRange is live).
     llvm::SmallVector<bool> isRank0(numIterArgs, false);
     llvm::SmallVector<mlir::RankedTensorType> oldTensorTypes(numIterArgs);
 
-    // Step 1: Extract scalars from rank-0 tensor init args
+    // step 1: extract scalars from rank-0 tensor init args
     llvm::SmallVector<mlir::Value> newInitArgs;
     for (unsigned i = 0; i < numIterArgs; ++i) {
         auto init = oldInitArgs[i];
@@ -67,20 +77,20 @@ void rewriteForOp(mlir::scf::ForOp oldFor) {
         }
     }
 
-    // Step 2: Create new scf.for with scalar init args
+    // step 2: create new scf.for with scalar init args
     auto newFor = mlir::scf::ForOp::create(
         builder, loc, oldFor.getLowerBound(), oldFor.getUpperBound(),
         oldFor.getStep(), newInitArgs);
 
-    // Step 3: Move the old body into the new for op
+    // step 3: move the old body into the new for op
     auto& oldBody = oldFor.getBodyRegion();
     auto& newBody = newFor.getBodyRegion();
 
-    // The new body has default blocks. Clear them and move old block in.
+    // the new body has default blocks. Clear them and move old block in.
     newBody.getBlocks().clear();
     newBody.getBlocks().splice(newBody.end(), oldBody.getBlocks());
 
-    // Step 4: Update block argument types for rank-0 tensor iter_args
+    // step 4: update block argument types for rank-0 tensor iter_args
     auto* entryBlock = &newBody.front();
     for (unsigned i = 0; i < numIterArgs; ++i) {
         if (isRank0[i]) {
@@ -89,31 +99,31 @@ void rewriteForOp(mlir::scf::ForOp oldFor) {
         }
     }
 
-    // Step 5: Insert tensor.from_elements for each use of the now-scalar
+    // step 5: insert tensor.from_elements for each use of the now-scalar
     //         block arg, and replace uses with the wrapped tensor.
     for (unsigned i = 0; i < numIterArgs; ++i) {
         if (!isRank0[i]) continue;
 
         auto scalarArg = entryBlock->getArgument(i + 1);
 
-        // Collect all current uses
+        // collect all current uses
         llvm::SmallVector<mlir::OpOperand*> uses;
         for (auto& use : scalarArg.getUses()) {
             uses.push_back(&use);
         }
 
-        // Insert tensor.from_elements at the start of the block
+        // insert tensor.from_elements at the start of the block
         builder.setInsertionPointToStart(entryBlock);
         auto wrapped = mlir::tensor::FromElementsOp::create(
             builder, loc, oldTensorTypes[i], mlir::ValueRange{scalarArg});
 
-        // Replace all collected uses
+        // replace all collected uses
         for (auto* use : uses) {
             use->set(wrapped);
         }
     }
 
-    // Step 6: Before the scf.yield, extract scalars from rank-0 tensor
+    // step 6: before the scf.yield, extract scalars from rank-0 tensor
     //         yield operands
     auto yieldOp =
         llvm::cast<mlir::scf::YieldOp>(entryBlock->getTerminator());
@@ -131,7 +141,7 @@ void rewriteForOp(mlir::scf::ForOp oldFor) {
     }
     yieldOp->setOperands(newYieldOperands);
 
-    // Step 7: After the loop, wrap scalar results back to tensors
+    // step 7: after the loop, wrap scalar results back to tensors
     builder.setInsertionPointAfter(newFor);
 
     llvm::SmallVector<mlir::Value> newResults;
@@ -145,12 +155,12 @@ void rewriteForOp(mlir::scf::ForOp oldFor) {
         }
     }
 
-    // Replace old for results with new wrapped results
+    // replace old for results with new wrapped results
     for (auto [i, oldResult] : llvm::enumerate(oldFor.getResults())) {
         oldResult.replaceAllUsesWith(newResults[i]);
     }
 
-    // Erase the old (now-empty) for op
+    // erase the old (now-empty) for op
     oldFor.erase();
 }
 

@@ -205,7 +205,7 @@ token lexer::num_gen() {
             return token {
                 {begin_line, begin_column, line, column, filename},
                 tok::tk_num,
-                "0"
+                str
             };
         }
     }

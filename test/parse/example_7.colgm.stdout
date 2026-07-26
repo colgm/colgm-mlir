@@ -1,0 +1,28 @@
+Root -> test/parse/example_7.colgm:1:1
+`--FuncDecl main -> test/parse/example_7.colgm:1:1
+   `--BlockStmt -> test/parse/example_7.colgm:1:13
+      |--VarDecl x -> test/parse/example_7.colgm:2:5
+      |  `--Tensor -> test/parse/example_7.colgm:2:13
+      |     |--IntLiteral 0 -> test/parse/example_7.colgm:2:14
+      |     |--IntLiteral 1 -> test/parse/example_7.colgm:2:17
+      |     |--IntLiteral 2 -> test/parse/example_7.colgm:2:20
+      |     `--IntLiteral 3 -> test/parse/example_7.colgm:2:23
+      |--VarDecl y -> test/parse/example_7.colgm:3:5
+      |  `--ForExpr i -> test/parse/example_7.colgm:3:13
+      |     |--RangeExpr -> test/parse/example_7.colgm:3:22
+      |     |  |--IntLiteral 2 -> test/parse/example_7.colgm:3:22
+      |     |  `--IntLiteral 4 -> test/parse/example_7.colgm:3:25
+      |     |--InitPairs
+      |     |  `--InitPair m
+      |     |     `--IntLiteral 0 -> test/parse/example_7.colgm:3:36
+      |     `--BlockStmt -> test/parse/example_7.colgm:3:39
+      |        `--YieldStmt -> test/parse/example_7.colgm:4:9
+      |           `--BinaryExpr + -> test/parse/example_7.colgm:4:17
+      |              |--identifier m -> test/parse/example_7.colgm:4:15
+      |              `--IndexAccess -> test/parse/example_7.colgm:4:20
+      |                 |--identifier x -> test/parse/example_7.colgm:4:19
+      |                 `--identifier i -> test/parse/example_7.colgm:4:21
+      `--ExprStmt -> test/parse/example_7.colgm:7:1
+         `--CallExpr -> test/parse/example_7.colgm:6:10
+            |--identifier print -> test/parse/example_7.colgm:6:5
+            `--identifier y -> test/parse/example_7.colgm:6:11

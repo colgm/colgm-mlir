@@ -1,0 +1,7 @@
+func main() {
+    var x = [0, 1, 2, 3]
+    var y = for i in 2..4 init(m = 0) {
+        yield m + x[i]
+    }
+    print(y)
+}

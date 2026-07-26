@@ -1,0 +1,10 @@
+func main() {
+    var x = [0.1, 0.2, 0.3, 0.4]
+    var x_sum = for i in 0..4 init(m = 0.0) {
+        var xi = x[i]
+        print(i, xi)
+        var next = xi + m
+        yield next
+    }
+    print(x_sum)
+}

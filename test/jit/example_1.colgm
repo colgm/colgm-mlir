@@ -1,0 +1,13 @@
+func main() {
+    var x = [-0.1, 0.2, -0.3, 0.4]
+    var y = for i in 0..4 init(m = 0.0) {
+        var tmp = if x[i] > 0.0 {
+            yield x[i]
+        } else {
+            yield -x[i]
+        }
+        yield m + tmp
+    }
+
+    print(y)
+}
