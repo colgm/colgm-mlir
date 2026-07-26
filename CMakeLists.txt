@@ -88,6 +88,7 @@ set(COLGM_LIB_SOURCES
     src/codegen/dialect_loader.cpp
     src/codegen/generator.cpp
     src/codegen/intrinsic.cpp
+    src/codegen/mlir_context_registry.cpp
     src/dialect/colgm/binary_op.cpp
     src/dialect/colgm/cmp_op.cpp
     src/dialect/colgm/broadcast.cpp
@@ -111,6 +112,7 @@ set(COLGM_LIB_SOURCES
     src/lexer/token.cpp
     src/parse/parser.cpp
     src/report/report.cpp
+    src/runtime/jit.cpp
     src/sema/context.cpp
     src/sema/intrinsic.cpp
     src/sema/sema.cpp
