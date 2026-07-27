@@ -227,6 +227,11 @@ if(ENABLE_MLIR)
         MLIRTransforms
         MLIRLLVMDialect
     )
+    target_link_options(colgm-mlir PRIVATE
+        "-L${LLVM_PREFIX}/lib"
+        "-lmlir_c_runner_utils"
+        "-Wl,-rpath,${LLVM_PREFIX}/lib"
+    )
 endif()
 
 # ---- install ----

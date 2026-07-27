@@ -1,6 +1,9 @@
 #include "runtime/jit.hpp"
 
+#include <dlfcn.h>
+
 #include <llvm/Support/TargetSelect.h>
+#include <llvm/Support/DynamicLibrary.h>
 #include <llvm/ExecutionEngine/Orc/Shared/ExecutorSymbolDef.h>
 
 #include <mlir/ExecutionEngine/ExecutionEngine.h>
@@ -49,6 +52,16 @@ void run_jit(mlir::MLIRContext& context, colgm_mlir::codegen& gen) {
         llvm::errs() << "LLVM conversion failed\n";
         std::exit(-1);
     }
+
+    // Make process symbols (including linked shared libraries like
+    // libmlir_c_runner_utils) available to the JIT for resolving
+    // runtime functions such as memrefCopy.
+    //
+    // First, load libmlir_c_runner_utils explicitly via dlopen.
+    // The linker may optimize it out (--as-needed), so we must load
+    // it at runtime to make memrefCopy available.
+    dlopen("libmlir_c_runner_utils.so", RTLD_NOW | RTLD_GLOBAL);
+    llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
 
     auto maybeEngine = mlir::ExecutionEngine::create(gen.get_module());
     if (!maybeEngine) {

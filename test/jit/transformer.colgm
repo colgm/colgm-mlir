@@ -1,0 +1,148 @@
+// ============================================================
+// Transformer block with function calls — now working with JIT
+// ============================================================
+// dims: seq_len=2, d_model=4, num_heads=2, d_k=2, d_ff=8
+
+func softmax_2d(x: f64[2, 2]) -> f64[2, 2] {
+    var e = exp(x)
+    var s = reduce_sum(e, [1])
+    var sr = reshape(s, [2, 1])
+    var sb = broadcast(sr, [2, 2])
+    return e / sb
+}
+
+func layer_norm(x: f64[2, 4], gamma: f64[4], beta: f64[4]) -> f64[2, 4] {
+    var sum_x = reduce_sum(x, [1])
+    var four = broadcast(4.0, [2])
+    var mean = sum_x / four
+    var mean_r = reshape(mean, [2, 1])
+    var mean_b = broadcast(mean_r, [2, 4])
+    var diff = x - mean_b
+    var diff_sq = diff * diff
+    var sum_sq = reduce_sum(diff_sq, [1])
+    var var_x = sum_sq / four
+    var var_r = reshape(var_x, [2, 1])
+    var var_b = broadcast(var_r, [2, 4])
+    var eps = broadcast(1e-5, [2, 4])
+    var denom = sqrt(var_b + eps)
+    var norm = diff / denom
+    var g_b = broadcast(gamma, [2, 4])
+    var b_b = broadcast(beta, [2, 4])
+    return norm * g_b + b_b
+}
+
+func ffn(x: f64[2, 4], w1: f64[4, 8], b1: f64[8],
+                      w2: f64[8, 4], b2: f64[4]) -> f64[2, 4] {
+    var h1 = matmul(x, w1)
+    var b1_b = broadcast(b1, [2, 8])
+    var h2 = h1 + b1_b
+    var h3 = gelu(h2)
+    var h4 = matmul(h3, w2)
+    var b2_b = broadcast(b2, [2, 4])
+    return h4 + b2_b
+}
+
+func attention(x: f64[2, 4],
+               w_q: f64[4, 4], b_q: f64[4],
+               w_k: f64[4, 4], b_k: f64[4],
+               w_v: f64[4, 4], b_v: f64[4],
+               w_o: f64[4, 4], b_o: f64[4]) -> f64[2, 4] {
+    var Q0 = matmul(x, w_q)
+    var bq_b = broadcast(b_q, [2, 4])
+    var Q = Q0 + bq_b
+
+    var K0 = matmul(x, w_k)
+    var bk_b = broadcast(b_k, [2, 4])
+    var K = K0 + bk_b
+
+    var V0 = matmul(x, w_v)
+    var bv_b = broadcast(b_v, [2, 4])
+    var V = V0 + bv_b
+
+    var Q_h = reshape(Q, [2, 2, 2])
+    var K_h = reshape(K, [2, 2, 2])
+    var V_h = reshape(V, [2, 2, 2])
+
+    var Qt = transpose(Q_h, [1, 0, 2])
+    var Kt = transpose(K_h, [1, 0, 2])
+    var Vt = transpose(V_h, [1, 0, 2])
+
+    var Kt_T = transpose(Kt, [0, 2, 1])
+    var scores0 = matmul(Qt, Kt_T)
+
+    var d_k = sqrt(2.0)
+    var scale_b = broadcast(d_k, [2, 2, 2])
+    var scores = scores0 / scale_b
+
+    // Softmax along last dim with numerical stability
+    var max_s = reduce_max(scores, [2])
+    var max_b = broadcast(reshape(max_s, [2, 2, 1]), [2, 2, 2])
+    var shifted = scores - max_b
+    var e = exp(shifted)
+    var sum_e = reduce_sum(e, [2])
+    var sum_b = broadcast(reshape(sum_e, [2, 2, 1]), [2, 2, 2])
+    var attn = e / sum_b
+
+    var out_h = matmul(attn, Vt)
+
+    var out_t = transpose(out_h, [1, 0, 2])
+    var merged = reshape(out_t, [2, 4])
+
+    var out0 = matmul(merged, w_o)
+    var bo_b = broadcast(b_o, [2, 4])
+    return out0 + bo_b
+}
+
+func transformer_block(x: f64[2, 4],
+                       ln1_g: f64[4], ln1_b: f64[4],
+                       w_q: f64[4, 4], b_q: f64[4],
+                       w_k: f64[4, 4], b_k: f64[4],
+                       w_v: f64[4, 4], b_v: f64[4],
+                       w_o: f64[4, 4], b_o: f64[4],
+                       ln2_g: f64[4], ln2_b: f64[4],
+                       w1: f64[4, 8], b1: f64[8],
+                       w2: f64[8, 4], b2: f64[4]) -> f64[2, 4] {
+    var norm1 = layer_norm(x, ln1_g, ln1_b)
+    var attn_out = attention(norm1,
+                             w_q, b_q, w_k, b_k, w_v, b_v, w_o, b_o)
+    var x1 = x + attn_out
+    var norm2 = layer_norm(x1, ln2_g, ln2_b)
+    var ffn_out = ffn(norm2, w1, b1, w2, b2)
+    return x1 + ffn_out
+}
+
+func main() {
+    var x = [[0.1, 0.2, 0.3, 0.4],
+             [0.5, 0.6, 0.7, 0.8]]
+
+    var ones4 = [1.0, 1.0, 1.0, 1.0]
+    var zeros4 = [0.0, 0.0, 0.0, 0.0]
+
+    var I4 = [[1.0, 0.0, 0.0, 0.0],
+              [0.0, 1.0, 0.0, 0.0],
+              [0.0, 0.0, 1.0, 0.0],
+              [0.0, 0.0, 0.0, 1.0]]
+
+    var w1 = [[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
+              [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
+              [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
+              [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]]
+    var b1 = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    var w2 = [[0.1, 0.1, 0.1, 0.1],
+              [0.2, 0.2, 0.2, 0.2],
+              [0.3, 0.3, 0.3, 0.3],
+              [0.4, 0.4, 0.4, 0.4],
+              [0.5, 0.5, 0.5, 0.5],
+              [0.6, 0.6, 0.6, 0.6],
+              [0.7, 0.7, 0.7, 0.7],
+              [0.8, 0.8, 0.8, 0.8]]
+    var b2 = zeros4
+
+    var output = transformer_block(x,
+                                   ones4, zeros4,
+                                   I4, zeros4, I4, zeros4, I4, zeros4, I4, zeros4,
+                                   ones4, zeros4,
+                                   w1, b1, w2, b2)
+
+    print(output)
+}

@@ -1,0 +1,103 @@
+// ============================================================
+// Inlined Transformer block — avoids function boundary bufferization
+// ============================================================
+
+func main() {
+    // ---- Input ----
+    var x = [[0.1, 0.2, 0.3, 0.4],
+             [0.5, 0.6, 0.7, 0.8]]
+
+    // ---- Weights ----
+    var ones4 = [1.0, 1.0, 1.0, 1.0]
+    var zeros4 = [0.0, 0.0, 0.0, 0.0]
+    var I4 = [[1.0, 0.0, 0.0, 0.0],
+              [0.0, 1.0, 0.0, 0.0],
+              [0.0, 0.0, 1.0, 0.0],
+              [0.0, 0.0, 0.0, 1.0]]
+    var w1 = [[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
+              [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
+              [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
+              [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]]
+    var b1 = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    var w2 = [[0.1, 0.1, 0.1, 0.1],
+              [0.2, 0.2, 0.2, 0.2],
+              [0.3, 0.3, 0.3, 0.3],
+              [0.4, 0.4, 0.4, 0.4],
+              [0.5, 0.5, 0.5, 0.5],
+              [0.6, 0.6, 0.6, 0.6],
+              [0.7, 0.7, 0.7, 0.7],
+              [0.8, 0.8, 0.8, 0.8]]
+
+    // ==== Layer Norm 1 ====
+    var sum_x1 = reduce_sum(x, [1])
+    var mean1 = sum_x1 / broadcast(4.0, [2])
+    var mean1_b = broadcast(reshape(mean1, [2, 1]), [2, 4])
+    var diff1 = x - mean1_b
+    var diff_sq1 = diff1 * diff1
+    var var_x1 = reduce_sum(diff_sq1, [1]) / broadcast(4.0, [2])
+    var var1_b = broadcast(reshape(var_x1, [2, 1]), [2, 4])
+    var denom1 = sqrt(var1_b + broadcast(1e-5, [2, 4]))
+    var norm1 = (diff1 / denom1) * broadcast(ones4, [2, 4]) + broadcast(zeros4, [2, 4])
+
+    // ==== Attention ====
+    // Q projection
+    var Q0 = matmul(norm1, I4)
+    var Q = Q0 + broadcast(zeros4, [2, 4])
+    var K0 = matmul(norm1, I4)
+    var K = K0 + broadcast(zeros4, [2, 4])
+    var V0 = matmul(norm1, I4)
+    var V = V0 + broadcast(zeros4, [2, 4])
+
+    // Multi-head split
+    var Q_h = reshape(Q, [2, 2, 2])
+    var K_h = reshape(K, [2, 2, 2])
+    var V_h = reshape(V, [2, 2, 2])
+    var Qt = transpose(Q_h, [1, 0, 2])
+    var Kt = transpose(K_h, [1, 0, 2])
+    var Vt = transpose(V_h, [1, 0, 2])
+
+    // Scaled dot-product attention
+    var Kt_T = transpose(Kt, [0, 2, 1])
+    var scores0 = matmul(Qt, Kt_T)
+    var scores = scores0 / broadcast(sqrt(2.0), [2, 2, 2])
+
+    // Softmax 3D
+    var max_s = reduce_max(scores, [2])
+    var max_b = broadcast(reshape(max_s, [2, 2, 1]), [2, 2, 2])
+    var attn_e = exp(scores - max_b)
+    var attn_sum = reduce_sum(attn_e, [2])
+    var attn_sum_b = broadcast(reshape(attn_sum, [2, 2, 1]), [2, 2, 2])
+    var attn = attn_e / attn_sum_b
+
+    // Attention output
+    var out_h = matmul(attn, Vt)
+    var out_t = transpose(out_h, [1, 0, 2])
+    var merged = reshape(out_t, [2, 4])
+    var attn_out = matmul(merged, I4) + broadcast(zeros4, [2, 4])
+
+    // Residual 1
+    var x1 = x + attn_out
+
+    // ==== Layer Norm 2 ====
+    var sum_x2 = reduce_sum(x1, [1])
+    var mean2 = sum_x2 / broadcast(4.0, [2])
+    var mean2_b = broadcast(reshape(mean2, [2, 1]), [2, 4])
+    var diff2 = x1 - mean2_b
+    var diff_sq2 = diff2 * diff2
+    var var_x2 = reduce_sum(diff_sq2, [1]) / broadcast(4.0, [2])
+    var var2_b = broadcast(reshape(var_x2, [2, 1]), [2, 4])
+    var denom2 = sqrt(var2_b + broadcast(1e-5, [2, 4]))
+    var norm2 = (diff2 / denom2) * broadcast(ones4, [2, 4]) + broadcast(zeros4, [2, 4])
+
+    // ==== FFN ====
+    var ffn1 = matmul(norm2, w1)
+    var ffn2 = ffn1 + broadcast(b1, [2, 8])
+    var ffn3 = gelu(ffn2)
+    var ffn4 = matmul(ffn3, w2)
+    var ffn_out = ffn4 + broadcast(zeros4, [2, 4])
+
+    // Residual 2 + output
+    var output = x1 + ffn_out
+
+    print(output)
+}
