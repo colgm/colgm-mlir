@@ -337,4 +337,133 @@ mlir::LogicalResult tanh_op::verify() {
     return mlir::success();
 }
 
+void sin_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
+                   mlir::Value input) {
+    state.addOperands({input});
+    state.addTypes(input.getType());
+}
+
+sin_op sin_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                      mlir::Value input) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input);
+    return llvm::cast<sin_op>(builder.create(state));
+}
+
+mlir::ParseResult sin_op::parse(mlir::OpAsmParser& parser,
+                                mlir::OperationState& result) {
+    mlir::OpAsmParser::UnresolvedOperand input;
+    mlir::Type type;
+
+    if (parser.parseOperand(input) || parser.parseColonType(type)) {
+        return mlir::failure();
+    }
+
+    if (parser.resolveOperand(input, type, result.operands)) {
+        return mlir::failure();
+    }
+
+    result.addTypes(type);
+    return mlir::success();
+}
+
+void sin_op::print(mlir::OpAsmPrinter& p) {
+    p << " " << get_input()
+      << " : " << get_input().getType();
+}
+
+mlir::LogicalResult sin_op::verify() {
+    auto type = get_input().getType();
+    if (!is_float_type(type)) {
+        return mlir::emitError(getLoc(), "sin input must be a float type");
+    }
+    return mlir::success();
+}
+
+void cos_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
+                   mlir::Value input) {
+    state.addOperands({input});
+    state.addTypes(input.getType());
+}
+
+cos_op cos_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                      mlir::Value input) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input);
+    return llvm::cast<cos_op>(builder.create(state));
+}
+
+mlir::ParseResult cos_op::parse(mlir::OpAsmParser& parser,
+                                mlir::OperationState& result) {
+    mlir::OpAsmParser::UnresolvedOperand input;
+    mlir::Type type;
+
+    if (parser.parseOperand(input) || parser.parseColonType(type)) {
+        return mlir::failure();
+    }
+
+    if (parser.resolveOperand(input, type, result.operands)) {
+        return mlir::failure();
+    }
+
+    result.addTypes(type);
+    return mlir::success();
+}
+
+void cos_op::print(mlir::OpAsmPrinter& p) {
+    p << " " << get_input()
+      << " : " << get_input().getType();
+}
+
+mlir::LogicalResult cos_op::verify() {
+    auto type = get_input().getType();
+    if (!is_float_type(type)) {
+        return mlir::emitError(getLoc(), "cos input must be a float type");
+    }
+    return mlir::success();
+}
+
+void gelu_op::build(mlir::OpBuilder& builder, mlir::OperationState& state,
+                    mlir::Value input) {
+    state.addOperands({input});
+    state.addTypes(input.getType());
+}
+
+gelu_op gelu_op::create(mlir::OpBuilder& builder, mlir::Location loc,
+                        mlir::Value input) {
+    mlir::OperationState state(loc, getOperationName());
+    build(builder, state, input);
+    return llvm::cast<gelu_op>(builder.create(state));
+}
+
+mlir::ParseResult gelu_op::parse(mlir::OpAsmParser& parser,
+                                 mlir::OperationState& result) {
+    mlir::OpAsmParser::UnresolvedOperand input;
+    mlir::Type type;
+
+    if (parser.parseOperand(input) || parser.parseColonType(type)) {
+        return mlir::failure();
+    }
+
+    if (parser.resolveOperand(input, type, result.operands)) {
+        return mlir::failure();
+    }
+
+    result.addTypes(type);
+    return mlir::success();
+}
+
+void gelu_op::print(mlir::OpAsmPrinter& p) {
+    p << " " << get_input()
+      << " : " << get_input().getType();
+}
+
+mlir::LogicalResult gelu_op::verify() {
+    auto type = get_input().getType();
+    if (!is_float_type(type)) {
+        return mlir::emitError(getLoc(), "gelu input must be a float type");
+    }
+    return mlir::success();
+}
+
 }

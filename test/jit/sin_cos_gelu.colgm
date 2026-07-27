@@ -1,0 +1,24 @@
+// ============================================================
+// sin, cos, gelu JIT test
+// ============================================================
+
+func main() {
+    // sin
+    var a = sin(0.0)
+    var b = sin(1.5707963267948966)   // ~pi/2
+    print(a, b)
+    // expected: 0.0, ~1.0
+
+    // cos
+    var c = cos(0.0)
+    var d = cos(3.141592653589793)    // ~pi
+    print(c, d)
+    // expected: 1.0, ~-1.0
+
+    // gelu — tanh approximation
+    var e = gelu(0.0)
+    var f = gelu(1.0)
+    var g = gelu(-1.0)
+    print(e, f, g)
+    // expected: 0.0, ~0.841, ~-0.159
+}

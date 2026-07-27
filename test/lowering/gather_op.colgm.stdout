@@ -1,0 +1,18 @@
+#loc3 = loc("test/lowering/gather_op.colgm":7:24)
+module {
+  func.func @main() {
+    %cst = arith.constant dense<[[1.000000e-01, 2.000000e-01, 0.30000000000000004], [4.000000e-01, 5.000000e-01, 0.60000000000000009], [0.70000000000000007, 8.000000e-01, 9.000000e-01], [1.000000e+00, 1.100000e+00, 1.200000e+00]]> : tensor<4x3xf64> loc(#loc1)
+    %cst_0 = arith.constant dense<[2, 0]> : tensor<2xi64> loc(#loc2)
+    %generated = tensor.generate  {
+    ^bb0(%arg0: index loc("test/lowering/gather_op.colgm":7:24), %arg1: index loc("test/lowering/gather_op.colgm":7:24)):
+      %extracted = tensor.extract %cst_0[%arg0] : tensor<2xi64> loc(#loc3)
+      %0 = arith.index_cast %extracted : i64 to index loc(#loc3)
+      %extracted_1 = tensor.extract %cst[%0, %arg1] : tensor<4x3xf64> loc(#loc3)
+      tensor.yield %extracted_1 : f64 loc(#loc3)
+    } : tensor<2x3xf64> loc(#loc3)
+    return loc(#loc)
+  } loc(#loc)
+} loc(#loc)
+#loc = loc("test/lowering/gather_op.colgm":1:1)
+#loc1 = loc("test/lowering/gather_op.colgm":2:23)
+#loc2 = loc("test/lowering/gather_op.colgm":6:21)

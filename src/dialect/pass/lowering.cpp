@@ -565,6 +565,30 @@ lowering_tanh::matchAndRewrite(mlir::Operation* op,
 }
 
 mlir::LogicalResult
+lowering_sin::matchAndRewrite(mlir::Operation* op,
+                              llvm::ArrayRef<mlir::Value> operands,
+                              mlir::ConversionPatternRewriter& rewriter) const {
+    auto sin = llvm::cast<sin_op>(op);
+    return lowering_math_unary(op, sin.get_input(), rewriter,
+        [](mlir::OpBuilder& b, mlir::Location loc, mlir::Value v, mlir::arith::FastMathFlagsAttr fm) {
+            return mlir::math::SinOp::create(b, loc, v, fm);
+        }
+    );
+}
+
+mlir::LogicalResult
+lowering_cos::matchAndRewrite(mlir::Operation* op,
+                              llvm::ArrayRef<mlir::Value> operands,
+                              mlir::ConversionPatternRewriter& rewriter) const {
+    auto cos = llvm::cast<cos_op>(op);
+    return lowering_math_unary(op, cos.get_input(), rewriter,
+        [](mlir::OpBuilder& b, mlir::Location loc, mlir::Value v, mlir::arith::FastMathFlagsAttr fm) {
+            return mlir::math::CosOp::create(b, loc, v, fm);
+        }
+    );
+}
+
+mlir::LogicalResult
 lowering_sigmoid::matchAndRewrite(mlir::Operation* op,
                                   llvm::ArrayRef<mlir::Value> operands,
                                   mlir::ConversionPatternRewriter& rewriter) const {
@@ -611,6 +635,92 @@ lowering_sigmoid::matchAndRewrite(mlir::Operation* op,
     auto result = mlir::arith::DivFOp::create(
         rewriter, op->getLoc(),
         mlir::ValueRange { one, one_plus_exp->getResult(0) }
+    );
+
+    rewriter.replaceOp(op, result->getResults());
+    return mlir::success();
+}
+
+mlir::LogicalResult
+lowering_gelu::matchAndRewrite(mlir::Operation* op,
+                               llvm::ArrayRef<mlir::Value> operands,
+                               mlir::ConversionPatternRewriter& rewriter) const {
+    auto gelu = llvm::cast<gelu_op>(op);
+    auto input = gelu.get_input();
+    auto ty = llvm::cast<mlir::RankedTensorType>(input.getType());
+    auto base_type = ty.getElementType();
+
+    if (!llvm::isa<mlir::FloatType>(base_type)) {
+        return mlir::failure();
+    }
+
+    auto ft = llvm::cast<mlir::FloatType>(base_type);
+    auto loc = op->getLoc();
+    auto fastmath = mlir::arith::FastMathFlagsAttr::get(
+        rewriter.getContext(), mlir::arith::FastMathFlags::none
+    );
+
+    // Constants
+    mlir::TypedAttr one_attr = mlir::DenseElementsAttr::get(
+        ty, llvm::APFloat(ft.getFloatSemantics(), "1")
+    );
+    mlir::TypedAttr half_attr = mlir::DenseElementsAttr::get(
+        ty, llvm::APFloat(ft.getFloatSemantics(), "0.5")
+    );
+    mlir::TypedAttr coeff1_attr = mlir::DenseElementsAttr::get(
+        ty, llvm::APFloat(ft.getFloatSemantics(), "0.044715")
+    );
+    // sqrt(2/pi) ≈ 0.7978845608028654
+    mlir::TypedAttr coeff2_attr = mlir::DenseElementsAttr::get(
+        ty, llvm::APFloat(ft.getFloatSemantics(), "0.7978845608028654")
+    );
+
+    auto one = mlir::arith::ConstantOp::create(rewriter, loc, one_attr);
+    auto half = mlir::arith::ConstantOp::create(rewriter, loc, half_attr);
+    auto coeff1 = mlir::arith::ConstantOp::create(rewriter, loc, coeff1_attr);
+    auto coeff2 = mlir::arith::ConstantOp::create(rewriter, loc, coeff2_attr);
+
+    // x^3 = x * x * x
+    auto x2 = mlir::arith::MulFOp::create(
+        rewriter, loc, mlir::ValueRange{ input, input }
+    );
+    auto x3 = mlir::arith::MulFOp::create(
+        rewriter, loc, mlir::ValueRange{ x2->getResult(0), input }
+    );
+
+    // 0.044715 * x^3
+    auto t1 = mlir::arith::MulFOp::create(
+        rewriter, loc, mlir::ValueRange{ coeff1, x3->getResult(0) }
+    );
+
+    // x + 0.044715 * x^3
+    auto t2 = mlir::arith::AddFOp::create(
+        rewriter, loc, mlir::ValueRange{ input, t1->getResult(0) }
+    );
+
+    // sqrt(2/pi) * (x + 0.044715 * x^3)
+    auto t3 = mlir::arith::MulFOp::create(
+        rewriter, loc, mlir::ValueRange{ coeff2, t2->getResult(0) }
+    );
+
+    // tanh(...)
+    auto tanh = mlir::math::TanhOp::create(
+        rewriter, loc, t3->getResult(0), fastmath
+    );
+
+    // 1 + tanh(...)
+    auto t4 = mlir::arith::AddFOp::create(
+        rewriter, loc, mlir::ValueRange{ one, tanh->getResult(0) }
+    );
+
+    // 0.5 * (1 + tanh(...))
+    auto t5 = mlir::arith::MulFOp::create(
+        rewriter, loc, mlir::ValueRange{ half, t4->getResult(0) }
+    );
+
+    // x * 0.5 * (1 + tanh(...))
+    auto result = mlir::arith::MulFOp::create(
+        rewriter, loc, mlir::ValueRange{ input, t5->getResult(0) }
     );
 
     rewriter.replaceOp(op, result->getResults());
@@ -1044,6 +1154,164 @@ lowering_reduce_sum::matchAndRewrite(mlir::Operation* op,
     return mlir::success();
 }
 
+mlir::LogicalResult
+lowering_reduce_max::matchAndRewrite(mlir::Operation* op,
+                                     llvm::ArrayRef<mlir::Value> operands,
+                                     mlir::ConversionPatternRewriter& rewriter) const {
+    auto rm = llvm::cast<reduce_max>(op);
+    auto loc = rm.getLoc();
+    auto input = rm.get_input();
+    auto axes_attr = rm.get_axes();
+    auto result_type = llvm::cast<mlir::RankedTensorType>(rm->getResult(0).getType());
+
+    auto input_type = llvm::cast<mlir::RankedTensorType>(input.getType());
+    auto input_shape = input_type.getShape();
+    auto input_rank = static_cast<i64>(input_shape.size());
+    auto elem_type = input_type.getElementType();
+
+    llvm::SmallBitVector reduced(static_cast<unsigned>(input_rank));
+    for (auto a : axes_attr) {
+        reduced.set(static_cast<unsigned>(llvm::cast<mlir::IntegerAttr>(a).getInt()));
+    }
+
+    llvm::SmallVector<mlir::utils::IteratorType> iter_types;
+    for (i64 i = 0; i < input_rank; ++i) {
+        if (reduced[i]) {
+            iter_types.push_back(mlir::utils::IteratorType::reduction);
+        } else {
+            iter_types.push_back(mlir::utils::IteratorType::parallel);
+        }
+    }
+
+    auto ctx = rewriter.getContext();
+
+    llvm::SmallVector<mlir::AffineExpr> input_exprs;
+    for (i64 i = 0; i < input_rank; ++i) {
+        input_exprs.push_back(mlir::getAffineDimExpr(i, ctx));
+    }
+    auto input_map = mlir::AffineMap::get(input_rank, 0, input_exprs, ctx);
+
+    llvm::SmallVector<mlir::AffineExpr> output_exprs;
+    for (i64 i = 0; i < input_rank; ++i) {
+        if (!reduced[i]) {
+            output_exprs.push_back(mlir::getAffineDimExpr(i, ctx));
+        }
+    }
+    auto output_map = mlir::AffineMap::get(input_rank, 0, output_exprs, ctx);
+
+    // For reduce_max, init is the minimum representable value
+    // (identity element for max operation)
+    mlir::TypedAttr min_attr;
+    if (llvm::isa<mlir::FloatType>(elem_type)) {
+        auto ft = llvm::cast<mlir::FloatType>(elem_type);
+        auto neg_inf = llvm::APFloat::getInf(ft.getFloatSemantics(), /*Negative=*/true);
+        min_attr = mlir::DenseElementsAttr::get(result_type,
+            llvm::ArrayRef<mlir::Attribute>{rewriter.getFloatAttr(ft, neg_inf)});
+    } else if (llvm::isa<mlir::IntegerType>(elem_type)) {
+        auto it = llvm::cast<mlir::IntegerType>(elem_type);
+        auto min_val = llvm::APInt::getSignedMinValue(it.getWidth());
+        min_attr = mlir::DenseElementsAttr::get(result_type,
+            llvm::ArrayRef<mlir::Attribute>{rewriter.getIntegerAttr(it, min_val)});
+    } else {
+        return mlir::failure();
+    }
+
+    auto init = mlir::arith::ConstantOp::create(rewriter, loc, min_attr);
+
+    auto generic = mlir::linalg::GenericOp::create(
+        rewriter, loc,
+        mlir::TypeRange { result_type },
+        mlir::ValueRange { input }, mlir::ValueRange { init },
+        llvm::ArrayRef<mlir::AffineMap> { input_map, output_map },
+        iter_types,
+        [&](mlir::OpBuilder& b, mlir::Location loc, mlir::ValueRange args) {
+            mlir::Value acc;
+            if (llvm::isa<mlir::FloatType>(elem_type)) {
+                auto maxf = mlir::arith::MaximumFOp::create(b, loc, mlir::ValueRange{args[0], args[1]});
+                acc = maxf->getResult(0);
+            } else if (llvm::isa<mlir::IntegerType>(elem_type)) {
+                auto maxi = mlir::arith::MaxSIOp::create(b, loc, mlir::ValueRange{args[0], args[1]});
+                acc = maxi->getResult(0);
+            } else {
+                return;
+            }
+            mlir::linalg::YieldOp::create(b, loc, acc);
+        }
+    );
+    rewriter.replaceOp(op, generic->getResults());
+    return mlir::success();
+}
+
+mlir::LogicalResult
+lowering_gather::matchAndRewrite(mlir::Operation* op,
+                                 llvm::ArrayRef<mlir::Value> operands,
+                                 mlir::ConversionPatternRewriter& rewriter) const {
+    auto gather = llvm::cast<gather_op>(op);
+    auto loc = gather.getLoc();
+    auto params = gather.get_params();
+    auto indices = gather.get_indices();
+    auto axis = gather.get_axis();
+
+    auto params_type = llvm::cast<mlir::RankedTensorType>(params.getType());
+    auto indices_type = llvm::cast<mlir::RankedTensorType>(indices.getType());
+    auto result_type = llvm::cast<mlir::RankedTensorType>(gather->getResult(0).getType());
+
+    auto params_rank = params_type.getRank();
+    auto indices_rank = indices_type.getRank();
+    auto params_shape = params_type.getShape();
+    auto indices_shape = indices_type.getShape();
+
+    // Only support 1D indices (embedding lookup use case)
+    if (indices_rank != 1) {
+        return mlir::failure();
+    }
+
+    auto output_shape = result_type.getShape();
+    auto out_rank = static_cast<i64>(output_shape.size());
+
+    // Use tensor.generate to fill the output element-by-element
+    auto gen = mlir::tensor::GenerateOp::create(
+        rewriter, loc, result_type, mlir::ValueRange{},
+        [&](mlir::OpBuilder& b, mlir::Location loc, mlir::ValueRange ivs) {
+            // Build the index into params:
+            // For each dim of output, map back to params dim.
+            // output dims before axis → params dims before axis
+            // output dims at axis → indices[i] (map to params dim at axis)
+            // output dims after axis → params dims after axis+1 (shifted by indices_rank-1)
+
+            // Extract the index value from indices tensor
+            // ivs[axis] is the position in the indices dimension
+            auto idx_val = mlir::tensor::ExtractOp::create(
+                b, loc, indices, mlir::ValueRange{ ivs[axis] }
+            );
+
+            // Cast to index type
+            auto idx = mlir::arith::IndexCastOp::create(
+                b, loc, b.getIndexType(), idx_val->getResult(0)
+            );
+
+            // Build the indices into params
+            llvm::SmallVector<mlir::Value> params_ivs;
+            for (i64 i = 0; i < axis; ++i) {
+                params_ivs.push_back(ivs[i]);
+            }
+            params_ivs.push_back(idx->getResult(0));
+            for (i64 i = axis + 1; i < out_rank; ++i) {
+                params_ivs.push_back(ivs[i]);
+            }
+
+            auto val = mlir::tensor::ExtractOp::create(
+                b, loc, params, params_ivs
+            );
+
+            mlir::tensor::YieldOp::create(b, loc, val->getResult(0));
+        }
+    );
+
+    rewriter.replaceOp(op, gen->getResults());
+    return mlir::success();
+}
+
 static void emit_print_scalar(mlir::OpBuilder& builder, mlir::Location loc,
                               mlir::Value scalar, mlir::Type elem_type) {
     llvm::StringRef callee;
@@ -1190,11 +1458,13 @@ void colgm_lowering::runOnOperation() {
                  lowering_abs, lowering_exp,
                  lowering_log, lowering_sqrt,
                  lowering_tanh, lowering_sigmoid,
+                 lowering_sin, lowering_cos, lowering_gelu,
                  lowering_yield, lowering_if, lowering_for,
                  lowering_matmul,
                  lowering_elements, lowering_stack,
                  lowering_reshape, lowering_transpose,
                  lowering_broadcast, lowering_reduce_sum,
+                 lowering_reduce_max, lowering_gather,
                  lowering_print>(cvt, &getContext());
 
     mlir::FrozenRewritePatternSet frozen(std::move(patterns));

@@ -244,6 +244,36 @@ struct lowering_sigmoid : public mlir::ConversionPattern {
                     mlir::ConversionPatternRewriter& rewriter) const override;
 };
 
+struct lowering_sin : public mlir::ConversionPattern {
+    explicit lowering_sin(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
+        : mlir::ConversionPattern(cvt, sin_op::getOperationName(), 1, ctx) {}
+
+    mlir::LogicalResult
+    matchAndRewrite(mlir::Operation* op,
+                    llvm::ArrayRef<mlir::Value> operands,
+                    mlir::ConversionPatternRewriter& rewriter) const override;
+};
+
+struct lowering_cos : public mlir::ConversionPattern {
+    explicit lowering_cos(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
+        : mlir::ConversionPattern(cvt, cos_op::getOperationName(), 1, ctx) {}
+
+    mlir::LogicalResult
+    matchAndRewrite(mlir::Operation* op,
+                    llvm::ArrayRef<mlir::Value> operands,
+                    mlir::ConversionPatternRewriter& rewriter) const override;
+};
+
+struct lowering_gelu : public mlir::ConversionPattern {
+    explicit lowering_gelu(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
+        : mlir::ConversionPattern(cvt, gelu_op::getOperationName(), 1, ctx) {}
+
+    mlir::LogicalResult
+    matchAndRewrite(mlir::Operation* op,
+                    llvm::ArrayRef<mlir::Value> operands,
+                    mlir::ConversionPatternRewriter& rewriter) const override;
+};
+
 struct lowering_yield : public mlir::ConversionPattern {
     explicit lowering_yield(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
         : mlir::ConversionPattern(cvt, yield_op::getOperationName(), 1, ctx) {}
@@ -337,6 +367,26 @@ struct lowering_broadcast : public mlir::ConversionPattern {
 struct lowering_reduce_sum : public mlir::ConversionPattern {
     explicit lowering_reduce_sum(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
         : mlir::ConversionPattern(cvt, reduce_sum::getOperationName(), 1, ctx) {}
+
+    mlir::LogicalResult
+    matchAndRewrite(mlir::Operation* op,
+                    llvm::ArrayRef<mlir::Value> operands,
+                    mlir::ConversionPatternRewriter& rewriter) const override;
+};
+
+struct lowering_reduce_max : public mlir::ConversionPattern {
+    explicit lowering_reduce_max(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
+        : mlir::ConversionPattern(cvt, reduce_max::getOperationName(), 1, ctx) {}
+
+    mlir::LogicalResult
+    matchAndRewrite(mlir::Operation* op,
+                    llvm::ArrayRef<mlir::Value> operands,
+                    mlir::ConversionPatternRewriter& rewriter) const override;
+};
+
+struct lowering_gather : public mlir::ConversionPattern {
+    explicit lowering_gather(const mlir::TypeConverter& cvt, mlir::MLIRContext* ctx)
+        : mlir::ConversionPattern(cvt, gather_op::getOperationName(), 1, ctx) {}
 
     mlir::LogicalResult
     matchAndRewrite(mlir::Operation* op,

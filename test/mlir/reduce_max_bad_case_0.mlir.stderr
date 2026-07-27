@@ -1,0 +1,4 @@
+test/mlir/reduce_max_bad_case_0.mlir:5:8: error: 'colgm.reduce_max' op missing 'axes' attribute
+  %0 = colgm.reduce_max %arg : tensor<3x4xf64> -> tensor<4xf64>
+       ^
+test/mlir/reduce_max_bad_case_0.mlir:5:8: note: see current operation: %0 = "colgm.reduce_max"(%arg0) : (tensor<3x4xf64>) -> tensor<4xf64>

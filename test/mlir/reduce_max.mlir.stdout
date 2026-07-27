@@ -1,0 +1,7 @@
+module {
+  func.func @test_reduce_max(%arg0: tensor<3x4xf64>) -> tensor<4xf64> {
+    %0 = colgm.reduce_max %arg0 {axes = [0]} : tensor<3x4xf64> -> tensor<4xf64>
+    return %0 : tensor<4xf64>
+  }
+}
+

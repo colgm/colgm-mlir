@@ -47,11 +47,16 @@ type log_infer(error&, call_expr*, type_storage&);
 type sqrt_infer(error&, call_expr*, type_storage&);
 type tanh_infer(error&, call_expr*, type_storage&);
 type sigmoid_infer(error&, call_expr*, type_storage&);
+type sin_infer(error&, call_expr*, type_storage&);
+type cos_infer(error&, call_expr*, type_storage&);
+type gelu_infer(error&, call_expr*, type_storage&);
 type print_infer(error&, call_expr*, type_storage&);
 type matmul_infer(error&, call_expr*, type_storage&);
 type broadcast_infer(error&, call_expr*, type_storage&);
 type reduce_sum_infer(error&, call_expr*, type_storage&);
+type reduce_max_infer(error&, call_expr*, type_storage&);
 type reshape_infer(error&, call_expr*, type_storage&);
 type transpose_infer(error&, call_expr*, type_storage&);
+type gather_infer(error&, call_expr*, type_storage&);
 
 }

@@ -1,0 +1,7 @@
+module {
+  func.func @test_sin(%arg0: tensor<2x2xf64>) -> tensor<2x2xf64> {
+    %0 = colgm.sin %arg0 : tensor<2x2xf64>
+    return %0 : tensor<2x2xf64>
+  }
+}
+

@@ -1,0 +1,3 @@
+func gelu_f64(x: f64) -> f64 {
+    return gelu(x)
+}

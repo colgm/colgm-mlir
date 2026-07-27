@@ -1,0 +1,7 @@
+module {
+  func.func @test_gather(%arg0: tensor<4x3xf64>, %arg1: tensor<2xi64>) -> tensor<2x3xf64> {
+    %0 = colgm.gather %arg0, %arg1 {axis = 0} : tensor<4x3xf64>, tensor<2xi64> -> tensor<2x3xf64>
+    return %0 : tensor<2x3xf64>
+  }
+}
+

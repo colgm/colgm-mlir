@@ -1,0 +1,37 @@
+// ============================================================
+// reduce_max JIT test + numerically stable softmax
+// ============================================================
+
+// Numerically stable softmax using reduce_max
+func stable_softmax_1d(x: f64[4]) -> f64[4] {
+    var m = reduce_max(x, [0])
+    var mb = broadcast(m, [4])
+    var shifted = x - mb
+    var e = exp(shifted)
+    var s = reduce_sum(e, [0])
+    var sb = broadcast(s, [4])
+    return e / sb
+}
+
+func main() {
+    // reduce_max basic test
+    var a = [1.0, 5.0, 3.0, 2.0]
+    var max_a = reduce_max(a, [0])
+    print(max_a)
+    // expected: 5.0
+
+    var b = [[1.0, 2.0], [3.0, 4.0]]
+    var max_rows = reduce_max(b, [1])
+    print(max_rows)
+    // expected: [2.0, 4.0]
+
+    var max_cols = reduce_max(b, [0])
+    print(max_cols)
+    // expected: [3.0, 4.0]
+
+    // Numerically stable softmax
+    var x = [0.1, 0.2, 0.3, 0.4]
+    var y = stable_softmax_1d(x)
+    print(y)
+    // expected: ~[0.2138, 0.2363, 0.2612, 0.2887]
+}

@@ -1,0 +1,8 @@
+func main() {
+    var embed_table = [[0.1, 0.2, 0.3],
+                        [0.4, 0.5, 0.6],
+                        [0.7, 0.8, 0.9],
+                        [1.0, 1.1, 1.2]]
+    var token_ids = [2, 0]
+    var result = gather(embed_table, token_ids, 0)
+}

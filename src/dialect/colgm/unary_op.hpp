@@ -175,4 +175,67 @@ public:
     mlir::LogicalResult verify();
 };
 
+class sin_op: public mlir::Op<sin_op,
+                           mlir::OpTrait::OneOperand,
+                           mlir::OpTrait::OneResult,
+                           mlir::OpTrait::SameOperandsAndResultType> {
+public:
+    using Op::Op;
+    static llvm::StringRef getOperationName() { return "colgm.sin"; }
+    static llvm::ArrayRef<llvm::StringRef> getAttributeNames() { return {}; }
+
+    mlir::Value get_input() { return getOperand(); }
+
+    static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
+                      mlir::Value input);
+    static sin_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                         mlir::Value input);
+    static mlir::ParseResult parse(mlir::OpAsmParser& parser,
+                                   mlir::OperationState& result);
+    void print(mlir::OpAsmPrinter& p);
+    mlir::LogicalResult verify();
+};
+
+class cos_op: public mlir::Op<cos_op,
+                           mlir::OpTrait::OneOperand,
+                           mlir::OpTrait::OneResult,
+                           mlir::OpTrait::SameOperandsAndResultType> {
+public:
+    using Op::Op;
+    static llvm::StringRef getOperationName() { return "colgm.cos"; }
+    static llvm::ArrayRef<llvm::StringRef> getAttributeNames() { return {}; }
+
+    mlir::Value get_input() { return getOperand(); }
+
+    static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
+                      mlir::Value input);
+    static cos_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                         mlir::Value input);
+    static mlir::ParseResult parse(mlir::OpAsmParser& parser,
+                                   mlir::OperationState& result);
+    void print(mlir::OpAsmPrinter& p);
+    mlir::LogicalResult verify();
+};
+
+class gelu_op: public mlir::Op<gelu_op,
+                            mlir::OpTrait::OneOperand,
+                            mlir::OpTrait::OneResult,
+                            mlir::OpTrait::SameOperandsAndResultType> {
+public:
+    using Op::Op;
+    static llvm::StringRef getOperationName() { return "colgm.gelu"; }
+    static llvm::ArrayRef<llvm::StringRef> getAttributeNames() { return {}; }
+
+    mlir::Value get_input() { return getOperand(); }
+
+    static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
+                      mlir::Value input);
+    static gelu_op create(mlir::OpBuilder& builder, mlir::Location loc,
+                          mlir::Value input);
+    static mlir::ParseResult parse(mlir::OpAsmParser& parser,
+                                   mlir::OperationState& result);
+    void print(mlir::OpAsmPrinter& p);
+    mlir::LogicalResult verify();
+};
+
 }

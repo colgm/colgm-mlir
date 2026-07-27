@@ -1,0 +1,4 @@
+test/mlir/gather_bad_case_0.mlir:4:8: error: 'colgm.gather' op missing 'axis' attribute
+  %0 = colgm.gather %params, %indices : tensor<4x3xf64>, tensor<2xi64> -> tensor<2x3xf64>
+       ^
+test/mlir/gather_bad_case_0.mlir:4:8: note: see current operation: %0 = "colgm.gather"(%arg0, %arg1) : (tensor<4x3xf64>, tensor<2xi64>) -> tensor<2x3xf64>

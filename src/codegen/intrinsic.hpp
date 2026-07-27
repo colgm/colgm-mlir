@@ -13,8 +13,10 @@
 #include "dialect/colgm/print_op.hpp"
 #include "dialect/colgm/broadcast.hpp"
 #include "dialect/colgm/reduce_sum.hpp"
+#include "dialect/colgm/reduce_max.hpp"
 #include "dialect/colgm/reshape.hpp"
 #include "dialect/colgm/transpose.hpp"
+#include "dialect/colgm/gather.hpp"
 #include "dialect/dialect.hpp"
 
 namespace colgm_mlir {
@@ -49,11 +51,16 @@ mlir::Value log_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Va
 mlir::Value sqrt_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 mlir::Value tanh_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 mlir::Value sigmoid_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
+mlir::Value sin_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
+mlir::Value cos_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
+mlir::Value gelu_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 mlir::Value print_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 mlir::Value matmul_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 mlir::Value broadcast_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 mlir::Value reduce_sum_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
+mlir::Value reduce_max_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 mlir::Value reshape_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 mlir::Value transpose_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
+mlir::Value gather_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 
 }

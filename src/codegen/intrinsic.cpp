@@ -43,12 +43,17 @@ intrinsic_generator_registry::intrinsic_generator_registry() {
     regist("sqrt", sqrt_gen);
     regist("tanh", tanh_gen);
     regist("sigmoid", sigmoid_gen);
+    regist("sin", sin_gen);
+    regist("cos", cos_gen);
+    regist("gelu", gelu_gen);
     regist("print", print_gen);
     regist("matmul", matmul_gen);
     regist("broadcast", broadcast_gen);
     regist("reduce_sum", reduce_sum_gen);
+    regist("reduce_max", reduce_max_gen);
     regist("reshape", reshape_gen);
     regist("transpose", transpose_gen);
+    regist("gather", gather_gen);
 }
 
 intrinsic_gen_find_res
@@ -106,6 +111,27 @@ mlir::Value sigmoid_gen(mlir::OpBuilder& builder,
                         llvm::SmallVector<mlir::Value>& args) {
     auto sigmoid = sigmoid_op::create(builder, loc, args[0]);
     return sigmoid->getResult(0);
+}
+
+mlir::Value sin_gen(mlir::OpBuilder& builder,
+                    mlir::Location loc,
+                    llvm::SmallVector<mlir::Value>& args) {
+    auto sin = sin_op::create(builder, loc, args[0]);
+    return sin->getResult(0);
+}
+
+mlir::Value cos_gen(mlir::OpBuilder& builder,
+                    mlir::Location loc,
+                    llvm::SmallVector<mlir::Value>& args) {
+    auto cos = cos_op::create(builder, loc, args[0]);
+    return cos->getResult(0);
+}
+
+mlir::Value gelu_gen(mlir::OpBuilder& builder,
+                     mlir::Location loc,
+                     llvm::SmallVector<mlir::Value>& args) {
+    auto gelu = gelu_op::create(builder, loc, args[0]);
+    return gelu->getResult(0);
 }
 
 mlir::Value print_gen(mlir::OpBuilder& builder,
@@ -176,6 +202,16 @@ mlir::Value reduce_sum_gen(mlir::OpBuilder& builder,
     return op->getResult(0);
 }
 
+mlir::Value reduce_max_gen(mlir::OpBuilder& builder,
+                            mlir::Location loc,
+                            llvm::SmallVector<mlir::Value>& args) {
+    llvm::SmallVector<i64> axes;
+    extract_i64_constants(args[1], axes);
+    auto op = reduce_max::create(builder, loc, args[0], axes);
+    erase_dead_value(args[1]);
+    return op->getResult(0);
+}
+
 mlir::Value reshape_gen(mlir::OpBuilder& builder,
                          mlir::Location loc,
                          llvm::SmallVector<mlir::Value>& args) {
@@ -193,6 +229,17 @@ mlir::Value transpose_gen(mlir::OpBuilder& builder,
     extract_i64_constants(args[1], perm);
     auto op = transpose_op::create(builder, loc, args[0], perm);
     erase_dead_value(args[1]);
+    return op->getResult(0);
+}
+
+mlir::Value gather_gen(mlir::OpBuilder& builder,
+                       mlir::Location loc,
+                       llvm::SmallVector<mlir::Value>& args) {
+    llvm::SmallVector<i64> axis_vec;
+    extract_i64_constants(args[2], axis_vec);
+    auto axis = axis_vec[0];
+    auto op = gather_op::create(builder, loc, args[0], args[1], axis);
+    erase_dead_value(args[2]);
     return op->getResult(0);
 }
 

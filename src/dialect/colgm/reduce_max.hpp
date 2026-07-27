@@ -1,0 +1,36 @@
+#pragma once
+
+#include <mlir/IR/OpDefinition.h>
+#include <mlir/IR/BuiltinTypes.h>
+#include <mlir/IR/Builders.h>
+#include <mlir/Interfaces/SideEffectInterfaces.h>
+
+#include "utils/type.hpp"
+
+namespace colgm_mlir {
+
+class reduce_max: public mlir::Op<reduce_max,
+                                  mlir::OpTrait::OneOperand,
+                                  mlir::OpTrait::OneResult> {
+public:
+    using Op::Op;
+    static llvm::StringRef getOperationName() { return "colgm.reduce_max"; }
+    static llvm::ArrayRef<llvm::StringRef> getAttributeNames() { return {}; }
+
+    mlir::Value get_input() { return getOperand(); }
+
+    mlir::ArrayAttr get_axes() {
+        return llvm::cast<mlir::ArrayAttr>((*this)->getAttr("axes"));
+    }
+
+    static void build(mlir::OpBuilder& builder, mlir::OperationState& state,
+                      mlir::Value input, mlir::ArrayRef<i64> axes);
+    static reduce_max create(mlir::OpBuilder& builder, mlir::Location loc,
+                             mlir::Value input, mlir::ArrayRef<i64> axes);
+    static mlir::ParseResult parse(mlir::OpAsmParser& parser,
+                                   mlir::OperationState& result);
+    void print(mlir::OpAsmPrinter& p);
+    mlir::LogicalResult verify();
+};
+
+}

@@ -1,0 +1,3 @@
+test/mlir/gelu_bad_case_0.mlir:5:8: error: gelu input must be a float type
+  %0 = colgm.gelu %arg : tensor<i32>
+       ^

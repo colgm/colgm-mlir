@@ -100,8 +100,10 @@ set(COLGM_LIB_SOURCES
     src/dialect/colgm/if_op.cpp
     src/dialect/colgm/print_op.cpp
     src/dialect/colgm/reduce_sum.cpp
+    src/dialect/colgm/reduce_max.cpp
     src/dialect/colgm/reshape.cpp
     src/dialect/colgm/slice.cpp
+    src/dialect/colgm/gather.cpp
     src/dialect/colgm/transpose.cpp
     src/dialect/colgm/unary_op.cpp
     src/dialect/colgm/yield.cpp
