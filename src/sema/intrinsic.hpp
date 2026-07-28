@@ -58,5 +58,6 @@ type reduce_max_infer(error&, call_expr*, type_storage&);
 type reshape_infer(error&, call_expr*, type_storage&);
 type transpose_infer(error&, call_expr*, type_storage&);
 type gather_infer(error&, call_expr*, type_storage&);
+type stack_infer(error&, call_expr*, type_storage&);
 
 }

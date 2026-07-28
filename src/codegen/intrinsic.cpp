@@ -54,6 +54,7 @@ intrinsic_generator_registry::intrinsic_generator_registry() {
     regist("reshape", reshape_gen);
     regist("transpose", transpose_gen);
     regist("gather", gather_gen);
+    regist("stack", stack_gen);
 }
 
 intrinsic_gen_find_res
@@ -240,6 +241,14 @@ mlir::Value gather_gen(mlir::OpBuilder& builder,
     auto axis = axis_vec[0];
     auto op = gather_op::create(builder, loc, args[0], args[1], axis);
     erase_dead_value(args[2]);
+    return op->getResult(0);
+}
+
+mlir::Value stack_gen(mlir::OpBuilder& builder,
+                      mlir::Location loc,
+                      llvm::SmallVector<mlir::Value>& args) {
+    auto num_args = static_cast<i64>(args.size());
+    auto op = stack_op::create(builder, loc, args, {num_args});
     return op->getResult(0);
 }
 

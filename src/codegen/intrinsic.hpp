@@ -17,6 +17,7 @@
 #include "dialect/colgm/reshape.hpp"
 #include "dialect/colgm/transpose.hpp"
 #include "dialect/colgm/gather.hpp"
+#include "dialect/colgm/stack.hpp"
 #include "dialect/dialect.hpp"
 
 namespace colgm_mlir {
@@ -62,5 +63,6 @@ mlir::Value reduce_max_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<m
 mlir::Value reshape_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 mlir::Value transpose_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 mlir::Value gather_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
+mlir::Value stack_gen(mlir::OpBuilder&, mlir::Location, llvm::SmallVector<mlir::Value>&);
 
 }

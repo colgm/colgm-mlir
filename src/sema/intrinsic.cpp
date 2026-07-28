@@ -24,6 +24,7 @@ intrinsic_registry::intrinsic_registry() {
     regist("reshape", reshape_infer);
     regist("transpose", transpose_infer);
     regist("gather", gather_infer);
+    regist("stack", stack_infer);
 }
 
 intrinsic_find_res intrinsic_registry::find(const std::string& name) const {
@@ -532,6 +533,43 @@ type gather_infer(error& err, call_expr* node, type_storage& ts) {
     }
 
     return ts.get_tensor_type(tt.get_element_type(), output_shape);
+}
+
+type stack_infer(error& err, call_expr* node, type_storage& ts) {
+    auto& args = node->get_args();
+    if (args.size() < 1) {
+        err.err(node->get_location(), "stack takes at least one argument");
+        return ts.get_unknown_type();
+    }
+
+    auto first = args[0]->get_resolved();
+    if (!type::isa<tensor_type>(first)) {
+        err.err(node->get_location(), "stack arguments must be tensors");
+        return ts.get_unknown_type();
+    }
+    auto tt = type::as<tensor_type>(first);
+
+    for (size_t i = 1; i < args.size(); ++i) {
+        auto arg_ty = args[i]->get_resolved();
+        if (!type::isa<tensor_type>(arg_ty)) {
+            err.err(node->get_location(),
+                    "stack arguments must all be tensors");
+            return ts.get_unknown_type();
+        }
+        if (arg_ty != first) {
+            err.err(node->get_location(),
+                    "all stack arguments must have the same type");
+            return ts.get_unknown_type();
+        }
+    }
+
+    auto num_args = static_cast<i64>(args.size());
+    const auto& op_shape = tt.get_shape();
+    std::vector<i64> result_shape;
+    result_shape.push_back(num_args);
+    result_shape.insert(result_shape.end(), op_shape.begin(), op_shape.end());
+
+    return ts.get_tensor_type(tt.get_element_type(), result_shape);
 }
 
 }
