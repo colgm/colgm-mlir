@@ -107,6 +107,9 @@ set(COLGM_LIB_SOURCES
     src/dialect/colgm/transpose.cpp
     src/dialect/colgm/unary_op.cpp
     src/dialect/colgm/yield.cpp
+    src/dialect/pass/lowering/binary_op.cpp
+    src/dialect/pass/lowering/cmp_op.cpp
+    src/dialect/pass/lowering/unary_op.cpp
     src/dialect/pass/constfold.cpp
     src/dialect/pass/lowering.cpp
     src/dialect/pass/scf_for_rank0_scalar.cpp
