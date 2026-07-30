@@ -30,6 +30,12 @@ Check CUDA Toolkit:
 
 > nvcc --version
 
-## Install Triton
+## Install Triton & PyTorch
 
-> pip install triton
+Prepare venv
+
+```sh
+apt-get install python3.12-venv
+python3.12 -m venv ~/triton-env
+~/triton-env/bin/pip install triton torch
+```
